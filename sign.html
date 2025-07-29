@@ -31,13 +31,13 @@
     p {
       font-size: 16px;
     }
-    a.pdf-link {
-      display: inline-block;
-      margin: 20px 0;
-      font-weight: 600;
-      color: #007aff;
-      text-decoration: none;
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 24px 0;
     }
+    .button-link,
     button {
       background-color: #007aff;
       color: white;
@@ -46,18 +46,21 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      text-decoration: none;
       transition: background-color 0.2s ease-in-out;
     }
+    .button-link:hover,
     button:hover {
       background-color: #005dc1;
     }
     #signatureOutput {
       margin-top: 30px;
-      word-break: break-all;
+      word-break: break-word;
       background: #eee;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
       font-size: 14px;
+      text-align: left;
     }
     .timestamp {
       margin-top: 10px;
@@ -70,8 +73,10 @@
   <div class="container">
     <h1>Sign Terms & Conditions</h1>
     <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
-    <a href="BPC_Terms.pdf" class="pdf-link" target="_blank">📄 View PDF Terms</a>
-    <button onclick="signTerms()">Sign with Wallet</button>
+    <div class="button-group">
+      <a href="BPC_Terms.pdf" class="button-link" target="_blank">📄 View PDF Terms</a>
+      <button onclick="signTerms()">✍️ Sign with Wallet</button>
+    </div>
     <div id="signatureOutput"></div>
   </div>
   <script>
@@ -85,12 +90,11 @@
 
       const timestamp = new Date().toISOString();
       const message = `I, ${signer}, agree to the BPC Terms (see BPC_Terms.pdf) as of ${timestamp}`;
-      const hexMsg = '0x' + Buffer.from(message, 'utf8').toString('hex');
 
       try {
         const signature = await provider.request({
           method: 'personal_sign',
-          params: [hexMsg, signer]
+          params: [message, signer]
         });
 
         document.getElementById('signatureOutput').innerHTML = `✅ Signed as: <b>${signer}</b><br><br>🕒 Timestamp: ${timestamp}<br><br>🖋️ Signature:<br>${signature}`;

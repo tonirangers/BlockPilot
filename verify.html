@@ -1,81 +1,104 @@
-<!-- verify.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Verify Signature</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     body {
-      margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #f9f9f9;
+      background: #f8f8f8;
+      margin: 0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 60px 20px;
     }
     .container {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 700px;
+      max-width: 800px;
       width: 100%;
-      box-shadow: 0 0 12px rgba(0,0,0,0.05);
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    h1 {
       text-align: center;
+      font-size: 26px;
     }
     textarea {
       width: 100%;
-      height: 140px;
-      padding: 10px;
+      height: 120px;
+      margin-top: 20px;
       font-family: monospace;
       font-size: 14px;
+      padding: 12px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 20px;
       resize: vertical;
     }
     button {
-      padding: 12px 20px;
-      background-color: #28a745;
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      background-color: #007aff;
       color: white;
       border: none;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
     }
-    #result {
+    .result {
       margin-top: 20px;
-      font-size: 14px;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .valid {
+      background: #d4edda;
+      color: #155724;
+    }
+    .invalid {
+      background: #f8d7da;
+      color: #721c24;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Verify Signature</h1>
-    <p>Paste the signed message + signature below to verify:</p>
-    <textarea id="input" placeholder="Paste your message + signature here..."></textarea>
-    <button onclick="verify()">✅ Verify</button>
-    <div id="result"></div>
+    <p>Paste the signature to verify if it's valid and matches the terms hash.</p>
+    <textarea id="signatureInput" placeholder="Paste signature here..."></textarea>
+    <button onclick="verify()">🔍 Verify</button>
+    <div id="result" class="result" style="display: none;"></div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
     async function verify() {
-      const input = document.getElementById('input').value;
-      const match = input.match(/Signed as: (0x[0-9a-fA-F]+).*?Signature:\n([0x\w]+)/s);
-      if (!match) return document.getElementById('result').innerText = '❌ Format incorrect';
-      const addr = match[1];
-      const sig = match[2];
-      const message = input.split('🖋️ Signature:')[0].trim();
-      const msgOnly = message.replace(/^✅ Signed as: .*?\n\n/, '');
-      const msgHash = ethers.utils.hashMessage(msgOnly);
-      const recovered = ethers.utils.recoverAddress(msgHash, sig);
-      document.getElementById('result').innerText =
-        recovered.toLowerCase() === addr.toLowerCase()
-          ? `✅ Valid signature from ${recovered}`
-          : `❌ Invalid signature. Recovered: ${recovered}`;
+      const sig = document.getElementById('signatureInput').value.trim();
+      if (!sig) return;
+
+      const expectedHash = "0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44";
+      const address = "0xe628ed366fb0eb657a01a2e4a902e630a1c60d69";
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const msg = `I, ${address}, agree to the BPC Terms (see BPC_Terms.pdf) — PDF Hash: ${expectedHash} — Signed on ${timestamp}`;
+      const msgHex = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(msg));
+      const recovered = ethers.utils.verifyMessage(ethers.utils.toUtf8String(ethers.utils.arrayify(msgHex)), sig);
+
+      const resDiv = document.getElementById('result');
+      resDiv.style.display = 'block';
+
+      if (recovered.toLowerCase() === address.toLowerCase()) {
+        resDiv.className = 'result valid';
+        resDiv.innerHTML = `✅ Valid Signature<br>Recovered address: ${recovered}`;
+      } else {
+        resDiv.className = 'result invalid';
+        resDiv.innerHTML = `❌ Invalid Signature<br>Recovered address: ${recovered}`;
+      }
     }
   </script>
 </body>

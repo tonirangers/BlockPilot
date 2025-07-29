@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Signature BPC Agreement</title></head>
+  <body>
+    <h2>Signer le contrat BPC</h2>
+    <button id="signBtn">Signer avec Metamask ou Rabby</button>
+    <pre id="output"></pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+      const hash = "0x82fd1d6b8312db984dd7e1a6ae5cf72be0c2f23381f6b6d4c982f7ad68a29546";
+
+      document.getElementById("signBtn").onclick = async () => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+
+        const msg = `I, ${address}, accept the BPC Smart Wallet Management Agreement.\nDocument hash: ${hash}\nDate: 2025-07-29`;
+
+        const sig = await signer.signMessage(msg);
+
+        document.getElementById("output").textContent = 
+          `Adresse : ${address}\n\nMessage signé :\n${msg}\n\nSignature :\n${sig}`;
+      };
+    </script>
+  </body>
+</html>

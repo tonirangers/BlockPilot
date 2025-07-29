@@ -2,66 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Verify Signature</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: #f8f8f8;
-      margin: 0;
+      background-color: #f9f9f9;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      padding: 60px 20px;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
     }
     .container {
-      max-width: 800px;
-      width: 100%;
-      background: white;
+      background: #fff;
+      padding: 40px;
       border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
     }
     h1 {
-      text-align: center;
-      font-size: 26px;
+      margin-bottom: 20px;
     }
     textarea {
       width: 100%;
       height: 120px;
-      margin-top: 20px;
-      font-family: monospace;
-      font-size: 14px;
       padding: 12px;
-      border-radius: 8px;
+      font-size: 14px;
       border: 1px solid #ccc;
+      border-radius: 8px;
       resize: vertical;
+      margin-bottom: 20px;
     }
     button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      background-color: #007aff;
+      background: #007aff;
       color: white;
       border: none;
-      border-radius: 10px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #005dc1;
     }
     .result {
       margin-top: 20px;
-      font-size: 16px;
-      padding: 10px;
+      padding: 16px;
       border-radius: 8px;
+      font-size: 14px;
     }
     .valid {
-      background: #d4edda;
-      color: #155724;
+      background-color: #e6ffed;
+      color: #0a6640;
+      border: 1px solid #00b86b;
     }
     .invalid {
-      background: #f8d7da;
-      color: #721c24;
+      background-color: #ffe6e6;
+      color: #a94442;
+      border: 1px solid #ff4d4f;
     }
   </style>
 </head>
@@ -69,35 +72,32 @@
   <div class="container">
     <h1>Verify Signature</h1>
     <p>Paste the signature to verify if it's valid and matches the terms hash.</p>
-    <textarea id="signatureInput" placeholder="Paste signature here..."></textarea>
-    <button onclick="verify()">🔍 Verify</button>
+    <textarea id="signatureInput" placeholder="Paste the signature here..."></textarea>
+    <button onclick="verifySignature()">🔍 Verify</button>
     <div id="result" class="result" style="display: none;"></div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
   <script>
-    async function verify() {
-      const sig = document.getElementById('signatureInput').value.trim();
-      if (!sig) return;
+    const TERMS_HASH = "0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44";
 
-      const expectedHash = "0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44";
-      const address = "0xe628ed366fb0eb657a01a2e4a902e630a1c60d69";
+    async function verifySignature() {
+      const sig = document.getElementById("signatureInput").value.trim();
+      const resultEl = document.getElementById("result");
+      resultEl.style.display = "block";
 
-      const timestamp = new Date().toISOString().split('T')[0];
-      const msg = `I, ${address}, agree to the BPC Terms (see BPC_Terms.pdf) — PDF Hash: ${expectedHash} — Signed on ${timestamp}`;
-      const msgHex = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(msg));
-      const recovered = ethers.utils.verifyMessage(ethers.utils.toUtf8String(ethers.utils.arrayify(msgHex)), sig);
+      try {
+        const now = new Date().toISOString();
+        const msg = `I, (signer), agree to the BPC Terms (see BPC_Terms.pdf) as of ${now}`;
+        const hash = ethers.utils.hashMessage(msg);
+        const address = ethers.utils.verifyMessage(msg, sig);
 
-      const resDiv = document.getElementById('result');
-      resDiv.style.display = 'block';
+        if (!address) throw new Error("Invalid signature");
 
-      if (recovered.toLowerCase() === address.toLowerCase()) {
-        resDiv.className = 'result valid';
-        resDiv.innerHTML = `✅ Valid Signature<br>Recovered address: ${recovered}`;
-      } else {
-        resDiv.className = 'result invalid';
-        resDiv.innerHTML = `❌ Invalid Signature<br>Recovered address: ${recovered}`;
+        resultEl.className = "result valid";
+        resultEl.innerHTML = `✅ Valid Signature<br>Recovered Address: <b>${address}</b><br>PDF Hash: ${TERMS_HASH}`;
+      } catch (err) {
+        resultEl.className = "result invalid";
+        resultEl.innerHTML = `❌ Invalid Signature<br>${err.message}`;
       }
     }
   </script>

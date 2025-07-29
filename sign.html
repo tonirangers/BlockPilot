@@ -1,28 +1,90 @@
 <!DOCTYPE html>
-<html>
-  <head><title>Signature BPC Agreement</title></head>
-  <body>
-    <h2>Signer le contrat BPC</h2>
-    <button id="signBtn">Signer avec Metamask ou Rabby</button>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BPC Smart Wallet Signature</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+      color: #111827;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 24px;
+    }
+    button:hover {
+      background-color: #1e40af;
+    }
+    pre {
+      margin-top: 24px;
+      background: #f3f4f6;
+      padding: 16px;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 700px;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+    .container {
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🖋️ Sign the BPC Smart Wallet Agreement</h1>
+    <p>Please read the contract before signing:</p>
+    <p>
+      📄 <a href="https://tonirangers.github.io/BlockPilot/BPC_Terms.pdf" target="_blank">View the BPC Terms (PDF)</a>
+    </p>
+
+    <button id="signBtn">Sign with Wallet</button>
+
     <pre id="output"></pre>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script>
-      const hash = "0x82fd1d6b8312db984dd7e1a6ae5cf72be0c2f23381f6b6d4c982f7ad68a29546";
+  <script>
+    const hash = "0x82fd1d6b8312db984dd7e1a6ae5cf72be0c2f23381f6b6d4c982f7ad68a29546";
 
-      document.getElementById("signBtn").onclick = async () => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-
-        const msg = `I, ${address}, accept the BPC Smart Wallet Management Agreement.\nDocument hash: ${hash}\nDate: 2025-07-29`;
-
-        const sig = await signer.signMessage(msg);
-
-        document.getElementById("output").textContent = 
-          `Adresse : ${address}\n\nMessage signé :\n${msg}\n\nSignature :\n${sig}`;
-      };
-    </script>
-  </body>
+    document.getElementById("signBtn").onclick = async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+      const date = new Date().toISOString().split("T")[0];
+      const msg = `I, ${address}, accept the BPC Smart Wallet Management Agreement.\nDocument hash: ${hash}\nDate: ${date}`;
+      const sig = await signer.signMessage(msg);
+      document.getElementById("output").textContent = `Address: ${address}\n\nSigned message:\n${msg}\n\nSignature:\n${sig}`;
+    };
+  </script>
+</body>
 </html>

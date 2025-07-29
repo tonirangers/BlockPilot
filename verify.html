@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,7 +84,7 @@
       const result = document.getElementById('result');
       result.className = 'result';
 
-      const match = input.match(/Signed as: (0x[a-fA-F0-9]{40})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s);
+      const match = input.match(/Signed as: (0x[a-fA-F0-9]{40}) as of (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s);
       if (!match) {
         result.classList.add('error');
         result.innerText = '⚠️ Invalid input format';

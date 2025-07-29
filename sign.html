@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlockPilot Terms Signature</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/src/sha3.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -67,6 +68,20 @@
       font-size: 13px;
       color: #666;
     }
+    #copyBtn {
+      margin-top: 16px;
+      background: #4CAF50;
+    }
+    #pdfHash {
+      font-size: 13px;
+      color: #555;
+      margin-top: 20px;
+      word-break: break-all;
+    }
+    #verifyLink {
+      margin-top: 32px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -77,9 +92,18 @@
       <a href="BPC_Terms.pdf" class="button-link" target="_blank">📄 View PDF Terms</a>
       <button onclick="signTerms()">✍️ Sign with Wallet</button>
     </div>
+    <div id="pdfHash"><b>PDF Hash (Keccak-256):</b> 0xe0f60370be53c0c3b349171b0df8388781874f9e7c5c79ab2a275dfb50b26c37</div>
     <div id="signatureOutput"></div>
+    <button id="copyBtn" onclick="copySignature()" style="display:none">📋 Copy Signature to Clipboard</button>
+    <div id="verifyLink">
+      ✅ You can verify your signature <a href="verify.html" target="_blank">here</a> anytime.
+    </div>
   </div>
+
   <script>
+    let lastSignature = '';
+    let lastMessage = '';
+
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');
 
@@ -97,10 +121,20 @@
           params: [message, signer]
         });
 
-        document.getElementById('signatureOutput').innerHTML = `✅ Signed as: <b>${signer}</b><br><br>🕒 Timestamp: ${timestamp}<br><br>🖋️ Signature:<br>${signature}`;
+        lastSignature = signature;
+        lastMessage = message;
+        document.getElementById('signatureOutput').innerHTML = `✅ Signed as: <b>${signer}</b><br><br>🕒 Timestamp: ${timestamp}<br><br>📄 Signed Message:<br><pre>${message}</pre><br>🖋️ Signature:<br><pre>${signature}</pre>`;
+        document.getElementById('copyBtn').style.display = 'inline-block';
       } catch (err) {
         alert('Signing failed');
       }
+    }
+
+    function copySignature() {
+      const output = `Signed Message:\n${lastMessage}\n\nSignature:\n${lastSignature}`;
+      navigator.clipboard.writeText(output).then(() => {
+        alert('Copied to clipboard. Paste in Telegram or your support channel.');
+      });
     }
   </script>
 </body>

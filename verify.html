@@ -3,96 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify Signature</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <title>BlockPilot Terms Signature</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/src/sha3.min.js"></script>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f9fafb;
-      padding: 40px 20px;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      color: #222;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 40px 20px;
     }
     .container {
       max-width: 800px;
-      width: 100%;
       background: white;
-      padding: 24px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+      text-align: center;
     }
     h1 {
-      text-align: center;
       font-size: 24px;
+      margin-bottom: 16px;
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 20px;
-    }
-    textarea, input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 12px 20px;
+    p {
       font-size: 16px;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .button-link,
+    button {
       background-color: #007aff;
       color: white;
+      padding: 12px 24px;
+      font-size: 16px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s ease-in-out;
     }
-    #result {
+    .button-link:hover,
+    button:hover {
+      background-color: #005dc1;
+    }
+    #signatureOutput {
+      margin-top: 30px;
+      word-break: break-word;
+      background: #eee;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: left;
+    }
+    .timestamp {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+    }
+    #copyBtn {
+      margin-top: 16px;
+      background: #4CAF50;
+    }
+    #pdfHash {
+      font-size: 13px;
+      color: #555;
       margin-top: 20px;
-      font-weight: bold;
-      text-align: center;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Verify BPC Signature</h1>
-    <label for="message">Signed Message</label>
-    <textarea id="message" rows="4" placeholder="Paste the signed message content here..."></textarea>
-
-    <label for="signature">Signature</label>
-    <textarea id="signature" rows="2" placeholder="Paste the EIP-191 signature..."></textarea>
-
-    <label for="expectedAddress">Expected Signer Address</label>
-    <input id="expectedAddress" placeholder="0x..." />
-
-    <button onclick="verifySignature()">Verify</button>
-
-    <div id="result"></div>
+    <h1>Sign Terms & Conditions</h1>
+    <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
+    <div class="button-group">
+      <a href="BPC_Terms.pdf" class="button-link" target="_blank">📄 View PDF Terms</a>
+      <button onclick="signTerms()">✍️ Sign with Wallet</button>
+    </div>
+    <div id="pdfHash"><b>PDF Hash (Keccak-256):</b> 0xTODO_REPLACE_WITH_HASH</div>
+    <div id="signatureOutput"></div>
+    <button id="copyBtn" onclick="copySignature()" style="display:none">📋 Copy Signature</button>
   </div>
 
   <script>
-    async function verifySignature() {
-      const message = document.getElementById('message').value.trim();
-      const signature = document.getElementById('signature').value.trim();
-      const expectedAddress = document.getElementById('expectedAddress').value.trim().toLowerCase();
+    let lastSignature = '';
+
+    async function signTerms() {
+      if (!window.ethereum) return alert('Wallet not detected');
+
+      const provider = window.ethereum;
+      await provider.request({ method: 'eth_requestAccounts' });
+      const accounts = await provider.request({ method: 'eth_accounts' });
+      const signer = accounts[0];
+
+      const timestamp = new Date().toISOString();
+      const message = `I, ${signer}, agree to the BPC Terms (see BPC_Terms.pdf) as of ${timestamp}`;
 
       try {
-        const recovered = ethers.utils.verifyMessage(message, signature).toLowerCase();
-        const result = document.getElementById('result');
-        if (recovered === expectedAddress) {
-          result.style.color = 'green';
-          result.textContent = `✅ Signature is valid. Signed by ${recovered}`;
-        } else {
-          result.style.color = 'red';
-          result.textContent = `❌ Signature is INVALID. Recovered: ${recovered}`;
-        }
-      } catch (e) {
-        document.getElementById('result').style.color = 'red';
-        document.getElementById('result').textContent = '⚠️ Error verifying signature.';
+        const signature = await provider.request({
+          method: 'personal_sign',
+          params: [message, signer]
+        });
+
+        lastSignature = signature;
+        document.getElementById('signatureOutput').innerHTML = `✅ Signed as: <b>${signer}</b><br><br>🕒 Timestamp: ${timestamp}<br><br>🖋️ Signature:<br>${signature}`;
+        document.getElementById('copyBtn').style.display = 'inline-block';
+      } catch (err) {
+        alert('Signing failed');
       }
+    }
+
+    function copySignature() {
+      if (!lastSignature) return;
+      navigator.clipboard.writeText(lastSignature).then(() => {
+        alert('Signature copied to clipboard.');
+      });
     }
   </script>
 </body>

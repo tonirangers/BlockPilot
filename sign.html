@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,15 +91,14 @@
     <a class="pdf-button" href="BPC_Terms.pdf" target="_blank">📄 View PDF Terms</a>
     <button class="wallet-button" onclick="signTerms()">✍️ Sign with Wallet</button>
     <div class="hash-line">
-      PDF Hash (Keccak-256): <span id="pdfHash"></span>
+      PDF Hash (Keccak-256): <span id="pdfHash">0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44</span>
     </div>
     <div id="signatureOutput"></div>
-    <p>✅ You can verify your signature <a href="verify.html">here</a> anytime.</p>
+    <p><a href="verify.html">✅ You can verify your signature here anytime.</a></p>
   </div>
 
   <script>
     const hash = '0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44';
-    document.getElementById("pdfHash").textContent = hash;
 
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');
@@ -115,25 +113,26 @@
 
       try {
         const signature = await signer.signMessage(message);
-        const fullOutput = `Signed as: ${address}
-Timestamp: ${timestamp}
-Signature:
-${signature}`;
         document.getElementById("signatureOutput").innerHTML = `
           <div class='output-box'>
-            ${fullOutput.replace(/
-/g, '<br>')}
-            <button class='copy-btn' onclick='copySig(\`${fullOutput}\`)'>📋 Copy to Clipboard</button>
+            ✅ <b>Signed as:</b> ${address}<br>
+            🕒 <b>Timestamp:</b> ${timestamp}<br>
+            📄 <b>PDF Hash:</b> ${hash}<br>
+            ✍️ <b>Signature:</b><br>${signature}<br>
+            <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
           </div>
         `;
+        window.fullSig = `Signed as: ${address} as of ${timestamp}
+Signature:
+${signature}`;
       } catch (err) {
         alert('Signing cancelled or failed.');
       }
     }
 
-    function copySig(text) {
-      navigator.clipboard.writeText(text);
-      alert("Copied!");
+    function copyFull() {
+      navigator.clipboard.writeText(window.fullSig);
+      alert("Copied to clipboard!");
     }
   </script>
 </body>

@@ -1,4 +1,4 @@
-<!-- ✅ sign.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,7 +60,7 @@
       font-size: 14px;
       color: #555;
       margin: 20px 0;
-      word-break: break-all;
+      word-break: break-word;
     }
     .output-box {
       background: #eee;
@@ -115,13 +115,15 @@
 
       try {
         const signature = await signer.signMessage(message);
+        const fullOutput = `Signed as: ${address}
+Timestamp: ${timestamp}
+Signature:
+${signature}`;
         document.getElementById("signatureOutput").innerHTML = `
           <div class='output-box'>
-            ✅ <b>Signed as:</b> ${address}<br>
-            🕒 <b>Timestamp:</b> ${timestamp}<br>
-            📄 <b>PDF Hash:</b> ${hash}<br>
-            ✍️ <b>Signature:</b> ${signature}<br>
-            <button class='copy-btn' onclick='copySig("${signature}")'>📋 Copy Signature to Clipboard</button>
+            ${fullOutput.replace(/
+/g, '<br>')}
+            <button class='copy-btn' onclick='copySig(\`${fullOutput}\`)'>📋 Copy to Clipboard</button>
           </div>
         `;
       } catch (err) {
@@ -129,9 +131,9 @@
       }
     }
 
-    function copySig(sig) {
-      navigator.clipboard.writeText(sig);
-      alert("Signature copied!");
+    function copySig(text) {
+      navigator.clipboard.writeText(text);
+      alert("Copied!");
     }
   </script>
 </body>

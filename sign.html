@@ -1,84 +1,88 @@
-<!-- sign.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Terms & Conditions</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      margin: 0;
       font-family: 'Inter', sans-serif;
-      background-color: #f9f9f9;
-      color: #222;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
     }
     .container {
-      max-width: 700px;
-      width: 100%;
-      background: white;
+      max-width: 800px;
+      margin-top: 60px;
+      background: #fff;
       border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
       padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       text-align: center;
     }
     h1 {
-      font-size: 24px;
+      font-size: 28px;
       margin-bottom: 10px;
     }
     p {
-      font-size: 16px;
-      margin-bottom: 20px;
+      font-size: 18px;
+      color: #444;
+      margin-bottom: 30px;
     }
-    .pdf-link, .sign-button {
+    .button {
       display: block;
       width: 100%;
       margin: 10px 0;
       padding: 14px;
       font-size: 16px;
-      font-weight: 600;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      text-decoration: none;
+      font-weight: 600;
     }
-    .pdf-link {
-      background-color: #e5f0ff;
+    .pdf-btn {
+      background: #e7f0ff;
       color: #007aff;
     }
-    .sign-button {
-      background-color: #007aff;
+    .sign-btn {
+      background: #007aff;
       color: white;
     }
-    .sign-button:hover {
-      background-color: #005dc1;
-    }
-    .output {
+    .hash {
       margin-top: 20px;
-      background: #f2f2f2;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: left;
       font-size: 14px;
+      color: #666;
       word-break: break-all;
     }
+    .signature-box {
+      background: #eee;
+      padding: 16px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: left;
+    }
     .copy-btn {
-      margin-top: 10px;
+      margin-top: 20px;
       background: #28a745;
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 10px 16px;
+      padding: 12px 20px;
+      font-size: 14px;
+      border-radius: 8px;
       cursor: pointer;
     }
-    .hash {
-      font-size: 12px;
-      color: #777;
+    a.verify-link {
+      display: block;
       margin-top: 20px;
+      color: #007aff;
+      text-decoration: none;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -86,49 +90,62 @@
   <div class="container">
     <h1>Sign Terms & Conditions</h1>
     <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
-    <a class="pdf-link" href="BPC_Terms.pdf" target="_blank">📄 View PDF Terms</a>
-    <button class="sign-button" onclick="signTerms()">🖋️ Sign with Wallet</button>
-    <div class="hash">PDF Hash (Keccak-256): <code id="pdfHash">loading...</code></div>
-    <div id="output" class="output" style="display: none;"></div>
-    <button id="copyBtn" class="copy-btn" style="display: none;" onclick="copySignature()">📋 Copy Signature to Clipboard</button>
-    <p style="margin-top:20px; font-size:13px;">✅ You can verify your signature <a href="verify.html">here</a> anytime.</p>
+    <a href="BPC_Terms.pdf" target="_blank" class="button pdf-btn">📄 View PDF Terms</a>
+    <button class="button sign-btn" onclick="signTerms()">✍️ Sign with Wallet</button>
+    <div class="hash" id="pdfHash">PDF Hash (Keccak-256): loading...</div>
+    <div id="signatureOutput" class="signature-box" style="display:none;"></div>
+    <button id="copyBtn" class="copy-btn" onclick="copySignature()" style="display:none;">📋 Copy Signature to Clipboard</button>
+    <a class="verify-link" href="verify.html">✅ You can verify your signature <b>here</b> anytime.</a>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/src/sha3.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script>
-    const pdfURL = 'BPC_Terms.pdf';
-    fetch(pdfURL)
-      .then(res => res.arrayBuffer())
-      .then(buf => {
-        const hash = keccak256(new Uint8Array(buf));
-        document.getElementById('pdfHash').textContent = '0x' + hash;
-      });
+    const pdfUrl = 'BPC_Terms.pdf';
+    const hashDiv = document.getElementById('pdfHash');
+
+    fetch(pdfUrl).then(res => res.arrayBuffer()).then(buf => {
+      const hash = keccak256(new Uint8Array(buf));
+      hashDiv.innerText = "PDF Hash (Keccak-256): 0x" + hash;
+    });
 
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');
+
       const provider = window.ethereum;
       await provider.request({ method: 'eth_requestAccounts' });
       const accounts = await provider.request({ method: 'eth_accounts' });
       const signer = accounts[0];
       const timestamp = new Date().toISOString();
-      const pdfHash = document.getElementById('pdfHash').textContent;
-      const message = `I, ${signer}, agree to the BPC Terms (see BPC_Terms.pdf) with hash ${pdfHash} as of ${timestamp}`;
-      const hexMsg = '0x' + Array.from(new TextEncoder().encode(message)).map(x => x.toString(16).padStart(2, '0')).join('');
+
+      const hash = hashDiv.innerText.split(': ')[1];
+      const message = `I, ${signer}, agree to the BPC Terms (see BPC_Terms.pdf) — PDF Hash: ${hash} — Signed on ${timestamp}`;
+      const hexMsg = '0x' + [...new TextEncoder().encode(message)].map(b => b.toString(16).padStart(2, '0')).join('');
 
       try {
-        const signature = await provider.request({ method: 'personal_sign', params: [hexMsg, signer] });
-        const out = `✅ Signed as: ${signer}\n\n🕒 Timestamp: ${timestamp}\n\n📄 PDF Hash: ${pdfHash}\n\n🖋️ Signature:\n${signature}`;
-        document.getElementById('output').textContent = out;
-        document.getElementById('output').style.display = 'block';
+        const signature = await provider.request({
+          method: 'personal_sign',
+          params: [hexMsg, signer]
+        });
+
+        document.getElementById('signatureOutput').style.display = 'block';
         document.getElementById('copyBtn').style.display = 'inline-block';
+        document.getElementById('signatureOutput').innerHTML = `
+          ✅ <b>Signed as:</b> ${signer}<br>
+          🕒 <b>Timestamp:</b> ${timestamp}<br>
+          📄 <b>PDF Hash:</b> ${hash}<br>
+          ✍️ <b>Signature:</b><br><code>${signature}</code>
+        `;
+        window.generatedSignature = signature;
       } catch (err) {
         alert('Signing failed');
       }
     }
 
     function copySignature() {
-      const text = document.getElementById('output').textContent;
-      navigator.clipboard.writeText(text);
-      alert('Signature copied!');
+      if (window.generatedSignature) {
+        navigator.clipboard.writeText(window.generatedSignature);
+        alert("Signature copied!");
+      }
     }
   </script>
 </body>

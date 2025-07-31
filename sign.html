@@ -91,14 +91,14 @@
     <a class="pdf-button" href="BPC_Terms.pdf" target="_blank">📄 View PDF Terms</a>
     <button class="wallet-button" onclick="signTerms()">✍️ Sign with Wallet</button>
     <div class="hash-line">
-      PDF Hash (Keccak-256): <span id="pdfHash">0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44</span>
+      PDF Hash (Keccak-256): <span id="pdfHash">0xba54d62496e82058eac315cd7ac8d1ad012d718432cd84b65d151507a00cec5b</span>
     </div>
     <div id="signatureOutput"></div>
     <p><a href="verify.html">✅ You can verify your signature here anytime.</a></p>
   </div>
 
   <script>
-    const hash = '0x1da1cbb858cd1827ddddce9614e8a9015cca728fcb204d05dfcd512aefb7ff44';
+    const hash = '0xba54d62496e82058eac315cd7ac8d1ad012d718432cd84b65d151507a00cec5b';
 
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');

@@ -112,7 +112,7 @@
 
       const timestamp = new Date().toISOString();
       // Embed the PDF file name into the message so that it can be verified later
-      const message = `I, ${address}, agree to the BPC Terms (see BPC_terms_Seed.pdf) as of ${timestamp}`;
+      const message = `I, ${address}, agree to the BPC Terms (see BPC_Terms_Seed.pdf) as of ${timestamp}`;
 
       try {
         const signature = await signer.signMessage(message);

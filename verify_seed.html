@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Signature</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+    h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      margin-bottom: 20px;
+      min-height: 120px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+    button:hover {
+      background-color: #005dc1;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      word-break: break-word;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Verify Signature</h2>
+    <p>Paste the full signed message + signature to verify it.</p>
+    <textarea id="inputData"></textarea>
+    <button onclick="verifySignature()">🔍 Verify</button>
+    <div id="result" class="result"></div>
+  </div>
+  <script>
+    async function verifySignature() {
+      const input = document.getElementById('inputData').value.trim();
+      const result = document.getElementById('result');
+      result.className = 'result';
+
+      // The signed text is expected to follow a specific format.
+      const match = input.match(/Signed as: (0x[a-fA-F0-9]{40}) as of (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s);
+      if (!match) {
+        result.classList.add('error');
+        result.innerText = '⚠️ Invalid input format';
+        return;
+      }
+
+      const [_, expectedAddress, timestamp, signature] = match;
+      // Reconstruct the message exactly as it was during signing using the seed PDF name
+      const message = `I, ${expectedAddress}, agree to the BPC Terms (see BPC_terms_Seed.pdf) as of ${timestamp}`;
+
+      try {
+        const recovered = ethers.utils.verifyMessage(message, signature);
+        if (recovered.toLowerCase() === expectedAddress.toLowerCase()) {
+          result.classList.add('success');
+          result.innerText = `✅ Valid Signature\nRecovered Address: ${recovered}`;
+        } else {
+          result.classList.add('error');
+          result.innerText = `❌ Invalid Signature\nRecovered Address: ${recovered}`;
+        }
+      } catch (err) {
+        result.classList.add('error');
+        result.innerText = '❌ Error verifying signature';
+      }
+    }
+  </script>
+</body>
+</html>

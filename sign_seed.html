@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Terms & Conditions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+    a.pdf-button,
+    button.wallet-button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+    a.pdf-button {
+      background-color: #e5f0ff;
+      color: #007aff;
+    }
+    button.wallet-button {
+      background-color: #007aff;
+      color: white;
+    }
+    button.wallet-button:hover {
+      background-color: #005bb5;
+    }
+    .hash-line {
+      font-size: 14px;
+      color: #555;
+      margin: 20px 0;
+      word-break: break-word;
+    }
+    .output-box {
+      background: #eee;
+      padding: 16px;
+      border-radius: 10px;
+      margin-top: 20px;
+      word-break: break-word;
+      text-align: left;
+    }
+    .copy-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sign Terms & Conditions</h1>
+    <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
+    <!-- Link to the new seed PDF -->
+    <a class="pdf-button" href="BPC_terms_Seed.pdf" target="_blank">📄 View PDF Terms</a>
+    <button class="wallet-button" onclick="signTerms()">✍️ Sign with Wallet</button>
+    <div class="hash-line">
+      PDF Hash (Keccak-256): <span id="pdfHash">0x0c2dcc745ef193bf61a5135ec0fa3cf691a7d85cbef81d3bf7ee67103f0f2861</span>
+    </div>
+    <div id="signatureOutput"></div>
+    <p><a href="verify_seed.html">✅ You can verify your signature here anytime.</a></p>
+  </div>
+  <script>
+    // Constant hash for the Seed terms PDF
+    const hash = '0x0c2dcc745ef193bf61a5135ec0fa3cf691a7d85cbef81d3bf7ee67103f0f2861';
+
+    async function signTerms() {
+      if (!window.ethereum) return alert('Wallet not detected');
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+
+      const timestamp = new Date().toISOString();
+      // Embed the PDF file name into the message so that it can be verified later
+      const message = `I, ${address}, agree to the BPC Terms (see BPC_terms_Seed.pdf) as of ${timestamp}`;
+
+      try {
+        const signature = await signer.signMessage(message);
+        document.getElementById("signatureOutput").innerHTML = `
+          <div class='output-box'>
+            ✅ <b>Signed as:</b> ${address}<br>
+            🕒 <b>Timestamp:</b> ${timestamp}<br>
+            📄 <b>PDF Hash:</b> ${hash}<br>
+            ✍️ <b>Signature:</b><br>${signature}<br>
+            <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
+          </div>
+        `;
+        window.fullSig = `Signed as: ${address} as of ${timestamp}\nSignature:\n${signature}`;
+      } catch (err) {
+        alert('Signing cancelled or failed.');
+      }
+    }
+
+    function copyFull() {
+      navigator.clipboard.writeText(window.fullSig);
+      alert("Copied to clipboard!");
+    }
+  </script>
+</body>
+</html>

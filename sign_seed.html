@@ -4,141 +4,80 @@
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Terms & Conditions</title>
+  <title>Sign Terms & Conditions (Seed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 20px;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
-      max-width: 600px;
-      width: 100%;
-      text-align: center;
-    }
-    h1 {
-      font-size: 26px;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 16px;
-      margin-bottom: 30px;
-    }
-    a.pdf-button,
-    button.wallet-button {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-    }
-    a.pdf-button {
-      background-color: #e5f0ff;
-      color: #007aff;
-    }
-    button.wallet-button {
-      background-color: #007aff;
-      color: white;
-    }
-    button.wallet-button:hover {
-      background-color: #005bb5;
-    }
-    .hash-line {
-      font-size: 14px;
-      color: #555;
-      margin: 20px 0;
-      word-break: break-word;
-    }
-    .output-box {
-      background: #eee;
-      padding: 16px;
-      border-radius: 10px;
-      margin-top: 20px;
-      word-break: break-word;
-      text-align: left;
-    }
-    .copy-btn {
-      background-color: #28a745;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    .copy-btn:hover {
-      background-color: #1e7e34;
-    }
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#f9f9f9;display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0}
+    .container{background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 20px rgba(0,0,0,.05);max-width:600px;width:100%;text-align:center}
+    .logo{height:150px;display:block;margin:0 auto 12px}
+    h1{font-size:26px;margin:0 0 10px}
+    p{font-size:16px;margin-bottom:24px}
+    :root{--blue:#0a6cff;--blueH:#055ad6;--ghost:#eaf2ff}
+    .btn{display:flex;align-items:center;justify-content:center;width:100%;margin:10px 0;padding:14px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer}
+    .btn-ghost{background:var(--ghost);color:var(--blue)}
+    .btn-primary{background:var(--blue);color:#fff}
+    .btn-primary:hover{background:var(--blueH)}
+    .hash-line{font-size:14px;color:#555;margin:18px 0;word-break:break-word}
+    .output-box{background:#eee;padding:16px;border-radius:10px;margin-top:20px;text-align:left;overflow-wrap:anywhere}
+    .copy-btn{background:#28a745;color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;margin-top:8px;cursor:pointer}
+    .copy-btn:hover{background:#1e7e34}
+    .small{font-size:13px;color:#666;margin-top:8px}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Sign Terms & Conditions</h1>
-    <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
-    <!-- Link to the new seed PDF -->
-    <a class="pdf-button" href="BPC_Terms_Seed.pdf" target="_blank">📄 View PDF Terms</a>
-    <button class="wallet-button" onclick="signTerms()">✍️ Sign with Wallet</button>
-    <div class="hash-line">
-      PDF Hash (Keccak-256): <span id="pdfHash">0x0c2dcc745ef193bf61a5135ec0fa3cf691a7d85cbef81d3bf7ee67103f0f2861</span>
-    </div>
+    <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
+    <h1>Sign Terms &amp; Conditions (Seed)</h1>
+    <p>By signing, you confirm you’ve read and agree to the official BPC Seed Terms.</p>
+
+    <a class="btn btn-ghost" href="BPC_Terms_Seed.pdf" target="_blank">📄 View PDF Terms</a>
+    <button class="btn btn-primary" onclick="signTerms()">✍️ Sign with Wallet</button>
+
+    <div class="hash-line">PDF Hash (Keccak-256): <span id="pdfHash">…</span></div>
     <div id="signatureOutput"></div>
-    <p><a href="verify_seed.html">✅ You can verify your signature here anytime.</a></p>
+
+    <p class="small">✅ You can verify your signature anytime on <a href="verify_seed.html">verify_seed.html</a>.</p>
   </div>
+
 <script>
-  // 1) Calcul auto du hash du PDF (pas de variable "hash" ailleurs)
-  const pdfPath = 'BPC_Terms_Seed.pdf'; 
+  // --- Config
+  const pdfPath = 'BPC_Terms_Seed.pdf';
   let pdfHash = '';
 
+  // Compute PDF hash on load
   (async () => {
     try {
       const r = await fetch(pdfPath, { cache: 'no-store' });
       const buf = new Uint8Array(await r.arrayBuffer());
-      pdfHash = '0x' + keccak256(buf); // fourni par js-sha3
-      const el = document.getElementById('pdfHash');
-      if (el) el.textContent = pdfHash;
+      pdfHash = '0x' + keccak256(buf);
+      document.getElementById('pdfHash').textContent = pdfHash;
     } catch (e) {
       console.error('PDF hash error:', e);
     }
   })();
 
-  // 2) Signature
   async function signTerms() {
     try {
       if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask)'); return; }
-
-      // Rabby aime bien ce call en premier
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const address = await signer.getAddress();
 
-      // Attends le hash si pas encore chargé (max ~5s)
-      for (let i = 0; i < 50 && !pdfHash; i++) await new Promise(r => setTimeout(r, 100));
+      // wait for hash (max ~5s)
+      for (let i=0;i<50 && !pdfHash;i++) await new Promise(r=>setTimeout(r,100));
       if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); return; }
 
       const timestamp = new Date().toISOString();
       const message =
-`I, ${address}, agree to the BPC Terms (BPC_Terms_Seed.pdf)
+`I, ${address}, agree to the BPC Terms (${pdfPath})
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
-      // Essaye signMessage, fallback vers personal_sign (très compatible Rabby)
+      // sign (fallback to personal_sign)
       let signature;
       try {
         signature = await signer.signMessage(message);
@@ -147,6 +86,7 @@ Signed on: ${timestamp}`;
         signature = await window.ethereum.request({ method: 'personal_sign', params: [hex, address] });
       }
 
+      // legacy copy block
       const block =
 `Signed as: ${address}
 PDF Hash: ${pdfHash}
@@ -154,27 +94,30 @@ Timestamp: ${timestamp}
 Signature:
 ${signature}`;
 
+      // compact token + verify link
+      const payload = { address, pdf: pdfPath, pdfHash, timestamp, signature };
+      const token = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const verifyLink = `verify_seed.html#token=${encodeURIComponent(token)}`;
+
       document.getElementById('signatureOutput').innerHTML = `
-        <div class='output-box'>
+        <div class="output-box">
           ✅ <b>Signed as:</b> ${address}<br>
           🕒 <b>Timestamp:</b> ${timestamp}<br>
-          📄 <b>PDF Hash:</b> ${pdfHash}<br>
-          ✍️ <b>Signature:</b><br>${signature}<br>
-          <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
+          📄 <b>PDF:</b> ${pdfPath}<br>
+          🧮 <b>PDF Hash:</b> ${pdfHash}<br>
+          ✍️ <b>Signature:</b><br>${signature}<br><br>
+          <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)'>📋 Copy block</button>
+          <button class="copy-btn" onclick='copyText(\`${token}\`)'>🔑 Copy token</button>
+          <a class="copy-btn" style="display:inline-block;text-decoration:none;text-align:center" href="${verifyLink}" target="_blank">🔗 Verify via link</a>
         </div>
       `;
-      window.fullSig = block;
     } catch (err) {
       console.error(err);
       alert('Signing cancelled or failed.');
     }
   }
 
-  function copyFull() {
-    navigator.clipboard.writeText(window.fullSig || '');
-    alert('Copied!');
-  }
+  function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
 </script>
-
 </body>
 </html>

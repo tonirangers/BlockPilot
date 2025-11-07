@@ -1,121 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verify Signature</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify Signature (Seed)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .container {
-      max-width: 800px;
-      width: 100%;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-      text-align: center;
-    }
-    h2 {
-      font-size: 24px;
-      margin-bottom: 16px;
-    }
-    textarea {
-      width: 100%;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      resize: vertical;
-      margin-bottom: 20px;
-      min-height: 120px;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-    }
-    button:hover {
-      background-color: #005dc1;
-    }
-    .result {
-      margin-top: 20px;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      word-break: break-word;
-    }
-    .success {
-      background: #d4edda;
-      color: #155724;
-    }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-    }
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#f4f4f4;margin:0;padding:40px 20px;display:flex;align-items:center;justify-content:center}
+    .container{max-width:640px;width:100%;background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 12px rgba(0,0,0,.05);text-align:center}
+    .logo{height:150px;display:block;margin:0 auto 12px}
+    h2{font-size:26px;margin:0 0 10px}
+    p{font-size:16px;margin:0 0 14px}
+    :root{--blue:#0a6cff;--blueH:#055ad6}
+    .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer;background:var(--blue);color:#fff}
+    .btn:hover{background:var(--blueH)}
+    textarea{width:100%;padding:12px;font-family:monospace;font-size:14px;border-radius:8px;border:1px solid #ccc;resize:vertical;min-height:120px;margin:10px 0 16px}
+    .result{margin-top:16px;padding:16px;border-radius:10px;font-size:14px;text-align:left;word-break:break-word;overflow-wrap:anywhere}
+    .ok{background:#d4edda;color:#155724}
+    .err{background:#f8d7da;color:#721c24}
+    .warn{background:#fff3cd;color:#856404}
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Verify Signature</h2>
-    <p>Paste the full signed message + signature to verify it.</p>
-    <textarea id="inputData"></textarea>
-    <button onclick="verifySignature()">🔍 Verify</button>
-    <div id="result" class="result"></div>
+    <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
+    <h2>Verify Signature (Seed)</h2>
+    <p>Paste your <b>verify token</b> (starts with <code>BPC1.</code>) or the full legacy block.</p>
+
+    <textarea id="inputData" placeholder="BPC1.eyJhZGRyZXNzIjoiMHh...  OR
+
+Signed as: 0x...
+PDF Hash: 0x...
+Timestamp: 2025-...
+Signature:
+0x..."></textarea>
+
+    <button class="btn" id="verifyBtn">🔍 Verify</button>
+
+    <div id="result" class="result" style="display:none"></div>
+    <div id="pdfCheck" class="result warn" style="display:none"></div>
   </div>
- <script>
-  async function verifySignature() {
-    const input = document.getElementById('inputData').value.trim();
-    const result = document.getElementById('result');
-    result.className = 'result';
 
-    // On attend EXACTEMENT ce bloc (copié depuis sign.html)
-    const match = input.match(
-      /Signed as: (0x[a-fA-F0-9]{40})\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s
-    );
-    if (!match) {
-      result.classList.add('error');
-      result.innerText = '⚠️ Invalid input format';
-      return;
+<script>
+  const defaultPdf = 'BPC_Terms_Seed.pdf';
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const h = location.hash;
+    if (h.startsWith('#token=')) {
+      const token = decodeURIComponent(h.slice(7));
+      document.getElementById('inputData').value = token;
+      verify();
     }
+  });
 
-    const [, expectedAddress, pdfHash, timestamp, signature] = match;
+  document.getElementById('verifyBtn').addEventListener('click', verify);
 
-    const message =
-`I, ${expectedAddress}, agree to the BPC Terms (BPC_Terms_Seed.pdf)
+  async function verify() {
+    const box = document.getElementById('inputData');
+    const out = document.getElementById('result');
+    const pdfBox = document.getElementById('pdfCheck');
+    out.style.display='none'; pdfBox.style.display='none';
+    out.className='result'; pdfBox.className='result warn';
+
+    const input = box.value.trim();
+    if (!input) return;
+
+    try {
+      let address, pdf, pdfHash, timestamp, signature;
+
+      if (input.startsWith('BPC1.')) {
+        const json = decodeURIComponent(escape(atob(input.slice(5))));
+        ({ address, pdf, pdfHash, timestamp, signature } = JSON.parse(json));
+      } else {
+        const m = input.match(/Signed as: (0x[a-fA-F0-9]{40})\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s);
+        if (!m) {
+          out.classList.add('err'); out.style.display='block';
+          out.textContent = '⚠️ Paste either the token (BPC1.) or the full block.'; return;
+        }
+        [, address, pdfHash, timestamp, signature] = m;
+        pdf = defaultPdf;
+      }
+
+      const message =
+`I, ${address}, agree to the BPC Terms (${pdf})
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
-    try {
       const recovered = ethers.utils.verifyMessage(message, signature);
-      if (recovered.toLowerCase() === expectedAddress.toLowerCase()) {
-        result.classList.add('success');
-        result.innerText = `✅ Valid Signature\nRecovered Address: ${recovered}`;
+
+      if (recovered.toLowerCase() === address.toLowerCase()) {
+        out.classList.add('ok'); out.style.display='block';
+        out.innerHTML = `✅ <b>Valid Signature</b><br>Recovered Address: <code>${recovered}</code><br>PDF: <code>${pdf}</code><br>PDF Hash: <code>${pdfHash}</code><br>Timestamp: <code>${timestamp}</code>`;
       } else {
-        result.classList.add('error');
-        result.innerText = `❌ Invalid Signature\nRecovered Address: ${recovered}`;
+        out.classList.add('err'); out.style.display='block';
+        out.innerHTML = `❌ <b>Invalid Signature</b><br>Recovered Address: <code>${recovered}</code>`;
+        return;
       }
-    } catch (err) {
-      result.classList.add('error');
-      result.innerText = '❌ Error verifying signature';
+
+      // optional: check current server PDF hash vs signed hash
+      try {
+        const res = await fetch(pdf || defaultPdf, { cache:'no-store' });
+        if (res.ok) {
+          const buf = new Uint8Array(await res.arrayBuffer());
+          const actual = '0x' + keccak256(buf);
+          if (actual.toLowerCase() === pdfHash.toLowerCase()) {
+            pdfBox.className='result ok'; pdfBox.innerHTML='🧮 PDF hash matches on server.'; 
+          } else {
+            pdfBox.className='result warn';
+            pdfBox.innerHTML = `⚠️ PDF hash mismatch on server.<br>Expected: <code>${pdfHash}</code><br>Server: <code>${actual}</code>`;
+          }
+          pdfBox.style.display='block';
+        }
+      } catch (_) {}
+    } catch (e) {
+      console.error(e);
+      out.classList.add('err'); out.style.display='block';
+      out.textContent = '❌ Error verifying signature';
     }
   }
 </script>
-
 </body>
 </html>

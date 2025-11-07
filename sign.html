@@ -128,14 +128,16 @@ Signed on: ${timestamp}`;
           <div class='output-box'>
             ✅ <b>Signed as:</b> ${address}<br>
             🕒 <b>Timestamp:</b> ${timestamp}<br>
-            📄 <b>PDF Hash:</b> ${hash}<br>
+            📄 <b>PDF Hash:</b> ${pdfHash}<br>
             ✍️ <b>Signature:</b><br>${signature}<br>
             <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
           </div>
         `;
-        window.fullSig = `Signed as: ${address} as of ${timestamp}
+window.fullSig = `Signed as: ${address}
+PDF Hash: ${pdfHash}
+Timestamp: ${timestamp}
 Signature:
-${signature}`;
+${signature}`
       } catch (err) {
         alert('Signing cancelled or failed.');
       }
@@ -145,6 +147,11 @@ ${signature}`;
       navigator.clipboard.writeText(window.fullSig);
       alert("Copied to clipboard!");
     }
+
+    
+if (!pdfHash) { alert('PDF hash not ready yet. Please wait 1–2s and retry.'); return; }
+
+    
   </script>
 </body>
 </html>

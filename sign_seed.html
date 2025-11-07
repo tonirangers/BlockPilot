@@ -118,8 +118,9 @@ fetch(pdfPath).then(r => r.arrayBuffer()).then(buf => {
       const address = await signer.getAddress();
 
       const timestamp = new Date().toISOString();
-      // Embed the PDF file name into the message so that it can be verified later
-      const message = `I, ${address}, agree to the BPC Terms (see BPC_Terms_Seed.pdf) as of ${timestamp}`;
+      const message = `I, ${address}, agree to the BPC Terms (BPC_Terms_Seed.pdf)
+PDF Hash: ${pdfHash}
+Signed on: ${timestamp}`;
 
       try {
         const signature = await signer.signMessage(message);

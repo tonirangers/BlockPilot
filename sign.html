@@ -107,6 +107,7 @@ fetch(pdfPath).then(r => r.arrayBuffer()).then(buf => {
   document.getElementById('pdfHash').textContent = pdfHash;
 });
 
+    
 
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');

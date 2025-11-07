@@ -99,50 +99,82 @@
     <div id="signatureOutput"></div>
     <p><a href="verify_seed.html">✅ You can verify your signature here anytime.</a></p>
   </div>
-  <script>
-const pdfPath = 'BPC_Terms_Seed.pdf';
-let pdfHash = '';
+<script>
+  // 1) Calcul auto du hash du PDF (pas de variable "hash" ailleurs)
+  const pdfPath = 'BPC_Terms_Seed.pdf'; 
+  let pdfHash = '';
 
-fetch(pdfPath).then(r => r.arrayBuffer()).then(buf => {
-  pdfHash = '0x' + keccak256(new Uint8Array(buf));
-  document.getElementById('pdfHash').textContent = pdfHash;
-});
+  (async () => {
+    try {
+      const r = await fetch(pdfPath, { cache: 'no-store' });
+      const buf = new Uint8Array(await r.arrayBuffer());
+      pdfHash = '0x' + keccak256(buf); // fourni par js-sha3
+      const el = document.getElementById('pdfHash');
+      if (el) el.textContent = pdfHash;
+    } catch (e) {
+      console.error('PDF hash error:', e);
+    }
+  })();
 
+  // 2) Signature
+  async function signTerms() {
+    try {
+      if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask)'); return; }
 
-    async function signTerms() {
-      if (!window.ethereum) return alert('Wallet not detected');
+      // Rabby aime bien ce call en premier
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       const address = await signer.getAddress();
 
+      // Attends le hash si pas encore chargé (max ~5s)
+      for (let i = 0; i < 50 && !pdfHash; i++) await new Promise(r => setTimeout(r, 100));
+      if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); return; }
+
       const timestamp = new Date().toISOString();
-      const message = `I, ${address}, agree to the BPC Terms (BPC_Terms_Seed.pdf)
+      const message =
+`I, ${address}, agree to the BPC Terms (BPC_Terms_Seed.pdf)
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
+      // Essaye signMessage, fallback vers personal_sign (très compatible Rabby)
+      let signature;
       try {
-        const signature = await signer.signMessage(message);
-        document.getElementById("signatureOutput").innerHTML = `
-          <div class='output-box'>
-            ✅ <b>Signed as:</b> ${address}<br>
-            🕒 <b>Timestamp:</b> ${timestamp}<br>
-            📄 <b>PDF Hash:</b> ${hash}<br>
-            ✍️ <b>Signature:</b><br>${signature}<br>
-            <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
-          </div>
-        `;
-        window.fullSig = `Signed as: ${address} as of ${timestamp}\nSignature:\n${signature}`;
-      } catch (err) {
-        alert('Signing cancelled or failed.');
+        signature = await signer.signMessage(message);
+      } catch (e) {
+        const hex = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message));
+        signature = await window.ethereum.request({ method: 'personal_sign', params: [hex, address] });
       }
-    }
 
-    function copyFull() {
-      navigator.clipboard.writeText(window.fullSig);
-      alert("Copied to clipboard!");
+      const block =
+`Signed as: ${address}
+PDF Hash: ${pdfHash}
+Timestamp: ${timestamp}
+Signature:
+${signature}`;
+
+      document.getElementById('signatureOutput').innerHTML = `
+        <div class='output-box'>
+          ✅ <b>Signed as:</b> ${address}<br>
+          🕒 <b>Timestamp:</b> ${timestamp}<br>
+          📄 <b>PDF Hash:</b> ${pdfHash}<br>
+          ✍️ <b>Signature:</b><br>${signature}<br>
+          <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
+        </div>
+      `;
+      window.fullSig = block;
+    } catch (err) {
+      console.error(err);
+      alert('Signing cancelled or failed.');
     }
-  </script>
+  }
+
+  function copyFull() {
+    navigator.clipboard.writeText(window.fullSig || '');
+    alert('Copied!');
+  }
+</script>
+
 </body>
 </html>

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sign Terms & Conditions (Seed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#f9f9f9;display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0}
@@ -21,7 +21,7 @@
     .btn-primary:hover{background:var(--blueH)}
     .hash-line{font-size:14px;color:#555;margin:18px 0;word-break:break-word}
     .output-box{background:#eee;padding:16px;border-radius:10px;margin-top:20px;text-align:left;overflow-wrap:anywhere}
-    .copy-btn{background:#28a745;color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;margin-top:8px;cursor:pointer}
+    .copy-btn{background:#28a745;color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
     .copy-btn:hover{background:#1e7e34}
     .small{font-size:13px;color:#666;margin-top:8px}
   </style>
@@ -42,11 +42,9 @@
   </div>
 
 <script>
-  // --- Config
   const pdfPath = 'BPC_Terms_Seed.pdf';
   let pdfHash = '';
 
-  // Compute PDF hash on load
   (async () => {
     try {
       const r = await fetch(pdfPath, { cache: 'no-store' });
@@ -67,7 +65,6 @@
       const signer = provider.getSigner();
       const address = await signer.getAddress();
 
-      // wait for hash (max ~5s)
       for (let i=0;i<50 && !pdfHash;i++) await new Promise(r=>setTimeout(r,100));
       if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); return; }
 
@@ -77,16 +74,13 @@
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
-      // sign (fallback to personal_sign)
       let signature;
-      try {
-        signature = await signer.signMessage(message);
-      } catch (e) {
+      try { signature = await signer.signMessage(message); }
+      catch (e) {
         const hex = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message));
         signature = await window.ethereum.request({ method: 'personal_sign', params: [hex, address] });
       }
 
-      // legacy copy block
       const block =
 `Signed as: ${address}
 PDF Hash: ${pdfHash}
@@ -94,10 +88,13 @@ Timestamp: ${timestamp}
 Signature:
 ${signature}`;
 
-      // compact token + verify link
       const payload = { address, pdf: pdfPath, pdfHash, timestamp, signature };
       const token = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
       const verifyLink = `verify_seed.html#token=${encodeURIComponent(token)}`;
+
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type:'application/json' });
+      const jsonUrl = URL.createObjectURL(blob);
 
       document.getElementById('signatureOutput').innerHTML = `
         <div class="output-box">
@@ -108,7 +105,8 @@ ${signature}`;
           ✍️ <b>Signature:</b><br>${signature}<br><br>
           <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)'>📋 Copy block</button>
           <button class="copy-btn" onclick='copyText(\`${token}\`)'>🔑 Copy token</button>
-          <a class="copy-btn" style="display:inline-block;text-decoration:none;text-align:center" href="${verifyLink}" target="_blank">🔗 Verify via link</a>
+          <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json">⬇️ Download JSON</a>
+          <a class="copy-btn" href="${verifyLink}" target="_blank">🔗 Verify via link</a>
         </div>
       `;
     } catch (err) {
@@ -116,7 +114,6 @@ ${signature}`;
       alert('Signing cancelled or failed.');
     }
   }
-
   function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
 </script>
 </body>

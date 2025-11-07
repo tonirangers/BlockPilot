@@ -92,8 +92,8 @@
         return;
       }
 
-      const [_, expectedAddress, timestamp, signature] = match;
-    const message = `I, ${expectedAddress}, agree to the BPC Terms (BPC_Terms.pdf)
+      const [_, expectedAddress, pdfHash, timestamp, signature] = match;
+   const message = `I, ${expectedAddress}, agree to the BPC Terms (BPC_Terms.pdf)
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 

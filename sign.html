@@ -26,6 +26,9 @@
       text-align: center;
     }
     h1 {
+      <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
+      .logo{height:42px;margin:6px auto 18px;display:block;opacity:.9}
+.output-box{overflow-wrap:anywhere}
       font-size: 26px;
       margin-bottom: 10px;
     }
@@ -98,16 +101,17 @@
     <p><a href="verify.html">✅ You can verify your signature here anytime.</a></p>
   </div>
 
- <script>
-  // 1) Calcul auto du hash du PDF (pas de variable "hash" ailleurs)
-  const pdfPath = 'BPC_Terms.pdf'; // 👉 pour la version seed, mets 'BPC_Terms_Seed.pdf'
+<script>
+  // --- CONFIG (standard) ---
+  const pdfPath = 'BPC_Terms.pdf'
   let pdfHash = '';
 
+  // Calcul auto du hash (keccak256 via js-sha3 déjà importé)
   (async () => {
     try {
       const r = await fetch(pdfPath, { cache: 'no-store' });
       const buf = new Uint8Array(await r.arrayBuffer());
-      pdfHash = '0x' + keccak256(buf); // fourni par js-sha3
+      pdfHash = '0x' + keccak256(buf);
       const el = document.getElementById('pdfHash');
       if (el) el.textContent = pdfHash;
     } catch (e) {
@@ -115,29 +119,27 @@
     }
   })();
 
-  // 2) Signature
+  // Sign + sortie UX : bloc, JSON, token, lien de vérif
   async function signTerms() {
     try {
       if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask)'); return; }
-
-      // Rabby aime bien ce call en premier
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const address = await signer.getAddress();
 
-      // Attends le hash si pas encore chargé (max ~5s)
-      for (let i = 0; i < 50 && !pdfHash; i++) await new Promise(r => setTimeout(r, 100));
-      if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); return; }
+      // attendre le hash si pas prêt
+      for (let i=0; i<50 && !pdfHash; i++) await new Promise(r => setTimeout(r,100));
+      if (!pdfHash) { alert('PDF hash not ready. Retry in 1s.'); return; }
 
       const timestamp = new Date().toISOString();
       const message =
-`I, ${address}, agree to the BPC Terms (BPC_Terms.pdf)
+`I, ${address}, agree to the BPC Terms (${pdfPath})
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
-      // Essaye signMessage, fallback vers personal_sign (très compatible Rabby)
+      // signer (fallback personal_sign si besoin)
       let signature;
       try {
         signature = await signer.signMessage(message);
@@ -146,6 +148,7 @@ Signed on: ${timestamp}`;
         signature = await window.ethereum.request({ method: 'personal_sign', params: [hex, address] });
       }
 
+      // Bloc à copier (legacy)
       const block =
 `Signed as: ${address}
 PDF Hash: ${pdfHash}
@@ -153,27 +156,44 @@ Timestamp: ${timestamp}
 Signature:
 ${signature}`;
 
+      // JSON structuré
+      const payload = { address, pdf: pdfPath, pdfHash, timestamp, signature };
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type:'application/json' });
+      const jsonUrl = URL.createObjectURL(blob);
+
+      // Token compact (1 seule valeur à coller)
+      const token = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const verifyLink = `verify.html#token=${encodeURIComponent(token)}`;
+
+      // UI
       document.getElementById('signatureOutput').innerHTML = `
         <div class='output-box'>
           ✅ <b>Signed as:</b> ${address}<br>
           🕒 <b>Timestamp:</b> ${timestamp}<br>
-          📄 <b>PDF Hash:</b> ${pdfHash}<br>
-          ✍️ <b>Signature:</b><br>${signature}<br>
-          <button class='copy-btn' onclick='copyFull()'>📋 Copy to Clipboard</button>
+          📄 <b>PDF:</b> ${pdfPath}<br>
+          🧮 <b>PDF Hash:</b> ${pdfHash}<br>
+          ✍️ <b>Signature:</b><br>${signature}<br><br>
+          <button class='copy-btn' onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)'>📋 Copy block</button>
+          <button class='copy-btn' onclick='copyText(\`${token}\`)'>🔑 Copy token</button>
+          <a class='copy-btn' style='display:inline-block;text-decoration:none;text-align:center' href='${jsonUrl}' download='bpc-signature-${address}.json'>⬇️ Download JSON</a>
+          <a class='copy-btn' style='display:inline-block;text-decoration:none;text-align:center' href='${verifyLink}' target='_blank'>🔗 Verify via link</a>
         </div>
       `;
       window.fullSig = block;
+      window.bpToken = token;
     } catch (err) {
       console.error(err);
       alert('Signing cancelled or failed.');
     }
   }
 
-  function copyFull() {
-    navigator.clipboard.writeText(window.fullSig || '');
+  function copyText(s) {
+    navigator.clipboard.writeText(s || '');
     alert('Copied!');
   }
 </script>
+
 
 </body>
 </html>

@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign Terms & Conditions</title>
+  <title>BPC — Sign (Standard & Seed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#f9f9f9;display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0}
-    .container{background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 20px rgba(0,0,0,.05);max-width:600px;width:100%;text-align:center}
+    .container{background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 20px rgba(0,0,0,.05);max-width:680px;width:100%;text-align:center}
     .logo{height:150px;display:block;margin:0 auto 12px}
-    /* tabs */
     .tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
-    .tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600}
+    .tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600;cursor:pointer;user-select:none}
     .tab.active{background:#0a6cff;color:#fff}
     h1{font-size:26px;margin:0 0 10px}
-    p{font-size:16px;margin-bottom:24px}
+    p{font-size:16px;margin-bottom:16px}
     :root{--blue:#0a6cff;--blueH:#055ad6;--ghost:#eaf2ff}
     .btn{display:flex;align-items:center;justify-content:center;width:100%;margin:10px 0;padding:14px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer}
     .btn-ghost{background:var(--ghost);color:var(--blue)}
@@ -27,7 +26,10 @@
     .output-box{background:#eee;padding:16px;border-radius:10px;margin-top:20px;text-align:left;overflow-wrap:anywhere}
     .copy-btn{background:#28a745;color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
     .copy-btn:hover{background:#1e7e34}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row .btn{flex:1 1 240px}
     .small{font-size:13px;color:#666;margin-top:8px}
+    .muted{color:#666}
   </style>
 </head>
 <body>
@@ -35,35 +37,79 @@
     <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
 
     <nav class="tabs">
-      <a href="sign.html" class="tab active">Standard</a>
-      <a href="sign_seed.html" class="tab">Seed</a>
+      <span class="tab" id="tab-standard">Standard</span>
+      <span class="tab" id="tab-seed">Seed</span>
     </nav>
 
-    <h1>Sign Terms &amp; Conditions</h1>
-    <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
+    <h1 id="title">Sign Terms &amp; Conditions</h1>
+    <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
 
-    <a class="btn btn-ghost" href="BPC_Terms.pdf" target="_blank">📄 View PDF Terms</a>
-    <button class="btn btn-primary" onclick="signTerms()">✍️ Sign with Wallet</button>
+    <div class="row">
+      <a id="viewPdfBtn" class="btn btn-ghost" href="BPC_Terms.pdf" target="_blank">📄 View PDF Terms</a>
+      <button class="btn btn-primary" onclick="signTerms()">✍️ Sign with Wallet</button>
+    </div>
 
-    <div class="hash-line">PDF Hash (Keccak-256): <span id="pdfHash">…</span></div>
+    <div class="hash-line">PDF (<span id="pdfName">BPC_Terms.pdf</span>) • Keccak-256: <span id="pdfHash">…</span></div>
+
     <div id="signatureOutput"></div>
 
-    <p class="small">✅ You can verify your signature anytime on <a href="verify.html">verify.html</a>.</p>
+    <p class="small">✅ You can verify signatures anytime on <a href="verify_all.html">verify_all.html</a>.</p>
   </div>
 
 <script>
-  const pdfPath = 'BPC_Terms.pdf';
+  // ---- Config / State
+  const PDFs = { standard: 'BPC_Terms.pdf', seed: 'BPC_Terms_Seed.pdf' };
+  let mode = 'standard';
+  let pdfPath = PDFs[mode];
   let pdfHash = '';
 
-  (async () => {
+  // ---- Init
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = getHashParams();
+    if (params.mode === 'seed') mode = 'seed';
+    applyMode();
+  });
+
+  document.getElementById('tab-standard').addEventListener('click', () => { mode='standard'; applyMode(true); });
+  document.getElementById('tab-seed').addEventListener('click', () => { mode='seed'; applyMode(true); });
+
+  function getHashParams() {
+    const h = (location.hash||'').replace(/^#/,'');
+    const o = {};
+    h.split('&').forEach(kv => {
+      const [k,v] = kv.split('=');
+      if (k) o[decodeURIComponent(k)] = v ? decodeURIComponent(v) : '';
+    });
+    return o;
+  }
+
+  async function applyMode(pushHash=false) {
+    pdfPath = PDFs[mode];
+    // tabs
+    document.getElementById('tab-standard').classList.toggle('active', mode==='standard');
+    document.getElementById('tab-seed').classList.toggle('active', mode==='seed');
+    // titles
+    document.getElementById('title').textContent = mode==='standard' ? 'Sign Terms & Conditions' : 'Sign Terms & Conditions (Seed)';
+    document.getElementById('subtitle').textContent = mode==='standard'
+      ? 'By signing, you confirm you’ve read and agree to the official BPC Terms.'
+      : 'By signing, you confirm you’ve read and agree to the official BPC Seed Terms.';
+    // links
+    document.getElementById('viewPdfBtn').href = pdfPath;
+    document.getElementById('pdfName').textContent = pdfPath;
+    // hash compute
+    pdfHash = '';
+    document.getElementById('pdfHash').textContent = '…';
     try {
       const r = await fetch(pdfPath, { cache: 'no-store' });
       const buf = new Uint8Array(await r.arrayBuffer());
       pdfHash = '0x' + keccak256(buf);
       document.getElementById('pdfHash').textContent = pdfHash;
-    } catch (e) { console.error('PDF hash error:', e); }
-  })();
+    } catch(e){ console.error('PDF hash error:', e); }
+    // url state
+    if (pushHash) location.hash = `mode=${mode}`;
+  }
 
+  // ---- Sign
   async function signTerms() {
     try {
       if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask)'); return; }
@@ -98,7 +144,7 @@ ${signature}`;
 
       const payload = { address, pdf: pdfPath, pdfHash, timestamp, signature };
       const token   = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      const verifyLink = `verify.html#token=${encodeURIComponent(token)}`;
+      const verifyLink = `verify_all.html#mode=${mode}&token=${encodeURIComponent(token)}`;
 
       const json = JSON.stringify(payload, null, 2);
       const blob = new Blob([json], { type:'application/json' });
@@ -122,6 +168,7 @@ ${signature}`;
       alert('Signing cancelled or failed.');
     }
   }
+
   function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
 </script>
 </body>

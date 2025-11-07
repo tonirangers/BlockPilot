@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Terms & Conditions</title>
@@ -99,8 +100,14 @@
     <p><a href="verify_seed.html">✅ You can verify your signature here anytime.</a></p>
   </div>
   <script>
-    // Constant hash for the Seed terms PDF
-    const hash = '0x0c2dcc745ef193bf61a5135ec0fa3cf691a7d85cbef81d3bf7ee67103f0f2861';
+const pdfPath = 'BPC_Terms_Seed.pdf';
+let pdfHash = '';
+
+fetch(pdfPath).then(r => r.arrayBuffer()).then(buf => {
+  pdfHash = '0x' + keccak256(new Uint8Array(buf));
+  document.getElementById('pdfHash').textContent = pdfHash;
+});
+
 
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');

@@ -53,7 +53,7 @@
 
     <div id="signatureOutput"></div>
 
-    <p class="small">✅ You can verify signatures anytime on <a href="verify_all.html">verify_all.html</a>.</p>
+    <p class="small">✅ You can verify signatures anytime on <a href="verify.html">verify.html</a>.</p>
   </div>
 
 <script>
@@ -144,7 +144,7 @@ ${signature}`;
 
       const payload = { address, pdf: pdfPath, pdfHash, timestamp, signature };
       const token   = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      const verifyLink = `verify_all.html#mode=${mode}&token=${encodeURIComponent(token)}`;
+      const verifyLink = `verify.html#mode=${mode}&token=${encodeURIComponent(token)}`;
 
       const json = JSON.stringify(payload, null, 2);
       const blob = new Blob([json], { type:'application/json' });

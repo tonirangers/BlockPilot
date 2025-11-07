@@ -117,7 +117,9 @@ fetch(pdfPath).then(r => r.arrayBuffer()).then(buf => {
       const address = await signer.getAddress();
 
       const timestamp = new Date().toISOString();
-      const message = `I, ${address}, agree to the BPC Terms (see BPC_Terms.pdf) as of ${timestamp}`;
++ const message = `I, ${address}, agree to the BPC Terms (BPC_Terms.pdf)
++ PDF Hash: ${pdfHash}
++ Signed on: ${timestamp}`;
 
       try {
         const signature = await signer.signMessage(message);

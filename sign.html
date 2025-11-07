@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Terms & Conditions</title>
@@ -98,7 +99,14 @@
   </div>
 
   <script>
-    const hash = '0xba54d62496e82058eac315cd7ac8d1ad012d718432cd84b65d151507a00cec5b';
+   const pdfPath = 'BPC_Terms.pdf';
+let pdfHash = '';
+
+fetch(pdfPath).then(r => r.arrayBuffer()).then(buf => {
+  pdfHash = '0x' + keccak256(new Uint8Array(buf));
+  document.getElementById('pdfHash').textContent = pdfHash;
+});
+
 
     async function signTerms() {
       if (!window.ethereum) return alert('Wallet not detected');

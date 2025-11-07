@@ -12,16 +12,10 @@
     body{font-family:'Inter',sans-serif;background:#f9f9f9;display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0}
     .container{background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 20px rgba(0,0,0,.05);max-width:600px;width:100%;text-align:center}
     .logo{height:150px;display:block;margin:0 auto 12px}
-<nav class="tabs">
-  <a href="sign.html" class="tab active">Standard</a>
-  <a href="sign_seed.html" class="tab">Seed</a>
-</nav>
-
-/* Onglets */
-.tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
-.tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600}
-.tab.active{background:#0a6cff;color:#fff}
-
+    /* tabs */
+    .tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
+    .tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600}
+    .tab.active{background:#0a6cff;color:#fff}
     h1{font-size:26px;margin:0 0 10px}
     p{font-size:16px;margin-bottom:24px}
     :root{--blue:#0a6cff;--blueH:#055ad6;--ghost:#eaf2ff}
@@ -40,6 +34,10 @@
   <div class="container">
     <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
 
+    <nav class="tabs">
+      <a href="sign.html" class="tab active">Standard</a>
+      <a href="sign_seed.html" class="tab">Seed</a>
+    </nav>
 
     <h1>Sign Terms &amp; Conditions</h1>
     <p>By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
@@ -63,9 +61,7 @@
       const buf = new Uint8Array(await r.arrayBuffer());
       pdfHash = '0x' + keccak256(buf);
       document.getElementById('pdfHash').textContent = pdfHash;
-    } catch (e) {
-      console.error('PDF hash error:', e);
-    }
+    } catch (e) { console.error('PDF hash error:', e); }
   })();
 
   async function signTerms() {

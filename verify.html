@@ -30,7 +30,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
+    <a href="index.html" aria-label="Home"><img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'"></a>
 
     <nav class="tabs">
       <span class="tab" id="tab-standard">Standard</span>
@@ -43,7 +43,10 @@
     <textarea id="inputData" placeholder="BPC1.eyJhZGRyZXNzIjoiMHh...  OR
 
 Signed as: 0x...
-PDF Hash: 0x...          ← new block
+Doc ID: BPC_Terms v1.0 (2025-11-07)
+Origin: https://yourdomain.tld
+PDF: BPC_Terms.pdf
+PDF Hash: 0x...
 Timestamp: 2025-...
 Signature:
 0x...
@@ -100,38 +103,64 @@ Signature:
     out.style.display='none'; pdfBox.style.display='none';
     out.className='result'; pdfBox.className='result warn';
 
-    const input = box.value.trim();
+    let input = box.value.trim();
     if (!input) return;
 
+    // normalize CRLF → LF (Windows paste friendly)
+    input = input.replace(/\r\n/g, '\n');
+
     try {
-      let address, pdf = defaultPdf, pdfHash = null, timestamp, signature, isLegacy = false;
+      let address, pdf = defaultPdf, pdfHash = null, timestamp, signature, isLegacy = false, docId = null, origin = null;
 
       if (input.startsWith('BPC1.')) {
         // token mode
         const json = decodeURIComponent(escape(atob(input.slice(5))));
         const p = JSON.parse(json);
-        address = p.address; pdf = p.pdf || defaultPdf; pdfHash = p.pdfHash || null; timestamp = p.timestamp; signature = p.signature;
+        address   = p.address;
+        pdf       = p.pdf || defaultPdf;
+        pdfHash   = p.pdfHash || null;
+        timestamp = p.timestamp;
+        signature = p.signature;
+        docId     = p.docId || null;
+        origin    = p.origin || null;
       } else {
-        // new block?
-        let m = input.match(/Signed as: (0x[a-fA-F0-9]{40})\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s);
+        // v1 block (with Doc ID & Origin)
+        let m = input.match(
+          /Signed as: (0x[a-fA-F0-9]{40})\nDoc ID: (.+?)\nOrigin: (.+?)\nPDF: (.+?)\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s
+        );
         if (m) {
-          [, address, pdfHash, timestamp, signature] = m;
-          // pdf stays defaultPdf
+          [, address, docId, origin, pdf, pdfHash, timestamp, signature] = m;
         } else {
-          // legacy v0?
-          m = input.match(/Signed as: (0x[a-fA-F0-9]{40}) as of (.*?)\s*Signature:\s*(0x[a-fA-F0-9]{130,})/s);
-          if (!m) {
-            out.classList.add('err'); out.style.display='block';
-            out.textContent = '⚠️ Paste a BPC1 token, a new-format block, or a legacy block.'; return;
+          // new block (sans docId/origin, génération précédente)
+          m = input.match(
+            /Signed as: (0x[a-fA-F0-9]{40})\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s
+          );
+          if (m) {
+            [, address, pdfHash, timestamp, signature] = m;
+            // pdf = defaultPdf
+          } else {
+            // legacy v0 (pas de hash, pas de pdf)
+            m = input.match(/Signed as: (0x[a-fA-F0-9]{40}) as of (.*?)\s*Signature:\s*(0x[a-fA-F0-9]{130,})/s);
+            if (!m) {
+              out.classList.add('err'); out.style.display='block';
+              out.textContent = '⚠️ Paste a BPC1 token, a new-format block, or a legacy block.'; return;
+            }
+            [, address, timestamp, signature] = m;
+            isLegacy = true;
           }
-          [, address, timestamp, signature] = m;
-          isLegacy = true;
         }
       }
 
+      // Rebuild exact message
       const message = isLegacy
         ? `I, ${address}, agree to the BPC Terms (see ${pdf}) as of ${timestamp}`
-        : `I, ${address}, agree to the BPC Terms (${pdf})
+        : (docId && origin)
+          ? `I, ${address}, agree to the BPC Terms (${pdf})
+Doc ID: ${docId}
+Origin: ${origin}
+PDF Hash: ${pdfHash}
+Signed on: ${timestamp}`
+          : `I, ${address}, agree to the BPC Terms (${pdf})
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
@@ -141,6 +170,8 @@ Signed on: ${timestamp}`;
         out.classList.add('ok'); out.style.display='block';
         out.innerHTML = `✅ <b>Valid Signature</b><br>
 Recovered Address: <code>${recovered}</code><br>
+${docId ? `Doc ID: <code>${docId}</code><br>` : ``}
+${origin ? `Origin: <code>${origin}</code><br>` : ``}
 PDF: <code>${pdf}</code><br>` +
 (isLegacy ? `PDF Hash: <i>not present in legacy signature</i><br>` : `PDF Hash: <code>${pdfHash}</code><br>`) +
 `Timestamp: <code>${timestamp}</code>`;
@@ -150,7 +181,7 @@ PDF: <code>${pdf}</code><br>` +
         return;
       }
 
-      // Optional: client-side fetch to compare current server PDF hash
+      // Optional: compare current server PDF hash
       try {
         const res = await fetch(pdf, { cache:'no-store' });
         if (res.ok) {

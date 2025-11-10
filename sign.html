@@ -24,13 +24,15 @@
     .btn-primary{background:var(--blue);color:#fff}
     .btn-primary:hover{background:var(--blueH)}
     .hash-line{font-size:14px;color:#555;margin:18px 0;word-break:break-word}
-    .output-box{background:#eee;padding:16px;border-radius:10px;margin-top:20px;text-align:left;overflow-wrap:anywhere}
+    .output-box{background:#f5f5f5;padding:16px;border-radius:10px;margin-top:20px;text-align:left;overflow-wrap:anywhere}
     .copy-btn{background:#28a745;color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
     .copy-btn:hover{background:#1e7e34}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .row .btn{flex:1 1 240px}
     .small{font-size:13px;color:#666;margin-top:8px}
     .muted{color:#666}
+    .qr-wrap{margin-top:12px;display:flex;justify-content:center}
+    canvas.qr{background:#fff;border:1px solid #e5e5e5;border-radius:8px}
   </style>
 </head>
 <body>
@@ -46,8 +48,8 @@
     <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
 
     <div class="row">
-      <a id="viewPdfBtn" class="btn btn-ghost" href="BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
-      <button id="signBtn" class="btn btn-primary" onclick="signTerms()" disabled>⏳ Preparing…</button>
+      <a id="viewPdfBtn" class="btn btn-ghost" href="./BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
+      <button id="signBtn" class="btn btn-primary" disabled>⏳ Preparing…</button>
     </div>
 
     <div class="hash-line">PDF (<span id="pdfName">BPC_Terms.pdf</span>) • Keccak-256: <span id="pdfHash">…</span></div>
@@ -59,17 +61,19 @@
 
 <script>
   // ---- Config
-  const PDFs = { standard: 'BPC_Terms.pdf', seed: 'BPC_Terms_Seed.pdf' };
+  const PDFs = { standard: './BPC_Terms.pdf', seed: './BPC_Terms_Seed.pdf' };
   const TERMS_META = {
     standard: { docId: 'BPC_Terms v1.0 (2025-11-07)' },
     seed:     { docId: 'BPC_Terms_Seed v1.0 (2025-11-07)' }
   };
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwqwEINqQNJOhxYzO0kQ1eUMsD2BIkltO2GRZg1QNImbGVm4TJywgazVI_fgIY_BasYEg/exec'; // Web App URL
+  // Nouveau webhook (Apps Script)
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzOmjt11dQ3vmYtVrydXl6gejh0lVwqiSxCbXMhUVpQPNBFoMTUP2JJlAj0atjTOcfDtg/exec';
 
   // ---- State
   let mode = 'standard';
   let pdfPath = PDFs[mode];
   let pdfHash = '';
+  let signing = false;
 
   // ---- Init
   document.addEventListener('DOMContentLoaded', () => {
@@ -80,6 +84,7 @@
 
   document.getElementById('tab-standard').addEventListener('click', () => { mode='standard'; applyMode(true); });
   document.getElementById('tab-seed').addEventListener('click', () => { mode='seed'; applyMode(true); });
+  document.getElementById('signBtn').addEventListener('click', signTerms);
 
   function getHashParams() {
     const h = (location.hash||'').replace(/^#/,'');
@@ -105,8 +110,12 @@
     document.getElementById('viewPdfBtn').href = pdfPath;
     document.getElementById('pdfName').textContent = pdfPath;
 
+    // clear previous receipt when switching tab
+    document.getElementById('signatureOutput').innerHTML = '';
+
     // disable button while hashing
     const btn = document.getElementById('signBtn');
+    signing = false;
     btn.disabled = true; btn.textContent = '⏳ Preparing…';
 
     // compute hash
@@ -127,10 +136,13 @@
     if (pushHash) location.hash = `mode=${mode}`;
   }
 
-  // ---- Sign
   async function signTerms() {
+    if (signing) return;
+    const btn = document.getElementById('signBtn');
     try {
       if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask)'); return; }
+      signing = true; btn.disabled = true; btn.textContent = '🔐 Waiting wallet…';
+
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -138,7 +150,7 @@
       const address = await signer.getAddress();
 
       for (let i=0;i<50 && !pdfHash;i++) await new Promise(r=>setTimeout(r,100));
-      if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); return; }
+      if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); signing = false; btn.disabled=false; btn.textContent='✍️ Sign with Wallet'; return; }
 
       const timestamp = new Date().toISOString();
       const origin = location.origin;
@@ -169,23 +181,21 @@ Timestamp: ${timestamp}
 Signature:
 ${signature}`;
 
-      const payload = {
-        mode, address, pdf: pdfPath, pdfHash, timestamp, signature, origin, docId,
-        userAgent: navigator.userAgent
-      };
+      const payload = { mode, address, pdf: pdfPath, pdfHash, timestamp, signature, origin, docId, userAgent: navigator.userAgent };
       const token   = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      const verifyLink = `verify.html#mode=${mode}&token=${encodeURIComponent(token)}`;
+      const verifyUrl = new URL('verify.html', location.href).toString();
+      const verifyLink = `${verifyUrl}#mode=${mode}&token=${encodeURIComponent(token)}`;
 
       const json = JSON.stringify(payload, null, 2);
       const blob = new Blob([json], { type:'application/json' });
       const jsonUrl = URL.createObjectURL(blob);
 
-      // Try to log to Google Sheets (optional)
+      // Log to Google Sheets (best-effort)
       if (WEBHOOK_URL) {
         try {
           await fetch(WEBHOOK_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' }, // simple request => pas de preflight
+            headers: { 'Content-Type': 'text/plain' }, // simple => pas de preflight
             body: JSON.stringify(payload)
           });
         } catch (e) { /* silencieux */ }
@@ -194,7 +204,7 @@ ${signature}`;
       // Render receipt
       document.getElementById('signatureOutput').innerHTML = `
         <div class="output-box">
-          ✅ <b>Signed as:</b> ${address}<br>
+          ✅ <b>Signed as:</b> ${address} <span class="muted">[${mode}]</span><br>
           🕒 <b>Timestamp:</b> ${timestamp}<br>
           📄 <b>Doc ID:</b> ${docId}<br>
           🌐 <b>Origin:</b> ${origin}<br>
@@ -205,40 +215,50 @@ ${signature}`;
           <button class="copy-btn" onclick='copyText(\`${token}\`)' title="Un seul champ à coller pour vérifier">🔑 Copy token</button>
           <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="Reçu JSON">⬇️ Download JSON</a>
           <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="Lien direct de vérification">🔗 Verify via link</a>
-          <div style="margin-top:12px">
-            <canvas id="qrCanvas" width="160" height="160" style="background:#fff;border-radius:8px"></canvas>
+          <div class="qr-wrap">
+            <canvas id="qrCanvas" class="qr" width="320" height="320"></canvas>
           </div>
         </div>
       `;
 
-      // QR code
+      // QR code (plus grand + correction)
       const canvas = document.getElementById('qrCanvas');
       const url = verifyLink;
       try {
+        if (!window.QRCode || !QRCode.toCanvas) throw new Error('QRCode lib missing');
         await QRCode.toCanvas(canvas, url, {
-          width: 160,
-          margin: 1,
+          width: 320,
+          margin: 2,
+          errorCorrectionLevel: 'M',
           color: { dark: '#000000', light: '#FFFFFF' }
         });
       } catch (err) {
         console.error('QR canvas failed, fallback to IMG', err);
         try {
-          const dataUrl = await QRCode.toDataURL(url, { width: 160, margin: 1 });
+          const dataUrl = await QRCode.toDataURL(url, {
+            width: 320, margin: 2, errorCorrectionLevel: 'M',
+            color: { dark: '#000000', light: '#FFFFFF' }
+          });
           const img = new Image();
-          img.width = 160; img.height = 160; img.style.borderRadius = '8px';
+          img.width = 320; img.height = 320; img.style.borderRadius = '8px'; img.style.border = '1px solid #e5e5e5';
           img.src = dataUrl;
           canvas.replaceWith(img);
         } catch (e2) {
           console.error('QR fallback failed', e2);
         }
       }
+
+      // reset button
+      signing = false; btn.disabled = false; btn.textContent = '✍️ Sign again';
     } catch (err) {
       console.error(err);
+      signing = false;
+      const btn = document.getElementById('signBtn');
+      btn.disabled = false; btn.textContent = '✍️ Sign with Wallet';
       alert('Signing cancelled or failed.');
     }
   }
 
-  // <= IMPORTANT: à l'extérieur de signTerms()
   function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
 </script>
 </body>

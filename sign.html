@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#f9f9f9;display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0}
@@ -34,7 +35,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'">
+    <a href="index.html" aria-label="Home"><img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'"></a>
 
     <nav class="tabs">
       <span class="tab" id="tab-standard">Standard</span>
@@ -45,8 +46,8 @@
     <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
 
     <div class="row">
-      <a id="viewPdfBtn" class="btn btn-ghost" href="BPC_Terms.pdf" target="_blank">📄 View PDF Terms</a>
-      <button class="btn btn-primary" onclick="signTerms()">✍️ Sign with Wallet</button>
+      <a id="viewPdfBtn" class="btn btn-ghost" href="BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
+      <button id="signBtn" class="btn btn-primary" onclick="signTerms()" disabled>⏳ Preparing…</button>
     </div>
 
     <div class="hash-line">PDF (<span id="pdfName">BPC_Terms.pdf</span>) • Keccak-256: <span id="pdfHash">…</span></div>
@@ -57,8 +58,15 @@
   </div>
 
 <script>
-  // ---- Config / State
+  // ---- Config
   const PDFs = { standard: 'BPC_Terms.pdf', seed: 'BPC_Terms_Seed.pdf' };
+  const TERMS_META = {
+    standard: { docId: 'BPC_Terms v1.0 (2025-11-07)' },
+    seed:     { docId: 'BPC_Terms_Seed v1.0 (2025-11-07)' }
+  };
+  const WEBHOOK_URL = ''; // <= mets ici l’URL Web App Apps Script (ou laisse vide pour ignorer)
+
+  // ---- State
   let mode = 'standard';
   let pdfPath = PDFs[mode];
   let pdfHash = '';
@@ -96,7 +104,12 @@
     // links
     document.getElementById('viewPdfBtn').href = pdfPath;
     document.getElementById('pdfName').textContent = pdfPath;
-    // hash compute
+
+    // disable button while hashing
+    const btn = document.getElementById('signBtn');
+    btn.disabled = true; btn.textContent = '⏳ Preparing…';
+
+    // compute hash
     pdfHash = '';
     document.getElementById('pdfHash').textContent = '…';
     try {
@@ -104,8 +117,12 @@
       const buf = new Uint8Array(await r.arrayBuffer());
       pdfHash = '0x' + keccak256(buf);
       document.getElementById('pdfHash').textContent = pdfHash;
-    } catch(e){ console.error('PDF hash error:', e); }
-    // url state
+      btn.disabled = false; btn.textContent = '✍️ Sign with Wallet';
+    } catch(e){
+      console.error('PDF hash error:', e);
+      btn.disabled = true; btn.textContent = '⚠️ PDF hash error';
+    }
+
     if (pushHash) location.hash = `mode=${mode}`;
   }
 
@@ -123,26 +140,38 @@
       if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); return; }
 
       const timestamp = new Date().toISOString();
+      const origin = location.origin;
+      const docId = TERMS_META[mode].docId;
+
       const message =
 `I, ${address}, agree to the BPC Terms (${pdfPath})
+Doc ID: ${docId}
+Origin: ${origin}
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
       let signature;
-      try { signature = await signer.signMessage(message); }
-      catch {
+      try {
+        signature = await signer.signMessage(message);
+      } catch {
         const hex = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message));
         signature = await window.ethereum.request({ method: 'personal_sign', params: [hex, address] });
       }
 
       const block =
 `Signed as: ${address}
+Doc ID: ${docId}
+Origin: ${origin}
+PDF: ${pdfPath}
 PDF Hash: ${pdfHash}
 Timestamp: ${timestamp}
 Signature:
 ${signature}`;
 
-      const payload = { address, pdf: pdfPath, pdfHash, timestamp, signature };
+      const payload = {
+        mode, address, pdf: pdfPath, pdfHash, timestamp, signature, origin, docId,
+        userAgent: navigator.userAgent
+      };
       const token   = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
       const verifyLink = `verify.html#mode=${mode}&token=${encodeURIComponent(token)}`;
 
@@ -150,19 +179,39 @@ ${signature}`;
       const blob = new Blob([json], { type:'application/json' });
       const jsonUrl = URL.createObjectURL(blob);
 
+      // Try to log to Google Sheets (optional)
+      if (WEBHOOK_URL) {
+        try {
+          await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(payload)
+          });
+        } catch (e) { /* silencieux */ }
+      }
+
+      // Render receipt
       document.getElementById('signatureOutput').innerHTML = `
         <div class="output-box">
           ✅ <b>Signed as:</b> ${address}<br>
           🕒 <b>Timestamp:</b> ${timestamp}<br>
-          📄 <b>PDF:</b> ${pdfPath}<br>
+          📄 <b>Doc ID:</b> ${docId}<br>
+          🌐 <b>Origin:</b> ${origin}<br>
+          📘 <b>PDF:</b> ${pdfPath}<br>
           🧮 <b>PDF Hash:</b> ${pdfHash}<br>
           ✍️ <b>Signature:</b><br>${signature}<br><br>
-          <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)'>📋 Copy block</button>
-          <button class="copy-btn" onclick='copyText(\`${token}\`)'>🔑 Copy token</button>
-          <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json">⬇️ Download JSON</a>
-          <a class="copy-btn" href="${verifyLink}" target="_blank">🔗 Verify via link</a>
+          <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)' title="Copier le bloc lisible">📋 Copy block</button>
+          <button class="copy-btn" onclick='copyText(\`${token}\`)' title="Un seul champ à coller pour vérifier">🔑 Copy token</button>
+          <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="Reçu JSON">⬇️ Download JSON</a>
+          <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="Lien direct de vérification">🔗 Verify via link</a>
+          <div style="margin-top:12px">
+            <canvas id="qrCanvas" width="160" height="160" style="background:#fff;border-radius:8px"></canvas>
+          </div>
         </div>
       `;
+
+      try { QRCode.toCanvas(document.getElementById('qrCanvas'), verifyLink, { width: 160 }); } catch(_){}
+
     } catch (err) {
       console.error(err);
       alert('Signing cancelled or failed.');

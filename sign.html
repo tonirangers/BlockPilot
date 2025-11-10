@@ -64,7 +64,7 @@
     standard: { docId: 'BPC_Terms v1.0 (2025-11-07)' },
     seed:     { docId: 'BPC_Terms_Seed v1.0 (2025-11-07)' }
   };
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwqwEINqQNJOhxYzO0kQ1eUMsD2BIkltO2GRZg1QNImbGVm4TJywgazVI_fgIY_BasYEg/exec'; // <= mets ici l’URL Web App Apps Script (ou laisse vide pour ignorer)
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwqwEINqQNJOhxYzO0kQ1eUMsD2BIkltO2GRZg1QNImbGVm4TJywgazVI_fgIY_BasYEg/exec'; // Web App URL
 
   // ---- State
   let mode = 'standard';
@@ -113,7 +113,8 @@
     pdfHash = '';
     document.getElementById('pdfHash').textContent = '…';
     try {
-      const r = await fetch(pdfPath, { cache: 'no-store' });
+      const r = await fetch(pdfPath + '?v=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) throw new Error('Fetch PDF failed: ' + r.status);
       const buf = new Uint8Array(await r.arrayBuffer());
       pdfHash = '0x' + keccak256(buf);
       document.getElementById('pdfHash').textContent = pdfHash;
@@ -180,16 +181,15 @@ ${signature}`;
       const jsonUrl = URL.createObjectURL(blob);
 
       // Try to log to Google Sheets (optional)
-if (WEBHOOK_URL) {
-  try {
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // simple request
-      body: JSON.stringify(payload)
-    });
-  } catch (e) { /* ok silencieux */ }
-}
-
+      if (WEBHOOK_URL) {
+        try {
+          await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' }, // simple request => pas de preflight
+            body: JSON.stringify(payload)
+          });
+        } catch (e) { /* silencieux */ }
+      }
 
       // Render receipt
       document.getElementById('signatureOutput').innerHTML = `
@@ -211,30 +211,34 @@ if (WEBHOOK_URL) {
         </div>
       `;
 
-// après document.getElementById('signatureOutput').innerHTML = `...`
-const canvas = document.getElementById('qrCanvas');
-const url = verifyLink;
-
-try {
-  await QRCode.toCanvas(canvas, url, {
-    width: 160,
-    margin: 1,
-    color: { dark: '#000000', light: '#FFFFFF' } // noir sur blanc explicite
-  });
-} catch (err) {
-  console.error('QR canvas failed, fallback to IMG', err);
-  try {
-    const dataUrl = await QRCode.toDataURL(url, { width: 160, margin: 1 });
-    const img = new Image();
-    img.width = 160; img.height = 160; img.style.borderRadius = '8px';
-    img.src = dataUrl;
-    canvas.replaceWith(img);
-  } catch (e2) {
-    console.error('QR fallback failed', e2);
+      // QR code
+      const canvas = document.getElementById('qrCanvas');
+      const url = verifyLink;
+      try {
+        await QRCode.toCanvas(canvas, url, {
+          width: 160,
+          margin: 1,
+          color: { dark: '#000000', light: '#FFFFFF' }
+        });
+      } catch (err) {
+        console.error('QR canvas failed, fallback to IMG', err);
+        try {
+          const dataUrl = await QRCode.toDataURL(url, { width: 160, margin: 1 });
+          const img = new Image();
+          img.width = 160; img.height = 160; img.style.borderRadius = '8px';
+          img.src = dataUrl;
+          canvas.replaceWith(img);
+        } catch (e2) {
+          console.error('QR fallback failed', e2);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Signing cancelled or failed.');
+    }
   }
-}
 
-
+  // <= IMPORTANT: à l'extérieur de signTerms()
   function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
 </script>
 </body>

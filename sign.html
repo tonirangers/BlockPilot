@@ -180,15 +180,16 @@ ${signature}`;
       const jsonUrl = URL.createObjectURL(blob);
 
       // Try to log to Google Sheets (optional)
-      if (WEBHOOK_URL) {
-        try {
-          await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify(payload)
-          });
-        } catch (e) { /* silencieux */ }
-      }
+if (WEBHOOK_URL) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // simple request
+      body: JSON.stringify(payload)
+    });
+  } catch (e) { /* ok silencieux */ }
+}
+
 
       // Render receipt
       document.getElementById('signatureOutput').innerHTML = `
@@ -210,13 +211,29 @@ ${signature}`;
         </div>
       `;
 
-      try { QRCode.toCanvas(document.getElementById('qrCanvas'), verifyLink, { width: 160 }); } catch(_){}
+// après document.getElementById('signatureOutput').innerHTML = `...`
+const canvas = document.getElementById('qrCanvas');
+const url = verifyLink;
 
-    } catch (err) {
-      console.error(err);
-      alert('Signing cancelled or failed.');
-    }
+try {
+  await QRCode.toCanvas(canvas, url, {
+    width: 160,
+    margin: 1,
+    color: { dark: '#000000', light: '#FFFFFF' } // noir sur blanc explicite
+  });
+} catch (err) {
+  console.error('QR canvas failed, fallback to IMG', err);
+  try {
+    const dataUrl = await QRCode.toDataURL(url, { width: 160, margin: 1 });
+    const img = new Image();
+    img.width = 160; img.height = 160; img.style.borderRadius = '8px';
+    img.src = dataUrl;
+    canvas.replaceWith(img);
+  } catch (e2) {
+    console.error('QR fallback failed', e2);
   }
+}
+
 
   function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
 </script>

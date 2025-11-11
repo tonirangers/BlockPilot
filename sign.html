@@ -9,30 +9,62 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
+    :root{
+      /* Vert/teal proche du logo */
+      --brand:#0c7a73;
+      --brandH:#09615c;
+      --ghost:#e7f4f3;
+      --ink:#0b2725;
+      --muted:#5a6a68;
+      --ok:#22a06b;
+      --okH:#1a8156;
+      --card:#ffffff;
+      --soft:#f5f7f7;
+      --stroke:#e5eceb;
+    }
     *{box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#f9f9f9;display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0}
-    .container{background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 20px rgba(0,0,0,.05);max-width:680px;width:100%;text-align:center}
+    body{
+      font-family:'Inter',sans-serif;background:#f2f5f5;color:var(--ink);
+      display:flex;justify-content:center;align-items:center;padding:40px 20px;margin:0
+    }
+    .container{
+      background:var(--card);padding:30px;border-radius:16px;
+      box-shadow:0 0 20px rgba(0,0,0,.05);max-width:680px;width:100%;text-align:center
+    }
     .logo{height:150px;display:block;margin:0 auto 12px}
     .tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
-    .tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600;cursor:pointer;user-select:none}
-    .tab.active{background:#0a6cff;color:#fff}
+    .tab{
+      padding:8px 12px;border-radius:999px;background:var(--ghost);color:var(--brand);
+      text-decoration:none;font-weight:600;cursor:pointer;user-select:none;border:1px solid transparent
+    }
+    .tab:hover{border-color:var(--stroke)}
+    .tab.active{background:var(--brand);color:#fff}
     h1{font-size:26px;margin:0 0 10px}
     p{font-size:16px;margin-bottom:16px}
-    :root{--blue:#0a6cff;--blueH:#055ad6;--ghost:#eaf2ff}
-    .btn{display:flex;align-items:center;justify-content:center;width:100%;margin:10px 0;padding:14px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer}
-    .btn-ghost{background:var(--ghost);color:var(--blue)}
-    .btn-primary{background:var(--blue);color:#fff}
-    .btn-primary:hover{background:var(--blueH)}
-    .hash-line{font-size:14px;color:#555;margin:18px 0;word-break:break-word}
-    .output-box{background:#f5f5f5;padding:16px;border-radius:10px;margin-top:20px;text-align:left;overflow-wrap:anywhere}
-    .copy-btn{background:#28a745;color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
-    .copy-btn:hover{background:#1e7e34}
+    .btn{
+      display:flex;align-items:center;justify-content:center;width:100%;margin:10px 0;
+      padding:14px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer
+    }
+    .btn-ghost{background:var(--ghost);color:var(--brand)}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brandH)}
+    .hash-line{font-size:14px;color:var(--muted);margin:18px 0;word-break:break-word}
+    .output-box{
+      background:var(--soft);padding:16px;border-radius:12px;margin-top:20px;text-align:left;
+      overflow-wrap:anywhere;border:1px solid var(--stroke)
+    }
+    .copy-btn{
+      background:var(--ok);color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;
+      margin:6px 6px 0 0;cursor:pointer;display:inline-block
+    }
+    .copy-btn:hover{background:var(--okH)}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .row .btn{flex:1 1 240px}
-    .small{font-size:13px;color:#666;margin-top:8px}
-    .muted{color:#666}
+    .small{font-size:13px;color:var(--muted);margin-top:8px}
+    .muted{color:var(--muted)}
     .qr-wrap{margin-top:12px;display:flex;justify-content:center}
-    canvas.qr{background:#fff;border:1px solid #e5e5e5;border-radius:8px}
+    canvas.qr{background:#fff;border:1px solid var(--stroke);border-radius:8px}
+    .actions{margin-top:8px}
   </style>
 </head>
 <body>
@@ -66,7 +98,7 @@
     standard: { docId: 'BPC_Terms v1.0 (2025-11-07)' },
     seed:     { docId: 'BPC_Terms_Seed v1.0 (2025-11-07)' }
   };
-  // Nouveau webhook (Apps Script)
+  // Webhook Apps Script (nouveau)
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzOmjt11dQ3vmYtVrydXl6gejh0lVwqiSxCbXMhUVpQPNBFoMTUP2JJlAj0atjTOcfDtg/exec';
 
   // ---- State
@@ -140,7 +172,7 @@
     if (signing) return;
     const btn = document.getElementById('signBtn');
     try {
-      if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask)'); return; }
+      if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask/Zeal)'); return; }
       signing = true; btn.disabled = true; btn.textContent = '🔐 Waiting wallet…';
 
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -190,14 +222,10 @@ ${signature}`;
       const blob = new Blob([json], { type:'application/json' });
       const jsonUrl = URL.createObjectURL(blob);
 
-      // Log to Google Sheets (best-effort)
+      // Log to Google Sheets (best-effort, no preflight)
       if (WEBHOOK_URL) {
         try {
-          await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' }, // simple => pas de preflight
-            body: JSON.stringify(payload)
-          });
+          await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
         } catch (e) { /* silencieux */ }
       }
 
@@ -211,40 +239,46 @@ ${signature}`;
           📘 <b>PDF:</b> ${pdfPath}<br>
           🧮 <b>PDF Hash:</b> ${pdfHash}<br>
           ✍️ <b>Signature:</b><br>${signature}<br><br>
-          <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)' title="Copier le bloc lisible">📋 Copy block</button>
-          <button class="copy-btn" onclick='copyText(\`${token}\`)' title="Un seul champ à coller pour vérifier">🔑 Copy token</button>
-          <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="Reçu JSON">⬇️ Download JSON</a>
-          <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="Lien direct de vérification">🔗 Verify via link</a>
-          <div class="qr-wrap">
-            <canvas id="qrCanvas" class="qr" width="320" height="320"></canvas>
+
+          <div class="actions">
+            <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)' title="Copier le bloc lisible">📋 Copy block</button>
+            <button class="copy-btn" onclick='copyText(\`${token}\`)' title="Coller dans verify.html">🔑 Copy token</button>
+            <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="Reçu JSON">⬇️ Download JSON</a>
+            <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="Lien direct de vérification">🔗 Open verify</a>
           </div>
+
+          <div class="actions">
+            <button class="copy-btn" onclick='shareLink("${verifyLink}")'>📤 Share link</button>
+            <button class="copy-btn" onclick='shareToken("${token}")'>🔑 Share token</button>
+            <button class="copy-btn" onclick='shareJsonFile("bpc-signature-${address}.json", \`${json.replace(/`/g,"\\`")}\`)'>🧾 Share JSON</button>
+          </div>
+
+          <details class="qr-wrap">
+            <summary style="cursor:pointer;margin:10px 0">Afficher un QR (optionnel)</summary>
+            <canvas id="qrCanvas" class="qr" width="320" height="320"></canvas>
+          </details>
         </div>
       `;
 
-      // QR code (plus grand + correction)
+      // QR code (affiché seulement si l'utilisateur déplie le <details>)
       const canvas = document.getElementById('qrCanvas');
-      const url = verifyLink;
-      try {
-        if (!window.QRCode || !QRCode.toCanvas) throw new Error('QRCode lib missing');
-        await QRCode.toCanvas(canvas, url, {
-          width: 320,
-          margin: 2,
-          errorCorrectionLevel: 'M',
-          color: { dark: '#000000', light: '#FFFFFF' }
-        });
-      } catch (err) {
-        console.error('QR canvas failed, fallback to IMG', err);
+      if (canvas) {
+        const url = verifyLink;
         try {
-          const dataUrl = await QRCode.toDataURL(url, {
+          if (!window.QRCode || !QRCode.toCanvas) throw new Error('QRCode lib missing');
+          await QRCode.toCanvas(canvas, url, {
             width: 320, margin: 2, errorCorrectionLevel: 'M',
             color: { dark: '#000000', light: '#FFFFFF' }
           });
-          const img = new Image();
-          img.width = 320; img.height = 320; img.style.borderRadius = '8px'; img.style.border = '1px solid #e5e5e5';
-          img.src = dataUrl;
-          canvas.replaceWith(img);
-        } catch (e2) {
-          console.error('QR fallback failed', e2);
+        } catch (err) {
+          console.error('QR canvas failed, fallback to IMG', err);
+          try {
+            const dataUrl = await QRCode.toDataURL(url, { width: 320, margin: 2, errorCorrectionLevel: 'M' });
+            const img = new Image();
+            img.width = 320; img.height = 320; img.style.borderRadius = '8px'; img.style.border = '1px solid var(--stroke)';
+            img.src = dataUrl;
+            canvas.replaceWith(img);
+          } catch (e2) { console.error('QR fallback failed', e2); }
         }
       }
 
@@ -253,13 +287,40 @@ ${signature}`;
     } catch (err) {
       console.error(err);
       signing = false;
-      const btn = document.getElementById('signBtn');
       btn.disabled = false; btn.textContent = '✍️ Sign with Wallet';
       alert('Signing cancelled or failed.');
     }
   }
 
   function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
+
+  // --- Share helpers (Web Share API + fallbacks)
+  async function shareLink(url){
+    try{
+      if(navigator.share){ await navigator.share({title:'BPC — Verify',text:'Vérifier ma signature BPC :',url}); }
+      else { await navigator.clipboard.writeText(url); alert('Link copied!'); }
+    }catch(_){}
+  }
+  async function shareToken(token){
+    const text = `BPC verify token:\n${token}`;
+    try{
+      if(navigator.share){ await navigator.share({title:'BPC — Token',text}); }
+      else { await navigator.clipboard.writeText(text); alert('Token copied!'); }
+    }catch(_){}
+  }
+  async function shareJsonFile(filename, jsonStr){
+    try{
+      const file = new File([jsonStr], filename, {type:'application/json'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({ title:'BPC — JSON Receipt', files:[file] });
+      }else{
+        const blob = new Blob([jsonStr], {type:'application/json'});
+        const url  = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), {href:url, download:filename});
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }
+    }catch(_){}
+  }
 </script>
 </body>
 </html>

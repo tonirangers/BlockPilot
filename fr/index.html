@@ -99,4 +99,171 @@
             <div class="note">Pas de mélange entre clients.</div>
           </div>
         </div>
-      </
+      </div>
+    </section>
+
+    <section id="performance" class="section">
+      <h2>Performance & Yield</h2>
+      <p class="lead">Le marché bouge. Ce que BlockPilot ajoute : du rendement sur vos actifs + une allocation adaptée + des retraits simples.</p>
+
+      <div class="grid2">
+        <div class="card pad">
+          <div class="kicker">Contexte marché (public)</div>
+          <div class="tabs" role="tablist" aria-label="Marché">
+            <button class="tabbtn active" type="button" data-market="total">TOTAL</button>
+            <button class="tabbtn" type="button" data-market="btc">BTC</button>
+            <button class="tabbtn" type="button" data-market="eth">ETH</button>
+          </div>
+
+          <div class="market-kpis" aria-label="Performance marché">
+            <div class="kpi"><div class="label">30 jours</div><div id="kpi-30" class="val">—</div></div>
+            <div class="kpi"><div class="label">90 jours</div><div id="kpi-90" class="val">—</div></div>
+            <div class="kpi"><div class="label">1 an</div><div id="kpi-365" class="val">—</div></div>
+          </div>
+
+          <div class="chartbox">
+            <div id="market-chart" aria-label="Courbe marché"></div>
+            <div id="market-note" class="note"></div>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="kicker">Ce que BlockPilot ajoute</div>
+
+          <div class="yieldcards">
+            <div class="yc"><div class="t">Stable — moyenne actuelle</div><div class="v">10%</div><div class="u">APR</div></div>
+            <div class="yc"><div class="t">BTC — moyenne actuelle</div><div class="v">2%</div><div class="u">APR</div></div>
+            <div class="yc"><div class="t">ETH — moyenne actuelle</div><div class="v">4%</div><div class="u">APR</div></div>
+            <div class="yc"><div class="t">BNB — moyenne actuelle</div><div class="v">13%</div><div class="u">APR</div></div>
+          </div>
+
+          <div class="hr"></div>
+          <div class="note">
+            Le yield = un revenu (ou une capitalisation) généré par vos actifs, en plus de l’exposition au marché.
+            Si le prix de l’actif monte, la valeur du yield en € augmente aussi — et si vous réinvestissez, l’effet est multiplicatif.
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="formrow">
+            <div>
+              <label for="amount-eur">Montant (€)</label>
+              <input id="amount-eur" inputmode="decimal" placeholder="10000"/>
+            </div>
+
+            <div>
+              <label for="asset">Actif</label>
+              <select id="asset">
+                <option value="stable">Stable</option>
+                <option value="btc">BTC</option>
+                <option value="eth" selected>ETH</option>
+                <option value="bnb">BNB</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toggles" aria-label="Mode">
+            <button class="toggle active" type="button" data-mode="compound">Capitaliser</button>
+            <button class="toggle" type="button" data-mode="payout">Encaisser</button>
+            <span id="mode-label" class="note"></span>
+          </div>
+
+          <div class="toggles" aria-label="Scénario prix">
+            <button class="toggle active" type="button" data-scen="flat">Prix constant</button>
+            <button class="toggle" type="button" data-scen="bull20">Prix +20%/an</button>
+            <button class="toggle" type="button" data-scen="bull50">Prix +50%/an</button>
+          </div>
+
+          <div class="outs">
+            <div class="out"><span class="k">Yield annuel estimé</span><span id="out-annual" class="v">—</span></div>
+            <div class="out"><span class="k">Yield mensuel estimé</span><span id="out-monthly" class="v">—</span></div>
+            <div class="out"><span class="k">Capital estimé à 12 mois (tokens)</span><span id="out-cap" class="v">—</span></div>
+            <div id="out-hint" class="smallhint"></div>
+          </div>
+
+          <div id="compound-box" class="compound" aria-label="Effet composé">
+            <div class="head">Effet composé</div>
+            <div class="rows">
+              <div class="cell" data-h="12"><div class="h">12 mois</div><div class="b">—</div><div class="s">—</div></div>
+              <div class="cell" data-h="36"><div class="h">3 ans</div><div class="b">—</div><div class="s">—</div></div>
+              <div class="cell" data-h="60"><div class="h">5 ans</div><div class="b">—</div><div class="s">—</div></div>
+            </div>
+          </div>
+
+          <div class="note">Moyennes indicatives. Variables selon conditions de marché et protocoles.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="setup" class="section">
+      <h2>Mise en place (3 étapes concrètes)</h2>
+      <p class="lead">Simple, lisible, contrôlé. On fait la mise en place ensemble, puis BlockPilot opère au quotidien.</p>
+
+      <div class="mini">
+        <div class="card pad">
+          <b>1) Création du coffre + sécurité</b>
+          <div class="note">On crée votre Safe à votre nom et on active les protections (règles, co-signature).</div>
+        </div>
+        <div class="card pad">
+          <b>2) Dépôt + allocation</b>
+          <div class="note">On met en place les rails (IBAN/carte/on-ramp), puis on définit l’allocation selon votre profil.</div>
+        </div>
+        <div class="card pad">
+          <b>3) Suivi + retraits</b>
+          <div class="note">Vous voyez tout on-chain. Un retrait ? Vous signez (ou co-signez) et ça sort.</div>
+        </div>
+        <div class="card pad">
+          <b>Support</b>
+          <div class="note">Un interlocuteur unique : Toni (exécution + support).</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="security" class="section">
+      <h2>Sécurité & contrôle</h2>
+      <p class="lead">Vous restez propriétaire. Notre rôle : opérer. Vos retraits : par signature / co-signature.</p>
+
+      <div class="card pad">
+        <div class="mini">
+          <div class="card pad">
+            <b>Propriété</b>
+            <div class="note">Votre Safe est à votre nom. Vous gardez la clé.</div>
+          </div>
+          <div class="card pad">
+            <b>Retraits (2/2)</b>
+            <div class="note">Aucun retrait sans vous. Co-signature (2/2 ou batch) puis retour au mode standard.</div>
+          </div>
+          <div class="card pad">
+            <b>Protection</b>
+            <div class="note">Règles “anti-erreur” + limitations : évite les sorties non prévues.</div>
+          </div>
+          <div class="card pad">
+            <b>Transparence</b>
+            <div class="note">Transactions et positions visibles on-chain + reporting.</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="kicker">En clair</div>
+        <div class="glossary">
+          <div class="gitem"><b>Safe</b><span>Votre coffre-fort crypto (smart wallet) à votre nom.</span></div>
+          <div class="gitem"><b>DeFi</b><span>Des “produits d’épargne” on-chain pour générer du rendement.</span></div>
+          <div class="gitem"><b>Guard / règles</b><span>Des protections qui évitent les erreurs et certaines sorties non prévues.</span></div>
+          <div class="gitem"><b>2/2</b><span>Pas de retrait sans votre signature (vous avez le dernier mot).</span></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Contact: <a id="footer-email" href="#">toni@blockpilot.capital</a>
+        · <a id="footer-call" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
+        · <a id="footer-docs" href="#" style="display:none">Docs</a>
+        · <a id="footer-terms" href="../BPC_Terms.pdf">Fees/Terms (PDF)</a>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../assets/main.js"></script>
+</body>
+</html>

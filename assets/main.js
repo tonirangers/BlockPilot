@@ -1,327 +1,311 @@
+/* assets/main.js
+   Fixes: links wiring, market charts (BTC/ETH/BNB) + long-run KPIs, yield calc (live prices).
+*/
 (() => {
-  const isEN = location.pathname.includes('/en/');
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const isFR = () => /\/fr\/($|index\.html)/.test(location.pathname);
+  const prefix = (/\/(fr|en)\//.test(location.pathname)) ? "../" : "./";
 
-  const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
-  const fmtPct = (x) => {
-    if (!isFinite(x)) return "—";
-    return (x >= 0 ? "+" : "") + (x * 100).toFixed(1) + "%";
+  const CG_IDS = { btc:"bitcoin", eth:"ethereum", bnb:"binancecoin" };
+
+  const fallback = {
+    contact:{ book_call_url:"", email:"hello@blockpilot.capital", terms_pdf_url:"BPC_Terms.pdf", docs_url:"" },
+    yield:{ apr:{ stable:.10, btc:.02, eth:.04, bnb:.13 } },
+    market:{ days:1825, kpis:[365,1095,1825], show_total:false },
+    defaults:{ amount_eur:10000, asset:"stable" },
+    yield_notes:{
+      fr:"Le yield s’accumule en tokens. Si le token prend de la valeur, la performance en € augmente en plus.",
+      en:"Yield accrues in tokens. If the token appreciates, your € performance increases on top of yield."
+    }
   };
-  const fmtNum = (n, digits = 2) => {
-    if (!isFinite(n)) return "—";
-    return n.toLocaleString(undefined, { maximumFractionDigits: digits });
+
+  const fmtPct = (x) => (x==null || !isFinite(x)) ? "—" : `${x>=0?"+":""}${x.toFixed(1)}%`;
+  const fmtNum = (x, d=2) => (x==null || !isFinite(x)) ? "—" : x.toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
+  const fmtTok = (x, sym) => {
+    if (x==null || !isFinite(x)) return "—";
+    const d = sym==="btc" ? 6 : sym==="eth" ? 5 : sym==="bnb" ? 4 : 2;
+    return x.toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
   };
-  const fmtTok = (n) => {
-    if (!isFinite(n)) return "—";
-    const abs = Math.abs(n);
-    const d = abs >= 100 ? 2 : abs >= 1 ? 4 : abs >= 0.01 ? 6 : 8;
-    return n.toLocaleString(undefined, { maximumFractionDigits: d });
+  const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
+
+  const setDisabled = (el, disabled) => {
+    if (!el) return;
+    el.classList.toggle("isDisabled", !!disabled);
+    if (el.tagName === "BUTTON") el.disabled = !!disabled;
+    if (el.tagName === "A") {
+      if (disabled) el.setAttribute("aria-disabled","true");
+      else el.removeAttribute("aria-disabled");
+    }
   };
 
   const fetchJSON = async (url) => {
-    const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
-  };
-  const binanceJSON = async (url) => {
-    const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok) throw new Error("Binance HTTP " + r.status);
-    return r.json();
+    const r = await fetch(url, { cache:"no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
   };
 
-  const loadConfig = async () => {
-    try { return await fetchJSON("../data/blockpilot.json"); }
-    catch (e) { console.warn("config load failed", e); return null; }
+  const cfgURL = `${prefix}data/blockpilot.json`;
+
+  const getCfg = async () => {
+    try{
+      const cfg = await fetchJSON(cfgURL);
+      return {
+        contact:{
+          book_call_url: cfg.contact?.book_call_url ?? fallback.contact.book_call_url,
+          email: cfg.contact?.email ?? fallback.contact.email,
+          terms_pdf_url: cfg.contact?.terms_pdf_url ?? fallback.contact.terms_pdf_url,
+          docs_url: cfg.contact?.docs_url ?? fallback.contact.docs_url
+        },
+        yield:{
+          apr:{
+            stable: cfg.yield?.apr?.stable ?? fallback.yield.apr.stable,
+            btc: cfg.yield?.apr?.btc ?? fallback.yield.apr.btc,
+            eth: cfg.yield?.apr?.eth ?? fallback.yield.apr.eth,
+            bnb: cfg.yield?.apr?.bnb ?? fallback.yield.apr.bnb
+          }
+        },
+        market:{
+          days: cfg.market?.days ?? fallback.market.days,
+          kpis: cfg.market?.kpis ?? fallback.market.kpis,
+          show_total: cfg.market?.show_total ?? fallback.market.show_total
+        },
+        defaults:{
+          amount_eur: cfg.defaults?.amount_eur ?? fallback.defaults.amount_eur,
+          asset: cfg.defaults?.asset ?? fallback.defaults.asset
+        },
+        yield_notes:{
+          fr: cfg.yield?.notes?.fr ?? fallback.yield_notes.fr,
+          en: cfg.yield?.notes?.en ?? fallback.yield_notes.en
+        }
+      };
+    }catch(e){
+      return fallback;
+    }
   };
 
-  const setHref = (el, href) => { if (el && href) el.setAttribute("href", href); };
+  const wireLinks = (cfg) => {
+    const book = cfg.contact.book_call_url || "";
+    const email = cfg.contact.email ? `mailto:${cfg.contact.email}` : "";
+    const terms = cfg.contact.terms_pdf_url ? `${prefix}${cfg.contact.terms_pdf_url}` : "";
+    const docs = cfg.contact.docs_url || "";
 
-  const wireCTAs = (cfg) => {
-    const bookUrl = cfg?.contact?.book_call_url || "";
-    const email = cfg?.contact?.email || "";
-    const termsUrl = cfg?.contact?.terms_url || "";
-    const docsUrl = cfg?.contact?.docs_url || "";
-
-    setHref($("#ctaBook"), bookUrl);
-    setHref($("#ctaEmail"), email ? `mailto:${email}` : "");
-
-    const footerEmail = $("#footerEmail");
-    if (footerEmail && email) footerEmail.textContent = email;
-    setHref($("#footerTerms"), termsUrl);
-
-    const docsEls = $$("#navDocs, [data-docs-link], #footerDocs").filter(Boolean);
-    docsEls.forEach((el) => {
-      if (docsUrl) {
-        el.classList.remove("is-disabled");
-        el.removeAttribute("aria-disabled");
-        el.setAttribute("href", docsUrl);
-        el.setAttribute("target", "_blank");
-        el.setAttribute("rel", "noopener");
-      } else {
-        el.classList.add("is-disabled");
-        el.setAttribute("aria-disabled", "true");
-        el.setAttribute("title", isEN ? "Docs coming soon" : "Docs bientôt disponibles");
-        el.setAttribute("href", "#");
-      }
-    });
+    $$('[data-link="book"]').forEach(a => { a.href = book || "#"; setDisabled(a, !book); if (book) a.target="_blank"; });
+    $$('[data-link="email"]').forEach(a => { a.href = email || "#"; setDisabled(a, !email); });
+    $$('[data-link="terms"]').forEach(a => { a.href = terms || "#"; setDisabled(a, !terms); if (terms) a.target="_blank"; });
+    $$('[data-link="docs"]').forEach(a => { a.href = docs || "#"; setDisabled(a, !docs); if (docs) a.target="_blank"; });
   };
 
-  const wireLangSwitch = () => {
-    const fr = $("#lang-fr"), en = $("#lang-en");
-    if (!fr || !en) return;
-    const path = location.pathname;
-    const pageEN = path.includes("/en/");
-    fr.classList.toggle("is-active", !pageEN);
-    en.classList.toggle("is-active", pageEN);
-    const go = (lang) => {
-      try { localStorage.setItem("bp_lang", lang); } catch (_) {}
-      location.href = lang === "fr" ? "../fr/" : "../en/";
+  const setAPRs = (cfg) => {
+    const pct = (x) => `${(x*100).toFixed(0)}%`;
+    const map = {
+      aprStable: pct(cfg.yield.apr.stable),
+      aprBtc: pct(cfg.yield.apr.btc),
+      aprEth: pct(cfg.yield.apr.eth),
+      aprBnb: pct(cfg.yield.apr.bnb)
     };
-    fr.addEventListener("click", () => { if (pageEN) go("fr"); });
-    en.addEventListener("click", () => { if (!pageEN) go("en"); });
+    Object.entries(map).forEach(([id,val]) => { const el = $("#"+id); if (el) el.textContent = val; });
   };
 
-  const svgLineChart = (series, w = 720, h = 220) => {
-    const pad = 10;
-    const xs = series.map(p => p[0]), ys = series.map(p => p[1]);
-    const xmin = Math.min(...xs), xmax = Math.max(...xs);
-    const ymin = Math.min(...ys), ymax = Math.max(...ys);
-    const yr = (ymax - ymin) || 1;
-    const x = (v) => pad + (v - xmin) * (w - pad * 2) / (xmax - xmin || 1);
-    const y = (v) => pad + (h - pad * 2) * (1 - (v - ymin) / yr);
-    let d = "";
-    for (let i = 0; i < series.length; i++) {
-      const [tx, ty] = series[i];
-      d += (i === 0 ? "M" : "L") + x(tx).toFixed(1) + " " + y(ty).toFixed(1) + " ";
+  const setYieldCopy = (cfg) => {
+    const el = $("#yieldExplain");
+    if (!el) return;
+    el.textContent = isFR() ? cfg.yield_notes.fr : cfg.yield_notes.en;
+  };
+
+  const chartSVG = (pts) => {
+    if (!pts || pts.length < 2) return "";
+    const w=1000,h=300,p=14;
+    const vals = pts.map(x=>x.v);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const sx = (i)=> p + (w-2*p) * (i / (pts.length-1));
+    const sy = (v)=> (h-p) - (h-2*p) * ((v-min) / ((max-min)||1));
+    let d = `M ${sx(0)} ${sy(vals[0])}`;
+    for (let i=1;i<vals.length;i++) d += ` L ${sx(i)} ${sy(vals[i])}`;
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+      <path d="${d}" fill="none" stroke="rgba(15,111,102,.95)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  };
+
+  const findPastValue = (series, daysAgo) => {
+    if (!series?.length) return null;
+    const target = series[series.length-1].t - daysAgo*86400000;
+    let best = null, bestDiff = Infinity;
+    for (let i=0;i<series.length;i++){
+      const diff = Math.abs(series[i].t - target);
+      if (diff < bestDiff){ bestDiff = diff; best = series[i].v; }
     }
-    return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img"><path d="${d.trim()}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+    return best;
   };
 
-  const msDay = 86400000;
-
-  const fetchKlinesDaily = async (symbol, days) => {
-    const end = Date.now();
-    let start = end - days * msDay;
-    const out = [];
-    for (let guard = 0; guard < 6; guard++) {
-      const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&startTime=${start}&limit=1000`;
-      const rows = await binanceJSON(url);
-      if (!Array.isArray(rows) || rows.length === 0) break;
-      for (const r of rows) {
-        const t = +r[0], close = +r[4];
-        if (isFinite(t) && isFinite(close)) out.push([t, close]);
-      }
-      const lastT = +rows[rows.length - 1][0];
-      const next = lastT + msDay;
-      if (next >= end || rows.length < 1000) break;
-      start = next;
-    }
-    out.sort((a, b) => a[0] - b[0]);
-    const uniq = [];
-    let lastT = -1;
-    for (const p of out) { if (p[0] !== lastT) uniq.push(p); lastT = p[0]; }
-    return uniq;
+  const pctChange = (series, daysAgo) => {
+    const last = series?.length ? series[series.length-1].v : null;
+    const past = findPastValue(series, daysAgo);
+    if (last==null || past==null || past===0) return null;
+    return ((last/past)-1)*100;
   };
 
-  const pickValueAtOrBefore = (series, t) => {
-    let lo = 0, hi = series.length - 1, ans = null;
-    while (lo <= hi) {
-      const mid = (lo + hi) >> 1;
-      const tm = series[mid][0];
-      if (tm <= t) { ans = series[mid][1]; lo = mid + 1; }
-      else hi = mid - 1;
-    }
-    return ans;
+  const cacheGet = (k, maxAgeMs) => {
+    try{
+      const raw = localStorage.getItem(k);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (!obj || !obj.t || !obj.v) return null;
+      if (Date.now() - obj.t > maxAgeMs) return null;
+      return obj.v;
+    }catch(e){ return null; }
+  };
+  const cacheSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify({t:Date.now(), v})); }catch(e){} };
+
+  const fetchMcap = async (market, days) => {
+    if (market === "total") return null;
+    const id = CG_IDS[market];
+    if (!id) return null;
+    const key = `bp_mcap_${id}_${days}`;
+    const cached = cacheGet(key, 6*60*60*1000);
+    if (cached) return cached;
+
+    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}`;
+    const j = await fetchJSON(url);
+    const pts = (j.market_caps || []).map(([t,v]) => ({ t, v }));
+    cacheSet(key, pts);
+    return pts;
   };
 
-  const computeReturns = (series, daysList) => {
-    const endT = series[series.length - 1]?.[0];
-    const endV = series[series.length - 1]?.[1];
-    const out = {};
-    for (const d of daysList) {
-      const v0 = pickValueAtOrBefore(series, endT - d * msDay);
-      out[d] = (v0 && endV) ? (endV / v0 - 1) : NaN;
-    }
-    return out;
-  };
-
-  const buildIndex = (btc, eth, bnb, weights) => {
-    const wb = weights?.btc ?? 0.6, we = weights?.eth ?? 0.3, wn = weights?.bnb ?? 0.1;
-    const map = new Map();
-    for (const [t, v] of btc) map.set(t, { t, btc: v });
-    for (const [t, v] of eth) { const o = map.get(t) || { t }; o.eth = v; map.set(t, o); }
-    for (const [t, v] of bnb) { const o = map.get(t) || { t }; o.bnb = v; map.set(t, o); }
-    const rows = Array.from(map.values()).filter(r => r.btc && r.eth && r.bnb).sort((a,b)=>a.t-b.t);
-    if (!rows.length) return [];
-    const b0 = rows[0].btc, e0 = rows[0].eth, n0 = rows[0].bnb;
-    return rows.map(r => [r.t, 100 * (wb * (r.btc / b0) + we * (r.eth / e0) + wn * (r.bnb / n0))]);
+  const paintKPI = (id, v) => {
+    const el = $("#"+id);
+    if (!el) return;
+    el.textContent = fmtPct(v);
+    el.classList.toggle("up", v!=null && v>=0);
+    el.classList.toggle("down", v!=null && v<0);
   };
 
   const initMarket = async (cfg) => {
-    const chartEl = $("#marketChart");
-    const hintEl = $("#marketHint");
-    const tabs = $$(".tab[data-market]");
-    if (!chartEl || tabs.length === 0) return;
+    const chart = $("#marketChart");
+    const hint = $("#marketHint");
+    if (!chart || !hint) return;
 
-    const days = clamp(cfg?.market?.days || 1825, 365, 1825);
-    const kpisDays = cfg?.market?.kpis_days || [365, 1095, 1825];
-    const weights = cfg?.market?.index_weights;
-    const symbols = cfg?.market?.symbols || { btc: "BTCUSDT", eth: "ETHUSDT", bnb: "BNBUSDT" };
+    const tabs = $$("#marketTabs .tab");
+    let active = "btc";
 
-    const seriesCache = {};
-    const ensureSeries = async (key) => {
-      if (seriesCache[key]) return seriesCache[key];
-      if (key === "btc" || key === "eth" || key === "bnb") {
-        seriesCache[key] = await fetchKlinesDaily(symbols[key], days);
-        return seriesCache[key];
+    const setActive = (m) => {
+      active = m;
+      tabs.forEach(b => b.classList.toggle("active", b.dataset.market === m));
+      update();
+    };
+
+    tabs.forEach(b => {
+      const m = b.dataset.market;
+      if (!m) return;
+      b.addEventListener("click", () => !b.disabled && setActive(m));
+    });
+
+    const update = async () => {
+      hint.textContent = isFR() ? "Chargement…" : "Loading…";
+      chart.innerHTML = "";
+      if (active === "total"){
+        hint.textContent = isFR() ? "TOTAL indisponible (source)." : "TOTAL unavailable (source).";
+        paintKPI("m1y", null); paintKPI("m3y", null); paintKPI("m5y", null);
+        return;
       }
-      const [b, e, n] = await Promise.all([ensureSeries("btc"), ensureSeries("eth"), ensureSeries("bnb")]);
-      seriesCache.total = buildIndex(b, e, n, weights);
-      return seriesCache.total;
-    };
+      try{
+        const days = clamp(cfg.market.days || 1825, 30, 3650);
+        const series = await fetchMcap(active, days);
+        if (!series?.length){
+          hint.textContent = isFR() ? "Données indisponibles." : "Data unavailable.";
+          paintKPI("m1y", null); paintKPI("m3y", null); paintKPI("m5y", null);
+          return;
+        }
+        chart.innerHTML = chartSVG(series);
 
-    const setActive = (key) => {
-      tabs.forEach(btn => {
-        const k = btn.getAttribute("data-market");
-        const on = k === key;
-        btn.classList.toggle("is-active", on);
-        btn.setAttribute("aria-selected", on ? "true" : "false");
-      });
-    };
+        const [d1, d3, d5] = cfg.market.kpis?.length ? cfg.market.kpis : [365,1095,1825];
+        paintKPI("m1y", pctChange(series, d1));
+        paintKPI("m3y", pctChange(series, d3));
+        paintKPI("m5y", pctChange(series, d5));
 
-    const render = async (key) => {
-      setActive(key);
-      if (hintEl) hintEl.textContent = (key === "total")
-        ? (isEN ? "TOTAL = BTC/ETH/BNB index (market proxy)." : "TOTAL = indice BTC/ETH/BNB (proxy de marché).")
-        : "";
-
-      try {
-        chartEl.innerHTML = `<div class="skeleton" style="height:220px"></div>`;
-        const series = await ensureSeries(key);
-        if (!series || series.length < 10) throw new Error("empty series");
-        chartEl.innerHTML = svgLineChart(series);
-
-        const r = computeReturns(series, kpisDays);
-        const m1 = $("#m1y"), m3 = $("#m3y"), m5 = $("#m5y");
-        if (m1) m1.textContent = fmtPct(r[365]);
-        if (m3) m3.textContent = fmtPct(r[1095]);
-        if (m5) m5.textContent = fmtPct(r[1825]);
-        [m1, m3, m5].forEach((el, i) => {
-          if (!el) return;
-          const v = [r[365], r[1095], r[1825]][i];
-          el.classList.toggle("pos", v > 0);
-          el.classList.toggle("neg", v < 0);
-        });
-      } catch (e) {
-        console.warn("market render failed", e);
-        chartEl.innerHTML = `<div class="muted small">${isEN ? "Data unavailable right now." : "Données indisponibles pour le moment."}</div>`;
+        const dt = new Date(series[series.length-1].t);
+        hint.textContent = (isFR() ? "Source: CoinGecko · Maj: " : "Source: CoinGecko · Updated: ") + dt.toLocaleDateString();
+      }catch(e){
+        hint.textContent = isFR() ? "Flux marché indisponible pour le moment." : "Market feed temporarily unavailable.";
+        paintKPI("m1y", null); paintKPI("m3y", null); paintKPI("m5y", null);
       }
     };
 
-    tabs.forEach(btn => btn.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      const key = btn.getAttribute("data-market");
-      if (key) render(key);
-    }));
-
-    await render("total");
+    await update();
   };
 
-  const fetchTickerPrice = async (symbol) => {
-    const o = await binanceJSON(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
-    const p = +o.price;
-    if (!isFinite(p) || p <= 0) throw new Error("bad price " + symbol);
-    return p;
+  const fetchPriceEUR = async (asset) => {
+    if (asset === "stable") return 1;
+    const id = CG_IDS[asset];
+    if (!id) return null;
+    const key = `bp_price_${id}_eur`;
+    const cached = cacheGet(key, 10*60*1000);
+    if (cached) return cached;
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=eur`;
+    const j = await fetchJSON(url);
+    const p = j?.[id]?.eur;
+    if (typeof p === "number" && isFinite(p) && p > 0){ cacheSet(key, p); return p; }
+    return null;
   };
 
-  const initYield = async (cfg) => {
+  const initYieldCalc = (cfg) => {
     const amountEl = $("#amount");
     const assetEl = $("#asset");
-    const scenEl = $("#priceScenario");
-    if (!amountEl || !assetEl) return;
+    const outDep = $("#depositTok");
+    const outY = $("#yYear");
+    const outM = $("#yMonth");
+    const outCap = $("#capTok");
+    const hint = $("#yieldHint");
+    if (!amountEl || !assetEl || !outDep || !outY || !outM || !outCap || !hint) return;
 
-    const apr = cfg?.yield?.apr || { stable: 0.10, btc: 0.02, eth: 0.04, bnb: 0.13 };
-    const outDeposit = $("#depositTok"), outYYear = $("#yYear"), outYMonth = $("#yMonth"), outCapTok = $("#capTok");
-    const outExplain = $("#yieldExplain"), outCapScenario = $("#capEurScenario");
-
-    const symbols = cfg?.market?.symbols || { btc: "BTCUSDT", eth: "ETHUSDT", bnb: "BNBUSDT", eur: "EURUSDT" };
-    let prices = null;
-    const ensurePrices = async () => {
-      if (prices) return prices;
-      const [eurUsdt, btc, eth, bnb] = await Promise.all([
-        fetchTickerPrice(symbols.eur || "EURUSDT"),
-        fetchTickerPrice(symbols.btc || "BTCUSDT"),
-        fetchTickerPrice(symbols.eth || "ETHUSDT"),
-        fetchTickerPrice(symbols.bnb || "BNBUSDT"),
-      ]);
-      prices = { eurUsdt, btc, eth, bnb };
-      return prices;
-    };
+    amountEl.value = String(cfg.defaults?.amount_eur ?? 10000);
+    assetEl.value = cfg.defaults?.asset ?? "stable";
 
     const calc = async () => {
-      const eur = +amountEl.value;
-      const key = (assetEl.value || "eth").toLowerCase();
-      const a = apr[key] ?? 0;
-      const scen = scenEl ? +scenEl.value : 0;
-
-      if (!isFinite(eur) || eur <= 0) {
-        if (outDeposit) outDeposit.textContent = "—";
-        if (outYYear) outYYear.textContent = "—";
-        if (outYMonth) outYMonth.textContent = "—";
-        if (outCapTok) outCapTok.textContent = "—";
-        if (outCapScenario) outCapScenario.textContent = "—";
-        if (outExplain) outExplain.textContent = "";
+      const eur = Number(amountEl.value || 0);
+      const a = assetEl.value;
+      const apr = cfg.yield?.apr?.[a] ?? (a==="stable"?.10:0);
+      if (!isFinite(eur) || eur <= 0){
+        outDep.textContent = "—"; outY.textContent = "—"; outM.textContent = "—"; outCap.textContent = "—";
+        hint.textContent = isFR() ? "Entrez un montant." : "Enter an amount.";
+        return;
+      }
+      const price = await fetchPriceEUR(a);
+      if (!price){
+        outDep.textContent = "—"; outY.textContent = "—"; outM.textContent = "—"; outCap.textContent = "—";
+        hint.textContent = isFR() ? "Prix indisponible (source)." : "Price unavailable (source).";
         return;
       }
 
-      try {
-        const p = await ensurePrices();
-        const usdt = eur * p.eurUsdt;
-        const priceUSDT = key === "stable" ? 1 : (key === "btc" ? p.btc : key === "bnb" ? p.bnb : p.eth);
-        const depositTok = usdt / priceUSDT;
-        const yYear = depositTok * a;
-        const yMonth = depositTok * (a / 12);
-        const capTok = depositTok * Math.pow(1 + a / 12, 12);
+      const depTok = eur / price;
+      const yYear = depTok * apr;
+      const yMonth = yYear / 12;
+      const capTok = depTok * Math.pow(1 + apr/12, 12);
 
-        const capUSDT_now = capTok * priceUSDT;
-        const capEUR_now = capUSDT_now / p.eurUsdt;
-        const capUSDT_scen = capTok * priceUSDT * (1 + scen);
-        const capEUR_scen = capUSDT_scen / p.eurUsdt;
+      outDep.textContent = `${fmtTok(depTok,a)} ${a.toUpperCase()}`;
+      outY.textContent = `${fmtTok(yYear,a)} ${a.toUpperCase()}`;
+      outM.textContent = `${fmtTok(yMonth,a)} ${a.toUpperCase()}`;
+      outCap.textContent = `${fmtTok(capTok,a)} ${a.toUpperCase()}`;
 
-        const sym = key === "stable" ? "USDT" : key.toUpperCase();
-        if (outDeposit) outDeposit.textContent = `${fmtTok(depositTok)} ${sym}`;
-        if (outYYear) outYYear.textContent = `${fmtTok(yYear)} ${sym}`;
-        if (outYMonth) outYMonth.textContent = `${fmtTok(yMonth)} ${sym}`;
-        if (outCapTok) outCapTok.textContent = `${fmtTok(capTok)} ${sym}`;
-        if (outCapScenario) outCapScenario.textContent = `≈ ${fmtNum(capEUR_scen, 0)} €`;
+      const eurStable = eur * Math.pow(1 + apr/12, 12);
+      const eurUp25 = (capTok * price) * 1.25;
 
-        if (outExplain) {
-          const yEUR = (yYear * priceUSDT) / p.eurUsdt;
-          outExplain.textContent = isEN
-            ? `≈ ${fmtNum(yEUR, 0)} € / year (yield) • ≈ ${fmtNum(capEUR_now, 0)} € at 12 months (compounded)`
-            : `≈ ${fmtNum(yEUR, 0)} € / an (yield) • ≈ ${fmtNum(capEUR_now, 0)} € à 12 mois (capitalisation)`;
-        }
-      } catch (e) {
-        console.warn("yield calc failed", e);
-        if (outExplain) outExplain.textContent = isEN ? "Prices unavailable right now." : "Prix indisponibles pour le moment.";
-      }
+      hint.textContent = isFR()
+        ? `Si le prix reste stable: ~${fmtNum(eurStable,0)}€. Si +25% sur le token: ~${fmtNum(eurUp25,0)}€ (illustratif).`
+        : `If price stays flat: ~€${fmtNum(eurStable,0)}. If token +25%: ~€${fmtNum(eurUp25,0)} (illustrative).`;
     };
 
     amountEl.addEventListener("input", calc);
     assetEl.addEventListener("change", calc);
-    if (scenEl) scenEl.addEventListener("change", calc);
-    await calc();
+    calc();
   };
 
-  const init = async () => {
-    const cfg = await loadConfig();
-    wireLangSwitch();
-    if (cfg) wireCTAs(cfg);
-    if (cfg) await initMarket(cfg);
-    if (cfg) await initYield(cfg);
-  };
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  document.addEventListener("DOMContentLoaded", async () => {
+    const cfg = await getCfg();
+    wireLinks(cfg);
+    setAPRs(cfg);
+    setYieldCopy(cfg);
+    initMarket(cfg);
+    initYieldCalc(cfg);
+  });
 })();

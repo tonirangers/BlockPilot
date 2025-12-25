@@ -1,280 +1,359 @@
-const DEFAULTS={
-  yields_avg:{BTC:0.02,ETH:0.04,STABLE:0.10,BNB:0.13},
-  calculator_default_amount:50000,
-  links:{call:"https://calendar.app.google/bQWcTHd22XDzuCt6A",email:"toni@blockpilot.capital",email_subject:"BlockPilot — Demande de call",terms:"../BPC_Terms.pdf"},
-  market:{vs_currency:"eur",days:365,coingecko_ids:{BTC:"bitcoin",ETH:"ethereum",BNB:"binancecoin"}}
+// assets/main.js
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+const fmt=(n,dp=2)=>Number.isFinite(n)?n.toLocaleString(undefined,{maximumFractionDigits:dp,minimumFractionDigits:dp}):"—";
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+
+const DEFAULT_CFG={
+  brand:{name:"BlockPilot"},
+  links:{book_call:"https://calendar.app.google/bQWcTHd22XDzuCt6A",email:"toni@blockpilot.capital",email_subject_fr:"BlockPilot — Demande d'information",email_subject_en:"BlockPilot — Inquiry",terms_pdf:"../BPC_Terms.pdf",docs_url:""},
+  yields:{stable:.10,btc:.02,eth:.04,bnb:.13},
+  assets:{
+    stable:{label_fr:"Stable",label_en:"Stable",coingecko_id:null},
+    btc:{label_fr:"BTC",label_en:"BTC",coingecko_id:"bitcoin"},
+    eth:{label_fr:"ETH",label_en:"ETH",coingecko_id:"ethereum"},
+    bnb:{label_fr:"BNB",label_en:"BNB",coingecko_id:"binancecoin"}
+  },
+  calculator:{default_amount_eur:10000,default_asset:"eth",price_scenarios:[
+    {id:"flat",label_fr:"Prix constant",label_en:"Flat price",annual_rate:0},
+    {id:"bull20",label_fr:"Prix +20%/an",label_en:"+20%/yr",annual_rate:.2},
+    {id:"bull50",label_fr:"Prix +50%/an",label_en:"+50%/yr",annual_rate:.5}
+  ]}
 };
 
-async function loadData(){
+async function loadCfg(){
   try{
     const r=await fetch("../data/blockpilot.json",{cache:"no-store"});
     if(!r.ok) throw 0;
     const j=await r.json();
-    return {
-      ...DEFAULTS, ...j,
-      links:{...DEFAULTS.links,...(j.links||{})},
-      yields_avg:{...DEFAULTS.yields_avg,...(j.yields_avg||{})},
-      market:{...DEFAULTS.market,...(j.market||{}),coingecko_ids:{...DEFAULTS.market.coingecko_ids,...(j.market?.coingecko_ids||{})}}
-    };
-  }catch(e){ return DEFAULTS; }
+    return {...DEFAULT_CFG,...j,links:{...DEFAULT_CFG.links,...(j.links||{})},yields:{...DEFAULT_CFG.yields,...(j.yields||{})},assets:{...DEFAULT_CFG.assets,...(j.assets||{})},calculator:{...DEFAULT_CFG.calculator,...(j.calculator||{})}};
+  }catch(e){return DEFAULT_CFG;}
 }
 
-function fmtPct(p){
-  if(!isFinite(p)) return "—";
-  const s=p*100;
-  return (s>=0?"+":"")+s.toFixed(1)+"%";
-}
-function fmtNum(x,dec=6){
-  if(!isFinite(x)) return "—";
-  let s=x.toFixed(dec);
-  s=s.replace(/0+$/,"").replace(/\.$/,"");
-  return s;
-}
-function fmtEUR(x){
-  if(!isFinite(x)) return "—";
-  const v=Math.round(x);
-  return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g," ")+" €";
-}
-function monthlyRate(apr){ return Math.pow(1+apr,1/12)-1; }
-
-function wireCTAs(d){
-  document.querySelectorAll("[data-cta='call']").forEach(a=>a.href=d.links.call);
-  const mail=`mailto:${d.links.email}?subject=${encodeURIComponent(d.links.email_subject||"BlockPilot")}`;
-  document.querySelectorAll("[data-cta='email']").forEach(a=>a.href=mail);
-  document.querySelectorAll("[data-link='terms']").forEach(a=>a.href=d.links.terms||"#");
+function toast(msg){
+  const t=$("#toast"); if(!t) return;
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1400);
 }
 
-function computeBasePath(){
-  const p=window.location.pathname;
-  const m=p.match(/^(.*)\/(fr|en)\/?$/);
-  if(m) return m[1]+"/";
-  return p.endsWith("/") ? p : p+"/";
+function mailto(email,subject){
+  const s=encodeURIComponent(subject||"");
+  return `mailto:${email}?subject=${s}`;
 }
 
-function setupLang(){
-  const base=computeBasePath();
-  const current=(window.location.pathname.match(/\/(fr|en)\/?$/)?.[1]) || "fr";
-  localStorage.setItem("bp_lang", current);
-  document.querySelectorAll("[data-lang]").forEach(b=>{
-    const l=b.dataset.lang;
-    b.classList.toggle("active", l===current);
-    b.addEventListener("click",(e)=>{
+function setNavLinks(cfg,lang){
+  const aCall=$("#nav-book-call"); if(aCall) aCall.href=cfg.links.book_call||"#";
+  const aDocs=$("#nav-docs"); 
+  if(aDocs){
+    const u=(cfg.links.docs_url||"").trim();
+    if(!u){aDocs.href="#";aDocs.setAttribute("aria-disabled","true");aDocs.addEventListener("click",e=>{e.preventDefault();toast(lang==="fr"?"Docs bientôt.":"Docs soon.");});}
+    else{aDocs.removeAttribute("aria-disabled");aDocs.href=u;}
+  }
+  const fDocs=$("#footer-docs");
+  if(fDocs){
+    const u=(cfg.links.docs_url||"").trim();
+    if(!u){fDocs.style.display="none";}
+    else{fDocs.style.display="inline"; fDocs.href=u;}
+  }
+  const t=$("#footer-terms"); if(t) t.href=cfg.links.terms_pdf||"../BPC_Terms.pdf";
+  const e=$("#hero-email"); if(e) e.href=mailto(cfg.links.email,lang==="fr"?cfg.links.email_subject_fr:cfg.links.email_subject_en);
+  const e2=$("#footer-email"); if(e2) e2.href=mailto(cfg.links.email,lang==="fr"?cfg.links.email_subject_fr:cfg.links.email_subject_en);
+  const c=$("#hero-call"); if(c) c.href=cfg.links.book_call||"#";
+  const c2=$("#footer-call"); if(c2) c2.href=cfg.links.book_call||"#";
+}
+
+function setLangActive(lang){
+  const fr=$("#lang-fr"), en=$("#lang-en");
+  if(fr){fr.classList.toggle("active",lang==="fr"); fr.setAttribute("aria-pressed",lang==="fr");}
+  if(en){en.classList.toggle("active",lang==="en"); en.setAttribute("aria-pressed",lang==="en");}
+}
+
+function smoothAnchors(){
+  $$('a[href^="#"]').forEach(a=>{
+    a.addEventListener("click",e=>{
+      const id=a.getAttribute("href");
+      if(!id || id==="#" ) return;
+      const el=$(id);
+      if(!el) return;
       e.preventDefault();
-      window.location.href = base + l + "/";
+      el.scrollIntoView({behavior:"smooth",block:"start"});
+      history.replaceState(null,"",id);
     });
   });
 }
 
-async function fetchJSON(url){
-  const r=await fetch(url,{cache:"no-store"});
-  if(!r.ok) throw 0;
-  return await r.json();
-}
-
-function pickChange(series, days){
-  if(!series||series.length<2) return NaN;
-  const last=series[series.length-1][1];
-  const idx=Math.max(0, series.length-1-days);
-  const base=series[idx][1];
-  return (last-base)/(base||1);
-}
-
-function renderLine(series, targetId, label){
-  const el=document.getElementById(targetId); if(!el) return;
-  if(!series||series.length<2){ el.innerHTML=""; return; }
-  const pts=series.slice(-240);
-  const w=560,h=220,p=16;
-  const vals=pts.map(x=>x[1]);
-  const min=Math.min(...vals), max=Math.max(...vals);
-  const xs=pts.map((_,i)=>p+(w-2*p)*(i/(pts.length-1||1)));
-  const ys=vals.map(v=>h-p-(h-2*p)*((v-min)/(max-min||1)));
-  const path=xs.map((x,i)=>(i?"L":"M")+x.toFixed(1)+","+ys[i].toFixed(1)).join(" ");
-  el.innerHTML=`<svg viewBox="0 0 ${w} ${h}" width="100%" height="220" role="img" aria-label="${label}">
-    <path d="${path}" fill="none" stroke="var(--brand)" stroke-width="3" stroke-linecap="round"/>
+function svgSparkline(values,w=520,h=110,pad=8){
+  if(!values || values.length<2) return "";
+  const xs=values.map((_,i)=>i);
+  const minY=Math.min(...values), maxY=Math.max(...values);
+  const span=maxY-minY || 1;
+  const x=(i)=>pad+(i/(values.length-1))*(w-2*pad);
+  const y=(v)=>pad+(1-(v-minY)/span)*(h-2*pad);
+  let d=`M ${x(0)} ${y(values[0])}`;
+  for(let i=1;i<values.length;i++) d+=` L ${x(i)} ${y(values[i])}`;
+  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <path d="${d}" fill="none" stroke="rgba(11,107,99,.95)" stroke-width="3" stroke-linecap="round"/>
+    <path d="${d} L ${x(values.length-1)} ${h-pad} L ${x(0)} ${h-pad} Z" fill="rgba(11,107,99,.08)"/>
   </svg>`;
 }
 
-async function loadMarketSeries(d, key){
-  const vs=d.market.vs_currency||"eur";
-  const days=d.market.days||365;
+function pct(a,b){return b===0?0:(a/b-1);}
 
-  if(key==="TOTAL"){
-    const j=await fetchJSON(`https://api.coingecko.com/api/v3/global/market_cap_chart?vs_currency=${vs}&days=${days}`);
-    const s=j.market_cap_chart || j.market_caps || j.market_cap_chart?.market_caps || [];
-    return s.map(p=>[p[0],p[1]]).filter(p=>p[0]&&p[1]);
-  }
-  const id = d.market.coingecko_ids?.[key];
-  if(!id) throw 0;
-  const j=await fetchJSON(`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs}&days=${days}`);
-  const s=j.prices || [];
-  return s.map(p=>[p[0],p[1]]).filter(p=>p[0]&&p[1]);
+async function loadMarketFallback(){
+  try{
+    const r=await fetch("../data/market.json",{cache:"no-store"});
+    if(!r.ok) throw 0;
+    return await r.json();
+  }catch(e){return null;}
 }
 
-async function marketModule(d, lang){
-  const tabs=[...document.querySelectorAll("[data-market-tab]")];
-  if(!tabs.length) return;
+async function fetchCoinGeckoMarketChart(id,days=365){
+  const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}&interval=daily`;
+  const r=await fetch(url,{cache:"no-store"});
+  if(!r.ok) throw 0;
+  const j=await r.json();
+  return (j.prices||[]).map(p=>({t:p[0],v:p[1]}));
+}
 
-  const label30=document.getElementById("m-30");
-  const label90=document.getElementById("m-90");
-  const label1y=document.getElementById("m-1y");
-  const note=document.getElementById("market-note");
+async function fetchCoinGeckoTotalMcap(days=365){
+  const url=`https://api.coingecko.com/api/v3/global/market_cap_chart?vs_currency=usd&days=${days}`;
+  const r=await fetch(url,{cache:"no-store"});
+  if(!r.ok) throw 0;
+  const j=await r.json();
+  const arr=(j.market_cap_chart||j.market_caps||[]); // handle variants
+  return (arr||[]).map(p=>({t:p[0],v:p[1]}));
+}
 
-  let fallback=null;
-  try{ fallback=await fetchJSON("../data/market.json"); }catch(e){ fallback=null; }
+function nearestIdxByDays(series,days){
+  if(!series || series.length<2) return null;
+  const last=series[series.length-1].t;
+  const target=last - days*86400*1000;
+  let best=0, bestd=Infinity;
+  for(let i=0;i<series.length;i++){
+    const d=Math.abs(series[i].t-target);
+    if(d<bestd){bestd=d;best=i;}
+  }
+  return best;
+}
 
-  async function setActive(key){
-    tabs.forEach(t=>t.classList.toggle("active",t.dataset.marketTab===key));
-    tabs.forEach(t=>t.setAttribute("type","button")); // anti-reload même si un <form> traîne
+function renderMarket(series,lang){
+  const k30=$("#kpi-30"), k90=$("#kpi-90"), k365=$("#kpi-365"), box=$("#market-chart");
+  if(!box) return;
+  const vals=(series||[]).map(x=>x.v).filter(Number.isFinite);
+  box.innerHTML=vals.length>=2?svgSparkline(vals.slice(-240)):"";
+  const last=series && series.length?series[series.length-1].v:null;
+  const i30=nearestIdxByDays(series,30), i90=nearestIdxByDays(series,90), i365=nearestIdxByDays(series,365);
+  const r30=(i30!=null && last!=null)?pct(last,series[i30].v):null;
+  const r90=(i90!=null && last!=null)?pct(last,series[i90].v):null;
+  const r365=(i365!=null && last!=null)?pct(last,series[i365].v):null;
 
+  const fmtPct=v=>v==null?"—":`${(v*100).toFixed(1)}%`;
+  if(k30) k30.textContent=fmtPct(r30);
+  if(k90) k90.textContent=fmtPct(r90);
+  if(k365) k365.textContent=fmtPct(r365);
+
+  const note=$("#market-note");
+  if(note){
+    if(vals.length<2) note.textContent=lang==="fr"?"Données marché indisponibles (affichage minimal).":"Market data unavailable (minimal view).";
+    else note.textContent="";
+  }
+}
+
+async function initMarket(cfg,lang){
+  const tabBtns=$$(".tabbtn[data-market]");
+  const fallback=await loadMarketFallback();
+
+  async function load(kind){
     try{
-      const series=await loadMarketSeries(d,key);
-      label30.textContent=fmtPct(pickChange(series,30));
-      label90.textContent=fmtPct(pickChange(series,90));
-      label1y.textContent=fmtPct(pickChange(series,365));
-      renderLine(series,"market-chart", key==="TOTAL" ? "Crypto market cap" : `${key} price`);
-      note.textContent = (lang==="en"
-        ? (key==="TOTAL" ? "Market context (public). Your results depend on your allocation." : "Price context (public).")
-        : (key==="TOTAL" ? "Contexte marché (public). Vos résultats dépendent de votre allocation." : "Contexte de prix (public)."));
+      if(kind==="btc") return await fetchCoinGeckoMarketChart("bitcoin",365);
+      if(kind==="eth") return await fetchCoinGeckoMarketChart("ethereum",365);
+      if(kind==="total") return await fetchCoinGeckoTotalMcap(365);
+      return null;
     }catch(e){
-      const series=fallback?.series?.[key] || [];
-      label30.textContent="—"; label90.textContent="—"; label1y.textContent="—";
-      renderLine(series,"market-chart","Market");
-      note.textContent = (lang==="en" ? "Market feed unavailable right now." : "Flux marché indisponible pour le moment.");
+      if(fallback && fallback[kind] && Array.isArray(fallback[kind])) return fallback[kind].map(p=>({t:p[0],v:p[1]}));
+      return null;
     }
   }
 
-  tabs.forEach(t=>t.addEventListener("click",(e)=>{e.preventDefault(); setActive(t.dataset.marketTab);}));
-  setActive("TOTAL");
-}
-
-function renderYields(d,lang){
-  const el=document.getElementById("yield-cards"); if(!el) return;
-  const avg=lang==="en"?"current average":"moyenne actuelle";
-  const items=[["STABLE",lang==="en"?"Stablecoins":"Stable"],["BTC","BTC"],["ETH","ETH"],["BNB","BNB"]];
-  el.innerHTML=items.map(([k,label])=>`
-    <div class="card">
-      <div class="small">${label} — ${avg}</div>
-      <div class="kpi"><div class="value mono">${Math.round(d.yields_avg[k]*100)}%</div><div class="label">APR</div></div>
-    </div>`).join("");
-}
-
-async function getPricesEUR(d){
-  const cacheKey="bp_prices_eur_v1";
-  const cached=localStorage.getItem(cacheKey);
-  if(cached){
-    try{
-      const j=JSON.parse(cached);
-      if(Date.now()-j.t < 10*60*1000) return j.v;
-    }catch(e){}
+  let current="total";
+  async function setTab(kind){
+    current=kind;
+    tabBtns.forEach(b=>b.classList.toggle("active",b.dataset.market===kind));
+    const s=await load(kind);
+    renderMarket(s||[],lang);
   }
-  const ids=[d.market.coingecko_ids.BTC, d.market.coingecko_ids.ETH, d.market.coingecko_ids.BNB].join(",");
-  const vs=d.market.vs_currency||"eur";
-  const j=await fetchJSON(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=${vs}`);
-  const v={
-    BTC: j[d.market.coingecko_ids.BTC]?.[vs],
-    ETH: j[d.market.coingecko_ids.ETH]?.[vs],
-    BNB: j[d.market.coingecko_ids.BNB]?.[vs],
+
+  tabBtns.forEach(b=>{
+    b.setAttribute("type","button");
+    b.addEventListener("click",e=>{e.preventDefault();setTab(b.dataset.market);});
+  });
+
+  await setTab(current);
+}
+
+async function fetchPricesEUR(){
+  const url="https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=eur";
+  const r=await fetch(url,{cache:"no-store"});
+  if(!r.ok) throw 0;
+  const j=await r.json();
+  return {
+    btc: j.bitcoin?.eur||null,
+    eth: j.ethereum?.eur||null,
+    bnb: j.binancecoin?.eur||null,
+    stable: 1
   };
-  localStorage.setItem(cacheKey, JSON.stringify({t:Date.now(), v}));
-  return v;
 }
 
-function renderCalculator(d,lang){
-  const amount=document.getElementById("calc-amount");
-  const asset=document.getElementById("calc-asset");
-  if(!amount||!asset) return;
+function pow1p(r,n){return Math.pow(1+r,n);}
 
-  amount.value=Number(d.calculator_default_amount||50000);
+function renderCalc(cfg,lang,prices){
+  const amountEl=$("#amount-eur"), assetEl=$("#asset"), outAnnual=$("#out-annual"), outMonthly=$("#out-monthly"), outCap=$("#out-cap"), outHint=$("#out-hint");
+  const modeBtns=$$(".toggle[data-mode]"), scenBtns=$$(".toggle[data-scen]");
+  if(!amountEl||!assetEl||!outAnnual||!outMonthly||!outCap) return;
 
-  const labels = lang==="en"
-    ? {STABLE:"Stablecoins",BTC:"BTC",ETH:"ETH",BNB:"BNB"}
-    : {STABLE:"Stable",BTC:"BTC",ETH:"ETH",BNB:"BNB"};
-  asset.innerHTML=Object.keys(d.yields_avg).map(k=>`<option value="${k}">${labels[k]||k}</option>`).join("");
+  const scens=cfg.calculator.price_scenarios||[];
+  let mode="compound";
+  let scen=scens[0]?.id||"flat";
 
-  const outY=document.getElementById("out-yield");
-  const outM=document.getElementById("out-monthly");
-  const outC=document.getElementById("out-capital");
-  const outHint=document.getElementById("out-hint");
-  const chart=document.getElementById("calc-chart");
-
-  function drawChart(vals){
-    if(!chart) return;
-    if(!vals||vals.length<2){ chart.innerHTML=""; return; }
-    const w=560,h=140,p=14;
-    const min=Math.min(...vals), max=Math.max(...vals);
-    const xs=vals.map((_,i)=>p+(w-2*p)*(i/(vals.length-1||1)));
-    const ys=vals.map(v=>h-p-(h-2*p)*((v-min)/(max-min||1)));
-    const path=xs.map((x,i)=>(i?"L":"M")+x.toFixed(1)+","+ys[i].toFixed(1)).join(" ");
-    chart.innerHTML=`<svg viewBox="0 0 ${w} ${h}" width="100%" height="140" role="img" aria-label="Compounding">
-      <path d="${path}" fill="none" stroke="var(--brand)" stroke-width="3" stroke-linecap="round"/>
-    </svg>`;
+  function labelScenario(id){
+    const s=scens.find(x=>x.id===id);
+    if(!s) return id;
+    return lang==="fr"?s.label_fr:s.label_en;
+  }
+  function rateScenario(id){
+    const s=scens.find(x=>x.id===id);
+    return s?Number(s.annual_rate||0):0;
   }
 
-  async function compute(){
-    const eur=Math.max(0,Number(amount.value||0));
-    const k=asset.value;
-    const apr=Number(d.yields_avg[k]||0);
-    const m=monthlyRate(apr);
-
-    let principalAsset=null, priceEUR=null;
-
-    if(k==="STABLE"){
-      principalAsset=eur; priceEUR=1;
-    }else{
-      try{
-        const prices=await getPricesEUR(d);
-        priceEUR=prices[k];
-        if(isFinite(priceEUR) && priceEUR>0) principalAsset = eur/priceEUR;
-      }catch(e){}
-    }
-
-    let capAsset=principalAsset;
-    const caps=[];
-    if(isFinite(capAsset)){
-      caps.push(capAsset);
-      for(let i=0;i<12;i++){ capAsset*=1+m; caps.push(capAsset); }
-    }
-
-    const annualAsset = isFinite(principalAsset) ? principalAsset*apr : NaN;
-    const monthlyAsset = isFinite(principalAsset) ? principalAsset*m : NaN;
-    const cap12Asset = isFinite(caps?.[12]) ? caps[12] : NaN;
-
-    const sym = (k==="STABLE") ? (lang==="en"?"EUR stable":"€ stable") : k;
-
-    outY.textContent = isFinite(annualAsset) ? `${fmtNum(annualAsset, k==="BTC"?6:5)} ${sym}` : "—";
-    outM.textContent = isFinite(monthlyAsset) ? `${fmtNum(monthlyAsset, k==="BTC"?6:5)} ${sym}` : "—";
-    outC.textContent = isFinite(cap12Asset) ? `${fmtNum(cap12Asset, k==="BTC"?6:5)} ${sym}` : "—";
-
-    if(isFinite(priceEUR) && isFinite(annualAsset)){
-      const annualEUR = annualAsset*priceEUR;
-      const monthlyEUR = monthlyAsset*priceEUR;
-      const cap12EUR = cap12Asset*priceEUR;
-      outHint.textContent = (lang==="en"
-        ? `≈ ${fmtEUR(annualEUR)} / year · ≈ ${fmtEUR(monthlyEUR)} / month · ≈ ${fmtEUR(cap12EUR)} after 12m`
-        : `≈ ${fmtEUR(annualEUR)} / an · ≈ ${fmtEUR(monthlyEUR)} / mois · ≈ ${fmtEUR(cap12EUR)} à 12 mois`);
-    }else{
-      outHint.textContent = (lang==="en"
-        ? "Euro equivalence depends on live prices."
-        : "L’équivalent en euros dépend des prix en temps réel.");
-    }
-
-    if(isFinite(principalAsset)) drawChart(caps);
-    else drawChart([]);
+  function updateToggles(){
+    modeBtns.forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+    scenBtns.forEach(b=>b.classList.toggle("active",b.dataset.scen===scen));
   }
 
-  amount.addEventListener("input", ()=>compute());
-  asset.addEventListener("change", ()=>compute());
-  compute();
+  function calc(){
+    const eur=clamp(Number(String(amountEl.value||"").replace(",","."))||0,0,1e12);
+    const a=assetEl.value;
+    const apr=cfg.yields[a]||0;
+    const p=prices[a]||null;
+    const token=(a==="stable")?eur:(p?eur/p:0);
+    const m=apr/12;
+    const months12=12, months36=36, months60=60;
+
+    const token12 = mode==="compound" ? token*pow1p(m,months12) : token;
+    const token36 = mode==="compound" ? token*pow1p(m,months36) : token;
+    const token60 = mode==="compound" ? token*pow1p(m,months60) : token;
+
+    const yMonthly = token*apr/12;
+    const yAnnual = token*apr;
+
+    outMonthly.textContent = `${fmt(yMonthly,5)} ${a.toUpperCase()}`;
+    outAnnual.textContent = `${fmt(yAnnual,5)} ${a.toUpperCase()}`;
+    outCap.textContent = `${fmt(token12,5)} ${a.toUpperCase()}`;
+
+    const g=rateScenario(scen);
+    const eur12 = token12 * (a==="stable"?1:(p||0)) * pow1p(g,1);
+    const eur36 = token36 * (a==="stable"?1:(p||0)) * pow1p(g,3);
+    const eur60 = token60 * (a==="stable"?1:(p||0)) * pow1p(g,5);
+
+    const eur12Flat = token12 * (a==="stable"?1:(p||0));
+    const eurMFlat = yMonthly * (a==="stable"?1:(p||0));
+    const eurAFlat = yAnnual * (a==="stable"?1:(p||0));
+
+    if(outHint){
+      if(!p && a!=="stable") outHint.textContent=lang==="fr"?"≈ prix indisponible":"≈ price unavailable";
+      else{
+        const scLabel=labelScenario(scen);
+        const line1=lang==="fr"
+          ? `≈ ${fmt(eurAFlat,0)} € / an · ≈ ${fmt(eurMFlat,0)} € / mois · ≈ ${fmt(eur12Flat,0)} € à 12 mois (prix constant)`
+          : `≈ €${fmt(eurAFlat,0)} / yr · ≈ €${fmt(eurMFlat,0)} / mo · ≈ €${fmt(eur12Flat,0)} at 12m (flat price)`;
+        const line2=lang==="fr"
+          ? `Scénario prix: ${scLabel} → ≈ ${fmt(eur12,0)} € (12m), ≈ ${fmt(eur36,0)} € (3a), ≈ ${fmt(eur60,0)} € (5a)`
+          : `Price scenario: ${scLabel} → ≈ €${fmt(eur12,0)} (12m), ≈ €${fmt(eur36,0)} (3y), ≈ €${fmt(eur60,0)} (5y)`;
+        outHint.textContent = `${line1}\n${line2}`;
+      }
+    }
+
+    const box=$("#compound-box");
+    if(box){
+      const tok=(x)=>`${fmt(x,5)} ${a.toUpperCase()}`;
+      const eurf=(x)=>a==="stable"?`${fmt(x,0)} €`:`${fmt(x,0)} €`;
+      box.querySelector('[data-h="12"] .b').textContent = tok(token12);
+      box.querySelector('[data-h="12"] .s').textContent = (p||a==="stable")?eurf(eur12):"—";
+      box.querySelector('[data-h="36"] .b').textContent = tok(token36);
+      box.querySelector('[data-h="36"] .s').textContent = (p||a==="stable")?eurf(eur36):"—";
+      box.querySelector('[data-h="60"] .b').textContent = tok(token60);
+      box.querySelector('[data-h="60"] .s').textContent = (p||a==="stable")?eurf(eur60):"—";
+      const head=box.querySelector(".head");
+      if(head) head.textContent = lang==="fr"
+        ? `Effet composé (tokens) + scénario prix (${labelScenario(scen)})`
+        : `Compounding effect (tokens) + price scenario (${labelScenario(scen)})`;
+    }
+    const modeLbl=$("#mode-label");
+    if(modeLbl) modeLbl.textContent = lang==="fr"
+      ? (mode==="compound"?"Mode: Capitaliser (réinvestir le yield)":"Mode: Encaisser (revenu mensuel)")
+      : (mode==="compound"?"Mode: Compound (reinvest yield)":"Mode: Payout (monthly income)");
+  }
+
+  modeBtns.forEach(b=>{
+    b.addEventListener("click",e=>{e.preventDefault();mode=b.dataset.mode;updateToggles();calc();});
+  });
+  scenBtns.forEach(b=>{
+    b.addEventListener("click",e=>{e.preventDefault();scen=b.dataset.scen;updateToggles();calc();});
+  });
+
+  amountEl.addEventListener("input",calc);
+  assetEl.addEventListener("change",calc);
+
+  updateToggles();
+  calc();
 }
 
-function langFromDoc(){ return document.documentElement.getAttribute("lang") || "fr"; }
+async function init(){
+  const lang=document.documentElement.getAttribute("lang")==="en"?"en":"fr";
+  const cfg=await loadCfg();
 
-(async function init(){
-  setupLang();
-  const lang=langFromDoc();
-  const d=await loadData();
-  wireCTAs(d);
-  renderYields(d,lang);
-  renderCalculator(d,lang);
-  await marketModule(d,lang);
-})();
+  setLangActive(lang);
+  setNavLinks(cfg,lang);
+  smoothAnchors();
+
+  const fr=$("#lang-fr"), en=$("#lang-en");
+  if(fr) fr.addEventListener("click",()=>localStorage.setItem("bp_lang","fr"));
+  if(en) en.addEventListener("click",()=>localStorage.setItem("bp_lang","en"));
+
+  const prefer=localStorage.getItem("bp_lang");
+  if(prefer && prefer!==lang){
+    // soft: do nothing auto (avoid surprise redirect), user can click toggle
+  }
+
+  await initMarket(cfg,lang);
+
+  let prices=null;
+  try{prices=await fetchPricesEUR();}catch(e){prices={btc:null,eth:null,bnb:null,stable:1};}
+  renderCalc(cfg,lang,prices);
+
+  // Populate asset select labels
+  const sel=$("#asset");
+  if(sel){
+    const a=cfg.assets;
+    const map={stable:a.stable,btc:a.btc,eth:a.eth,bnb:a.bnb};
+    sel.innerHTML="";
+    ["stable","btc","eth","bnb"].forEach(k=>{
+      const o=document.createElement("option");
+      o.value=k;
+      o.textContent=lang==="fr"?(map[k].label_fr):(map[k].label_en);
+      sel.appendChild(o);
+    });
+    sel.value=cfg.calculator.default_asset||"eth";
+  }
+  const amount=$("#amount-eur");
+  if(amount) amount.value=cfg.calculator.default_amount_eur||10000;
+
+  // Scenario buttons text (lang)
+  const scens=cfg.calculator.price_scenarios||[];
+  scens.forEach(s=>{
+    const b=$(`.toggle[data-scen="${s.id}"]`);
+    if(b) b.textContent = lang==="fr"?s.label_fr:s.label_en;
+  });
+}
+
+document.addEventListener("DOMContentLoaded",init);

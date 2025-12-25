@@ -153,4 +153,117 @@
 
             <div>
               <label for="asset">Asset</label>
-              <sel
+              <select id="asset">
+                <option value="stable">Stable</option>
+                <option value="btc">BTC</option>
+                <option value="eth" selected>ETH</option>
+                <option value="bnb">BNB</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toggles" aria-label="Mode">
+            <button class="toggle active" type="button" data-mode="compound">Compound</button>
+            <button class="toggle" type="button" data-mode="payout">Payout</button>
+            <span id="mode-label" class="note"></span>
+          </div>
+
+          <div class="toggles" aria-label="Price scenario">
+            <button class="toggle active" type="button" data-scen="flat">Flat price</button>
+            <button class="toggle" type="button" data-scen="bull20">Price +20%/yr</button>
+            <button class="toggle" type="button" data-scen="bull50">Price +50%/yr</button>
+          </div>
+
+          <div class="outs">
+            <div class="out"><span class="k">Estimated yearly yield</span><span id="out-annual" class="v">—</span></div>
+            <div class="out"><span class="k">Estimated monthly yield</span><span id="out-monthly" class="v">—</span></div>
+            <div class="out"><span class="k">Estimated tokens at 12 months</span><span id="out-cap" class="v">—</span></div>
+            <div id="out-hint" class="smallhint"></div>
+          </div>
+
+          <div id="compound-box" class="compound" aria-label="Compounding effect">
+            <div class="head">Compounding effect</div>
+            <div class="rows">
+              <div class="cell" data-h="12"><div class="h">12 months</div><div class="b">—</div><div class="s">—</div></div>
+              <div class="cell" data-h="36"><div class="h">3 years</div><div class="b">—</div><div class="s">—</div></div>
+              <div class="cell" data-h="60"><div class="h">5 years</div><div class="b">—</div><div class="s">—</div></div>
+            </div>
+          </div>
+
+          <div class="note">Indicative averages. Varies with market conditions and protocols.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="setup" class="section">
+      <h2>Setup (3 concrete steps)</h2>
+      <p class="lead">Simple, readable, controlled. We set things up together, then BlockPilot operates day-to-day.</p>
+
+      <div class="mini">
+        <div class="card pad">
+          <b>1) Create the vault + protections</b>
+          <div class="note">We create your Safe and enable protections (rules, co-signature).</div>
+        </div>
+        <div class="card pad">
+          <b>2) Deposit + allocation</b>
+          <div class="note">We set rails (IBAN/card/on-ramp), then define allocation for your risk profile.</div>
+        </div>
+        <div class="card pad">
+          <b>3) Monitoring + withdrawals</b>
+          <div class="note">You see everything on-chain. Need cash out? You sign (or co-sign).</div>
+        </div>
+        <div class="card pad">
+          <b>Support</b>
+          <div class="note">One private contact: Toni (execution + support).</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="security" class="section">
+      <h2>Security & control</h2>
+      <p class="lead">You remain the owner. Our role: operate. Withdrawals: by signature / co-signature.</p>
+
+      <div class="card pad">
+        <div class="mini">
+          <div class="card pad">
+            <b>Ownership</b>
+            <div class="note">Your Safe is in your name. You keep the key.</div>
+          </div>
+          <div class="card pad">
+            <b>Withdrawals (2/2)</b>
+            <div class="note">No withdrawal without you. 2/2 co-sign or batch, then back to standard mode.</div>
+          </div>
+          <div class="card pad">
+            <b>Protection</b>
+            <div class="note">“Anti-mistake” rules + limits to reduce unwanted transfers.</div>
+          </div>
+          <div class="card pad">
+            <b>Transparency</b>
+            <div class="note">Transactions and positions visible on-chain + reporting.</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="kicker">Plain English</div>
+        <div class="glossary">
+          <div class="gitem"><b>Safe</b><span>Your crypto vault (smart wallet) in your name.</span></div>
+          <div class="gitem"><b>DeFi</b><span>On-chain “savings products” used to generate yield.</span></div>
+          <div class="gitem"><b>Guard / rules</b><span>Protections that prevent mistakes and some unwanted transfers.</span></div>
+          <div class="gitem"><b>2/2</b><span>No withdrawal without your signature (you have the last word).</span></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Contact: <a id="footer-email" href="#">toni@blockpilot.capital</a>
+        · <a id="footer-call" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
+        · <a id="footer-docs" href="#" style="display:none">Docs</a>
+        · <a id="footer-terms" href="../BPC_Terms.pdf">Fees/Terms (PDF)</a>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../assets/main.js"></script>
+</body>
+</html>

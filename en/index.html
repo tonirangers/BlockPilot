@@ -1,269 +1,303 @@
 <!-- en/index.html -->
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>BlockPilot — Private digital asset management (individual mandates)</title>
-  <meta name="description" content="BlockPilot runs your DeFi yield (yield + allocation + risk management) while you keep ownership, on-chain transparency, and withdrawal control."/>
-  <link rel="stylesheet" href="../assets/styles.css"/>
-</head>
-<body>
-  <div id="top"></div>
-
-  <header>
-    <div class="container">
-      <div class="nav">
-        <a class="brand" href="#top" aria-label="BlockPilot">
-          <img src="../logo.png" alt="BlockPilot"/>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlockPilot — Private digital asset management</title>
+    <meta name="description" content="Private digital-asset management in individual mandates. You keep ownership and control; BlockPilot operates yield + allocation + risk management." />
+    <link rel="stylesheet" href="../assets/styles.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container navInner">
+        <a class="navBrand" href="#overview" aria-label="BlockPilot">
+          <img src="../logo.png" alt="BlockPilot" onerror="this.onerror=null;this.src='../assets/logo.svg';" />
         </a>
 
-        <nav class="navlinks" aria-label="Navigation">
+        <nav class="navLinks" aria-label="Navigation">
           <a href="#overview">Overview</a>
-          <a href="#performance">Performance & Yield</a>
+          <a href="#performance">Performance &amp; Yield</a>
           <a href="#setup">Setup</a>
           <a href="#security">Security</a>
-          <a id="nav-docs" href="#" aria-disabled="true">Docs</a>
+          <a href="#docs">Docs</a>
         </nav>
 
-        <div class="navright">
-          <a id="nav-book-call" class="link-cta" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
-          <div class="lang" aria-label="Language">
-            <a id="lang-fr" class="pill" href="../fr/" aria-pressed="false">FR</a>
-            <a id="lang-en" class="pill active" href="../en/" aria-pressed="true">EN</a>
-          </div>
+        <div class="navRight">
+          <a class="langBtn" data-lang="fr" href="../fr/">FR</a>
+          <a class="langBtn active" data-lang="en" href="../en/">EN</a>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1 class="h1">BlockPilot — Private digital asset management, individual mandates.</h1>
-      <div class="sub">
-        We run your DeFi yield (yield + allocation + risk management) while you keep ownership, on-chain transparency, and withdrawal control.
-      </div>
+    <main>
+      <section id="overview" class="hero">
+        <div class="container heroGrid">
+          <div class="heroCopy">
+            <h1>BlockPilot — Private digital-asset management, one mandate per client.</h1>
+            <p class="lead">
+              We make your crypto work while you keep control.
+              Your vault is in your name, you can withdraw anytime, and we handle the rest (allocation, yield, monitoring).
+            </p>
 
-      <ul class="bullets" aria-label="Key points">
-        <li><span class="dot"></span><span>Your crypto vault in your name (Safe).</span></li>
-        <li><span class="dot"></span><span>IBAN + card + guided deposits/withdrawals.</span></li>
-        <li><span class="dot"></span><span>Toni manages yield + allocation + risk, you keep the key.</span></li>
-      </ul>
-
-      <div class="ctas">
-        <a id="hero-call" class="btn primary" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
-        <a id="hero-email" class="btn" href="#">Email</a>
-        <a class="btn" href="#performance">View performance</a>
-      </div>
-
-      <div class="chips">
-        <div class="chip">1 client = 1 Safe</div>
-        <div class="chip">Yield on assets</div>
-        <div class="chip">Withdrawals by signature</div>
-      </div>
-    </section>
-
-    <section id="overview" class="section">
-      <h2>The “all-in-one” (easy to start)</h2>
-      <p class="lead">A “private banker” experience for crypto: one clear entry point, then we operate the strategy — without taking away control.</p>
-
-      <div class="grid2">
-        <div class="card pad">
-          <div class="bigsteps">
-            <div class="step"><div class="n">1</div><div><b>Safe</b><span>Your vault (smart wallet) in your name.</span></div></div>
-            <div class="step"><div class="n">2</div><div><b>Rails</b><span>IBAN + card + on/off-ramp, set up with you.</span></div></div>
-            <div class="step"><div class="n">3</div><div><b>Operations</b><span>Yield, rebalancing, arbitrage, capital protection.</span></div></div>
-            <div class="step"><div class="n">4</div><div><b>Transparency</b><span>Positions + transactions visible on-chain. Withdrawal = your signature.</span></div></div>
-          </div>
-        </div>
-
-        <div class="mini">
-          <div class="card pad">
-            <div class="kicker">Private contact</div>
-            <b>Toni</b>
-            <div class="note">Single point of contact, execution + support.</div>
-          </div>
-          <div class="card pad">
-            <div class="kicker">Clear reporting</div>
-            <b>Readable</b>
-            <div class="note">On-chain visibility + regular reviews.</div>
-          </div>
-          <div class="card pad">
-            <div class="kicker">Simple withdrawals</div>
-            <b>You sign</b>
-            <div class="note">You sign (or co-sign) and funds move out.</div>
-          </div>
-          <div class="card pad">
-            <div class="kicker">Isolated risk</div>
-            <b>No pool</b>
-            <div class="note">No commingling between clients.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="performance" class="section">
-      <h2>Performance & Yield</h2>
-      <p class="lead">Markets move. What BlockPilot adds: yield on your assets + tailored allocation + simple withdrawals.</p>
-
-      <div class="grid2">
-        <div class="card pad">
-          <div class="kicker">Market context (public)</div>
-          <div class="tabs" role="tablist" aria-label="Market">
-            <button class="tabbtn active" type="button" data-market="total">TOTAL</button>
-            <button class="tabbtn" type="button" data-market="btc">BTC</button>
-            <button class="tabbtn" type="button" data-market="eth">ETH</button>
-          </div>
-
-          <div class="market-kpis" aria-label="Market performance">
-            <div class="kpi"><div class="label">30 days</div><div id="kpi-30" class="val">—</div></div>
-            <div class="kpi"><div class="label">90 days</div><div id="kpi-90" class="val">—</div></div>
-            <div class="kpi"><div class="label">1 year</div><div id="kpi-365" class="val">—</div></div>
-          </div>
-
-          <div class="chartbox">
-            <div id="market-chart" aria-label="Market chart"></div>
-            <div id="market-note" class="note"></div>
-          </div>
-        </div>
-
-        <div class="card pad">
-          <div class="kicker">What BlockPilot adds</div>
-
-          <div class="yieldcards">
-            <div class="yc"><div class="t">Stable — current average</div><div class="v">10%</div><div class="u">APR</div></div>
-            <div class="yc"><div class="t">BTC — current average</div><div class="v">2%</div><div class="u">APR</div></div>
-            <div class="yc"><div class="t">ETH — current average</div><div class="v">4%</div><div class="u">APR</div></div>
-            <div class="yc"><div class="t">BNB — current average</div><div class="v">13%</div><div class="u">APR</div></div>
-          </div>
-
-          <div class="hr"></div>
-          <div class="note">
-            Yield = income (or compounding) generated by your assets, on top of market exposure.
-            If the asset price increases, the EUR value of your yield increases too — and if you reinvest, the effect compounds.
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="formrow">
-            <div>
-              <label for="amount-eur">Amount (€)</label>
-              <input id="amount-eur" inputmode="decimal" placeholder="10000"/>
+            <div class="ctaRow">
+              <a class="btn primary" data-book-call href="#">Book a call</a>
+              <a class="btn" data-email href="#">Email</a>
+              <a class="btn ghost" href="#performance">See performance</a>
             </div>
 
-            <div>
-              <label for="asset">Asset</label>
-              <select id="asset">
-                <option value="stable">Stable</option>
-                <option value="btc">BTC</option>
-                <option value="eth" selected>ETH</option>
-                <option value="bnb">BNB</option>
-              </select>
+            <p class="micro">
+              No jargon. No complicated flow. Simple setup, then ongoing management.
+            </p>
+          </div>
+
+          <div class="heroCard">
+            <div class="cardTitle">Why it’s simple</div>
+            <div class="miniCards">
+              <div class="mini">
+                <div class="k">1 client = 1 vault</div>
+                <div class="v">Assets stay isolated, in your name.</div>
+              </div>
+              <div class="mini">
+                <div class="k">In / out</div>
+                <div class="v">Assisted deposits & withdrawals, frictionless.</div>
+              </div>
+              <div class="mini">
+                <div class="k">“Private banker” ops</div>
+                <div class="v">Yield + allocation + risk, with reporting.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <h2>All-in-one (easy to start)</h2>
+          <p class="sub">A “private banker” experience for crypto: one clear entry point, then we run the strategy for you.</p>
+
+          <div class="grid2">
+            <div class="card">
+              <div class="steps">
+                <div class="step">
+                  <div class="n">1</div>
+                  <div>
+                    <b>Your vault (Safe)</b>
+                    <div class="muted">A “vault” wallet in your name. You remain the owner.</div>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="n">2</div>
+                  <div>
+                    <b>Rails</b>
+                    <div class="muted">We set up rails: deposit/withdraw flows, and your monitoring routine.</div>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="n">3</div>
+                  <div>
+                    <b>Operations</b>
+                    <div class="muted">BlockPilot runs: yield, rebalancing, capital protection.</div>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="n">4</div>
+                  <div>
+                    <b>Transparency</b>
+                    <div class="muted">You can see everything: positions & transactions. Withdrawal = your signature.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="gridMini">
+              <div class="card">
+                <b>Private point of contact</b>
+                <div class="muted">Toni = your single contact, execution + support.</div>
+              </div>
+              <div class="card">
+                <b>Clear reporting</b>
+                <div class="muted">Positions and transactions visible, regular review.</div>
+              </div>
+              <div class="card">
+                <b>Easy withdrawal</b>
+                <div class="muted">You sign (or co-sign), and it goes out.</div>
+              </div>
+              <div class="card">
+                <b>Isolated risk</b>
+                <div class="muted">No pool: no mixing between clients.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="performance" class="section">
+        <div class="container">
+          <h2>Performance &amp; Yield</h2>
+          <p class="sub">Market context is public. What matters: your allocation + the yield generated on your assets.</p>
+
+          <div class="grid2">
+            <div class="card">
+              <div class="cardHead">
+                <div>
+                  <div class="cardTitle">Market context (public)</div>
+                  <div class="muted small">BTC / ETH — long-term horizon (1Y, 3Y, 5Y).</div>
+                </div>
+                <div class="marketTabs" data-market-tabs>
+                  <button type="button" data-symbol="btc" class="active">BTC</button>
+                  <button type="button" data-symbol="eth">ETH</button>
+                  <button type="button" data-symbol="total" disabled title="Optional (if you add a cache data/market.json)">TOTAL</button>
+                </div>
+              </div>
+
+              <div class="marketKPIs">
+                <div class="kpi"><div class="k">1Y</div><div class="v" data-kpi="1y">—</div></div>
+                <div class="kpi"><div class="k">3Y</div><div class="v" data-kpi="3y">—</div></div>
+                <div class="kpi"><div class="k">5Y</div><div class="v" data-kpi="5y">—</div></div>
+              </div>
+
+              <div class="chartWrap">
+                <svg class="spark" viewBox="0 0 600 200" role="img" aria-label="Market curve">
+                  <path data-market-path d=""></path>
+                </svg>
+                <div class="muted small" data-market-status></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="cardTitle">What BlockPilot adds</div>
+              <div class="aprGrid" id="aprGrid"></div>
+
+              <hr class="sep" />
+
+              <div class="muted">Yield = income (or compounding) generated <b>on top</b> of price exposure.</div>
+
+              <div class="calc">
+                <div class="row">
+                  <div>
+                    <label for="amountEur">Amount (€)</label>
+                    <input id="amountEur" inputmode="decimal" placeholder="10000" />
+                  </div>
+                  <div>
+                    <label for="assetSel">Asset</label>
+                    <select id="assetSel">
+                      <option value="stable">Stable</option>
+                      <option value="btc">BTC</option>
+                      <option value="eth" selected>ETH</option>
+                      <option value="bnb">BNB</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="results">
+                  <div class="r">
+                    <span>Estimated capital (tokens) after 12 months — <b>compounding</b></span>
+                    <b data-out="capTok">—</b>
+                  </div>
+                  <div class="r">
+                    <span>Estimated yield (tokens) / year</span>
+                    <b data-out="yTokYear">—</b>
+                  </div>
+                  <div class="r">
+                    <span>Estimated yield (tokens) / month</span>
+                    <b data-out="yTokMonth">—</b>
+                  </div>
+                  <div class="sub" data-out="eurLine">—</div>
+                </div>
+
+                <div class="compBox">
+                  <div class="cardTitle">Why it’s powerful</div>
+                  <ul>
+                    <li><b>Token compounding</b>: reinvesting increases accumulation mechanically.</li>
+                    <li><b>Price effect</b>: if the asset goes up, your € value (and € yield) goes up with it.</li>
+                  </ul>
+                  <div class="story" id="yieldStory"></div>
+                </div>
+
+                <div class="muted small">Indicative averages. Varies with market and protocols.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="setup" class="section">
+        <div class="container">
+          <h2>Setup (3 concrete steps)</h2>
+          <p class="sub">In practice: onboarding, execution, reporting. For you: simple, readable, controlled.</p>
+          <div class="grid3">
+            <div class="card">
+              <b>1) Onboarding</b>
+              <div class="muted">Vault creation + rails setup, assisted.</div>
+            </div>
+            <div class="card">
+              <b>2) Execution</b>
+              <div class="muted">Deployments, rebalancing, risk management based on your profile.</div>
+            </div>
+            <div class="card">
+              <b>3) Reporting</b>
+              <div class="muted">Regular review + adjustments. Verifiable anytime.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="security" class="section">
+        <div class="container">
+          <h2>Security &amp; control</h2>
+          <p class="sub">You remain the owner. Our role: operate. Withdrawals: by signature / co-signature.</p>
+
+          <div class="card wide">
+            <div class="wide3">
+              <div>
+                <b>Standard mode</b>
+                <div class="muted">Outflows to your controlled addresses. No shared pool.</div>
+              </div>
+              <div>
+                <b>Withdrawals</b>
+                <div class="muted">Co-signature (2/2 or batch), then back to standard mode.</div>
+              </div>
+              <div>
+                <b>Transparency</b>
+                <div class="muted">Transactions and positions are visible. Auditable.</div>
+              </div>
             </div>
           </div>
 
-          <div class="toggles" aria-label="Mode">
-            <button class="toggle active" type="button" data-mode="compound">Compound</button>
-            <button class="toggle" type="button" data-mode="payout">Payout</button>
-            <span id="mode-label" class="note"></span>
-          </div>
+          <p class="muted small">“Safe” = a vault wallet (smart wallet). “Signature” = your withdrawal approval.</p>
+        </div>
+      </section>
 
-          <div class="toggles" aria-label="Price scenario">
-            <button class="toggle active" type="button" data-scen="flat">Flat price</button>
-            <button class="toggle" type="button" data-scen="bull20">Price +20%/yr</button>
-            <button class="toggle" type="button" data-scen="bull50">Price +50%/yr</button>
-          </div>
-
-          <div class="outs">
-            <div class="out"><span class="k">Estimated yearly yield</span><span id="out-annual" class="v">—</span></div>
-            <div class="out"><span class="k">Estimated monthly yield</span><span id="out-monthly" class="v">—</span></div>
-            <div class="out"><span class="k">Estimated tokens at 12 months</span><span id="out-cap" class="v">—</span></div>
-            <div id="out-hint" class="smallhint"></div>
-          </div>
-
-          <div id="compound-box" class="compound" aria-label="Compounding effect">
-            <div class="head">Compounding effect</div>
-            <div class="rows">
-              <div class="cell" data-h="12"><div class="h">12 months</div><div class="b">—</div><div class="s">—</div></div>
-              <div class="cell" data-h="36"><div class="h">3 years</div><div class="b">—</div><div class="s">—</div></div>
-              <div class="cell" data-h="60"><div class="h">5 years</div><div class="b">—</div><div class="s">—</div></div>
+      <section id="docs" class="section">
+        <div class="container">
+          <h2>Docs</h2>
+          <p class="sub">Glossary (Safe, signature, yield…), product details, and retail-friendly explanations.</p>
+          <div class="card">
+            <div class="docsRow">
+              <div>
+                <b>Documentation</b>
+                <div class="muted">Just add your GitBook link in <code>data/blockpilot.json</code>.</div>
+              </div>
+              <a class="btn" data-docs href="#">Open docs</a>
             </div>
           </div>
-
-          <div class="note">Indicative averages. Varies with market conditions and protocols.</div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="setup" class="section">
-      <h2>Setup (3 concrete steps)</h2>
-      <p class="lead">Simple, readable, controlled. We set things up together, then BlockPilot operates day-to-day.</p>
-
-      <div class="mini">
-        <div class="card pad">
-          <b>1) Create the vault + protections</b>
-          <div class="note">We create your Safe and enable protections (rules, co-signature).</div>
-        </div>
-        <div class="card pad">
-          <b>2) Deposit + allocation</b>
-          <div class="note">We set rails (IBAN/card/on-ramp), then define allocation for your risk profile.</div>
-        </div>
-        <div class="card pad">
-          <b>3) Monitoring + withdrawals</b>
-          <div class="note">You see everything on-chain. Need cash out? You sign (or co-sign).</div>
-        </div>
-        <div class="card pad">
-          <b>Support</b>
-          <div class="note">One private contact: Toni (execution + support).</div>
-        </div>
-      </div>
-    </section>
-
-    <section id="security" class="section">
-      <h2>Security & control</h2>
-      <p class="lead">You remain the owner. Our role: operate. Withdrawals: by signature / co-signature.</p>
-
-      <div class="card pad">
-        <div class="mini">
-          <div class="card pad">
-            <b>Ownership</b>
-            <div class="note">Your Safe is in your name. You keep the key.</div>
+      <footer class="footer">
+        <div class="container footerInner">
+          <div class="muted">
+            Contact: <a data-email href="#">toni@blockpilot.capital</a>
           </div>
-          <div class="card pad">
-            <b>Withdrawals (2/2)</b>
-            <div class="note">No withdrawal without you. 2/2 co-sign or batch, then back to standard mode.</div>
-          </div>
-          <div class="card pad">
-            <b>Protection</b>
-            <div class="note">“Anti-mistake” rules + limits to reduce unwanted transfers.</div>
-          </div>
-          <div class="card pad">
-            <b>Transparency</b>
-            <div class="note">Transactions and positions visible on-chain + reporting.</div>
+          <div class="muted footerLinks">
+            <a data-terms href="#" target="_blank" rel="noopener">Fees/Terms (PDF)</a>
+            <a data-docs href="#" target="_blank" rel="noopener">Docs</a>
           </div>
         </div>
+      </footer>
+    </main>
 
-        <div class="hr"></div>
-
-        <div class="kicker">Plain English</div>
-        <div class="glossary">
-          <div class="gitem"><b>Safe</b><span>Your crypto vault (smart wallet) in your name.</span></div>
-          <div class="gitem"><b>DeFi</b><span>On-chain “savings products” used to generate yield.</span></div>
-          <div class="gitem"><b>Guard / rules</b><span>Protections that prevent mistakes and some unwanted transfers.</span></div>
-          <div class="gitem"><b>2/2</b><span>No withdrawal without your signature (you have the last word).</span></div>
-        </div>
-      </div>
-
-      <div class="footer">
-        Contact: <a id="footer-email" href="#">toni@blockpilot.capital</a>
-        · <a id="footer-call" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
-        · <a id="footer-docs" href="#" style="display:none">Docs</a>
-        · <a id="footer-terms" href="../BPC_Terms.pdf">Fees/Terms (PDF)</a>
-      </div>
-    </section>
-  </main>
-
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="../assets/main.js"></script>
-</body>
+    <script src="../assets/main.js" defer></script>
+  </body>
 </html>

@@ -1,23 +1,27 @@
-/* data/blockpilot.json */
+// data/blockpilot.json
 {
-  "brand": { "name": "BlockPilot", "logo": "logo.png" },
   "links": {
-    "call": "https://calendar.app.google/bQWcTHd22XDzuCt6A",
+    "bookCall": "",
     "email": "toni@blockpilot.capital",
-    "terms_pdf": "BPC_Terms.pdf",
+    "emailSubject": "BlockPilot — demande d’informations",
+    "termsPdf": "../BPC_Terms.pdf",
     "docs": "",
-    "signature": "sign.html"
+    "signature": "../sign.html"
   },
   "yields": {
-    "stables": 0.10,
+    "stables": 0.1,
     "btc": 0.02,
     "eth": 0.04,
     "bnb": 0.13
   },
   "defaults": {
-    "amount_eur": 10000,
+    "amountEUR": 10000,
     "asset": "stables",
-    "email_subject_fr": "BlockPilot — infos",
-    "email_subject_en": "BlockPilot — info"
+    "scenario": 0
+  },
+  "fallbackPricesEUR": {
+    "btc": 90000,
+    "eth": 3000,
+    "bnb": 550
   }
 }

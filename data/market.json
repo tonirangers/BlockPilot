@@ -1,6 +1,7 @@
+// data/market.json
 {
-  "updated_at": null,
-  "global_marketcap": [],
   "btc": [],
-  "eth": []
+  "eth": [],
+  "bnb": [],
+  "total": []
 }

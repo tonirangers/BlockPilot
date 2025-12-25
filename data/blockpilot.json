@@ -1,15 +1,33 @@
+// data/blockpilot.json
 {
-  "yields_avg": { "BTC": 0.02, "ETH": 0.04, "STABLE": 0.10, "BNB": 0.13 },
-  "calculator_default_amount": 50000,
+  "brand": { "name": "BlockPilot" },
   "links": {
-    "call": "https://calendar.app.google/bQWcTHd22XDzuCt6A",
+    "book_call": "https://calendar.app.google/bQWcTHd22XDzuCt6A",
     "email": "toni@blockpilot.capital",
-    "email_subject": "BlockPilot — Demande de call",
-    "terms": "../BPC_Terms.pdf"
+    "email_subject_fr": "BlockPilot — Demande d'information",
+    "email_subject_en": "BlockPilot — Inquiry",
+    "terms_pdf": "../BPC_Terms.pdf",
+    "docs_url": ""
   },
-  "market": {
-    "vs_currency": "eur",
-    "days": 365,
-    "coingecko_ids": { "BTC": "bitcoin", "ETH": "ethereum", "BNB": "binancecoin" }
+  "yields": {
+    "stable": 0.10,
+    "btc": 0.02,
+    "eth": 0.04,
+    "bnb": 0.13
+  },
+  "assets": {
+    "stable": { "label_fr": "Stable", "label_en": "Stable", "coingecko_id": null },
+    "btc": { "label_fr": "BTC", "label_en": "BTC", "coingecko_id": "bitcoin" },
+    "eth": { "label_fr": "ETH", "label_en": "ETH", "coingecko_id": "ethereum" },
+    "bnb": { "label_fr": "BNB", "label_en": "BNB", "coingecko_id": "binancecoin" }
+  },
+  "calculator": {
+    "default_amount_eur": 10000,
+    "default_asset": "eth",
+    "price_scenarios": [
+      { "id": "flat", "label_fr": "Prix constant", "label_en": "Prix constant", "annual_rate": 0.0 },
+      { "id": "bull20", "label_fr": "Prix +20%/an", "label_en": "Price +20%/yr", "annual_rate": 0.2 },
+      { "id": "bull50", "label_fr": "Prix +50%/an", "label_en": "Price +50%/yr", "annual_rate": 0.5 }
+    ]
   }
 }

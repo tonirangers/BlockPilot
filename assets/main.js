@@ -299,4 +299,76 @@
 
     const prices = await fetchPricesEUR();
 
-    function getAPR(asset
+    function getAPR(asset){
+      const y = CFG.yields || {};
+      if (asset === "stables") return y.stables ?? 0.10;
+      if (asset === "btc") return y.btc ?? 0.02;
+      if (asset === "eth") return y.eth ?? 0.04;
+      if (asset === "bnb") return y.bnb ?? 0.13;
+      return 0.0;
+    }
+
+    function tokenOf(asset){
+      if (asset === "stables") return "STABLE";
+      if (asset === "btc") return "BTC";
+      if (asset === "eth") return "ETH";
+      if (asset === "bnb") return "BNB";
+      return "TOKEN";
+    }
+
+    function priceEUR(asset){
+      if (asset === "stables") return 1;
+      if (asset === "btc") return prices.BTC;
+      if (asset === "eth") return prices.ETH;
+      if (asset === "bnb") return prices.BNB;
+      return 1;
+    }
+
+    function update(){
+      const amount = Math.max(0, Number(amountEl.value || 0));
+      const asset = assetEl.value;
+      const apr = getAPR(asset);
+      const tok = tokenOf(asset);
+      const px = priceEUR(asset);
+
+      const depositTok = amount / px;
+      const cap1 = compoundTokens(depositTok, apr, 1);
+      const cap3 = compoundTokens(depositTok, apr, 3);
+      const cap5 = compoundTokens(depositTok, apr, 5);
+
+      if (tokenLabel) tokenLabel.textContent = tok;
+
+      if (outDeposit) outDeposit.textContent = `${fmt(depositTok, tok==="BTC"?6:tok==="ETH"?5:tok==="BNB"?4:2)} ${tok}`;
+      if (outY1) outY1.textContent = `${fmt(cap1, tok==="BTC"?6:tok==="ETH"?5:tok==="BNB"?4:2)} ${tok}`;
+      if (outY3) outY3.textContent = `${fmt(cap3, tok==="BTC"?6:tok==="ETH"?5:tok==="BNB"?4:2)} ${tok}`;
+      if (outY5) outY5.textContent = `${fmt(cap5, tok==="BTC"?6:tok==="ETH"?5:tok==="BNB"?4:2)} ${tok}`;
+
+      // EUR scenarios at 12 months (keep simple + illustrative)
+      const eurBase = cap1 * px;
+      if (outEurBase) outEurBase.textContent = `${fmt0(eurBase)} €`;
+
+      if (asset === "stables") {
+        if (outEur25) outEur25.textContent = "—";
+        if (outEur50) outEur50.textContent = "—";
+      } else {
+        if (outEur25) outEur25.textContent = `${fmt0(eurBase * 1.25)} €`;
+        if (outEur50) outEur50.textContent = `${fmt0(eurBase * 1.50)} €`;
+      }
+    }
+
+    amountEl.addEventListener("input", update);
+    assetEl.addEventListener("change", update);
+    update();
+  }
+
+  // init
+  (async () => {
+    const lang = document.documentElement.getAttribute("lang")?.startsWith("fr") ? "fr" : "en";
+    await loadCfg();
+    setLinks(lang);
+    langToggle(lang);
+    smoothAnchors();
+    await initMarket();
+    await initYield();
+  })();
+})();

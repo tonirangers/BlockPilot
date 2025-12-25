@@ -1,0 +1,28 @@
+{
+  "yields_avg": {
+    "BTC": 0.02,
+    "ETH": 0.04,
+    "STABLE": 0.1,
+    "BNB": 0.13
+  },
+  "calculator_default_amount": 50000,
+  "links": {
+    "call": "https://calendar.app.google/bQWcTHd22XDzuCt6A",
+    "email": "toni@blockpilot.capital",
+    "email_subject": "BlockPilot - Demande de call",
+    "terms": "../BPC_Terms.pdf"
+  },
+  "market": {
+    "coingecko": {
+      "vs_currency": "usd",
+      "days": 365,
+      "btc_id": "bitcoin",
+      "eth_id": "ethereum"
+    },
+    "tradingview_symbols": {
+      "TOTAL": "CRYPTOCAP:TOTAL",
+      "BTC": "BINANCE:BTCUSDT",
+      "ETH": "BINANCE:ETHUSDT"
+    }
+  }
+}

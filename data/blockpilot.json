@@ -1,4 +1,3 @@
-/* data/blockpilot.json */
 {
   "brand": {
     "name": "BlockPilot",
@@ -8,24 +7,19 @@
   "contact": {
     "email": "toni@blockpilot.capital",
     "email_subject_fr": "BlockPilot — prise de contact",
-    "email_subject_en": "BlockPilot — intro call"
-  },
-  "links": {
-    "book_call_url": "#",
-    "terms_pdf_url": "../BPC_Terms.pdf"
-  },
-  "docs": {
-    "url": ""
+    "email_subject_en": "BlockPilot — contact",
+    "book_call_url": "https://calendar.app.google/bQWcTHd22XDzuCt6A",
+    "docs_url": "",
+    "terms_url": "../BPC_Terms.pdf"
   },
   "market": {
-    "coingecko_days": 1825,
-    "chart_days": 1825
+    "days": 1825,
+    "kpis_days": [365, 1095, 1825],
+    "symbols": { "btc": "BTCUSDT", "eth": "ETHUSDT", "bnb": "BNBUSDT", "eur": "EURUSDT" },
+    "index_weights": { "btc": 0.6, "eth": 0.3, "bnb": 0.1 }
   },
-  "yields": {
-    "stable_apr": 0.10,
-    "btc_apr": 0.02,
-    "eth_apr": 0.04,
-    "bnb_apr": 0.13,
-    "default_amount_eur": 10000
+  "yield": {
+    "default_amount_eur": 10000,
+    "apr": { "stable": 0.1, "btc": 0.02, "eth": 0.04, "bnb": 0.13 }
   }
 }

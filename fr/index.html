@@ -1,3 +1,4 @@
+<!-- fr/index.html -->
 <!doctype html>
 <html lang="fr">
 <head>
@@ -16,7 +17,7 @@
 
         <div class="nav__links" aria-label="Navigation">
           <a href="#overview">Vue d’ensemble</a>
-          <a href="#performance">Performance & rendement</a>
+          <a href="#performance">Performance</a>
           <a href="#setup">Mise en place</a>
           <a href="#security">Sécurité</a>
           <a id="navDocs" class="disabled" href="#">Docs</a>
@@ -41,8 +42,7 @@
             On pilote vos rendements (intérêts + allocation + gestion du risque) pendant que vous gardez la propriété,
             la transparence on-chain, et le droit de retrait.
             <br><br>
-            Votre coffre crypto à votre nom (Safe). IBAN + carte + dépôts/retraits accompagnés.
-            Toni gère rendement + allocation + risque, vous gardez la clé.
+            Toni opère les stratégies. Vous gardez la clé de votre coffre (Safe).
           </p>
 
           <div class="kicker" aria-label="Highlights">
@@ -62,7 +62,7 @@
           <div class="cardTitle">Comment ça marche</div>
           <p class="cardSub">3 étapes, puis un suivi régulier.</p>
 
-          <div class="miniGrid" style="margin-top:10px;">
+          <div class="miniGrid">
             <div class="mini">
               <strong>1) Coffre Safe + règle de retrait</strong>
               <span>Safe à votre nom + règle signature/cosignature.</span>
@@ -78,10 +78,11 @@
           </div>
 
           <div class="hr"></div>
-          <div class="badgeRow" aria-label="Guarantees">
-            <span class="badge">1 client = 1 Safe</span>
-            <span class="badge">Retrait selon règle</span>
-            <span class="badge">On-chain + relevé</span>
+
+          <div class="kicker" aria-label="Setup tags">
+            <span>1 client = 1 Safe</span>
+            <span>Retrait selon règle</span>
+            <span>On-chain + relevé</span>
           </div>
         </aside>
       </div>
@@ -138,7 +139,7 @@
             <div class="formRow">
               <div>
                 <div class="small" style="margin-bottom:6px;">Montant ($)</div>
-                <input class="input" id="amountFiat" inputmode="decimal" placeholder="10000" />
+                <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Actif</div>
@@ -152,9 +153,10 @@
             </div>
 
             <div class="scenarios" aria-label="Price scenario">
-              <button class="chip" type="button" data-scn="0">Prix stable</button>
-              <button class="chip" type="button" data-scn="0.20">+20%/an</button>
-              <button class="chip" type="button" data-scn="0.50">+50%/an</button>
+              <button class="chip" type="button" data-scn="0">Prix constant</button>
+              <button class="chip" type="button" data-scn="0.20">+20%</button>
+              <button class="chip" type="button" data-scn="0.50">+50%</button>
+              <span id="stableScenarioNote">Stables : pas de scénario de prix.</span>
             </div>
 
             <div class="hr"></div>
@@ -170,9 +172,9 @@
 
               <div>
                 <div class="small">Valeur en $ (illustratif)</div>
-                <div class="simRow"><div class="l">Après 1 an</div><div class="r" id="v1Fiat">—</div></div>
-                <div class="simRow"><div class="l">Après 3 ans</div><div class="r" id="v3Fiat">—</div></div>
-                <div class="simRow"><div class="l">Après 5 ans</div><div class="r" id="v5Fiat">—</div></div>
+                <div class="simRow"><div class="l">Après 1 an</div><div class="r" id="v1Usd">—</div></div>
+                <div class="simRow"><div class="l">Après 3 ans</div><div class="r" id="v3Usd">—</div></div>
+                <div class="simRow"><div class="l">Après 5 ans</div><div class="r" id="v5Usd">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
             </div>
@@ -208,19 +210,21 @@
 
       <div class="grid2" style="margin-top:16px;">
         <div class="card cardPad">
-          <div class="cardTitle">Ce qu’on fait</div>
-          <ul class="ul">
-            <li>Mise en place du Safe + règle de retrait.</li>
-            <li>Exécution de la stratégie (allocation, swaps, claims…).</li>
-            <li>Revue régulière + relevé périodique.</li>
+          <div class="cardTitle">Pourquoi 1 client = 1 Safe</div>
+          <ul class="bullets">
+            <li>Risque isolé : pas de mélange avec d’autres clients.</li>
+            <li>Vous restez owner/signer : nous ne pouvons pas retirer sans votre accord.</li>
+            <li>Auditabilité : tout est vérifiable (Zeal / DeBank / Etherscan).</li>
+            <li>Retraits simples : vous signez, ça sort (pas de “ticket support”).</li>
           </ul>
         </div>
         <div class="card cardPad">
-          <div class="cardTitle">Ce qu’on ne peut pas faire sans vous</div>
-          <ul class="ul">
-            <li>Retirer vers l’extérieur si la règle exige votre signature/co-signature.</li>
-            <li>Changer la règle de retrait une fois définie.</li>
-            <li>Masquer l’historique: tout est visible on-chain.</li>
+          <div class="cardTitle">Modules de sécurité (adaptables)</div>
+          <ul class="bullets">
+            <li>Co-signature possible (seuil ajustable).</li>
+            <li>Limites de montant / règles d’exécution.</li>
+            <li>Time-lock / délai anti-panique si besoin.</li>
+            <li>Guard / monitoring selon profil de risque.</li>
           </ul>
         </div>
       </div>
@@ -229,7 +233,7 @@
 
   <footer class="footer">
     <div class="container">
-      <a id="footerEmail" href="#">Contact</a>
+      <a id="footerEmail" href="#">Email</a>
       <span> · </span>
       <a id="footerTerms" href="#" target="_blank" rel="noopener">Conditions (PDF)</a>
       <span> · </span>

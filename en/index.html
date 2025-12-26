@@ -36,38 +36,66 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Private digital asset management.</h1>
-          <p class="lead">We set up your vault and a withdrawal rule, then manage yield + allocation. You see everything, and you can withdraw under the agreed rule.</p>
+          <h1 class="h1">BlockPilot — Private digital asset management, one client at a time.</h1>
+
+          <p class="lead">
+            We manage your returns (interest + allocation + risk management) while you keep ownership,
+            on-chain transparency, and the right to withdraw.
+            <br><br>
+            Your crypto vault in your name (Safe). IBAN + card + guided deposits/withdrawals.
+            Toni runs yield + allocation + risk, you keep the key.
+          </p>
 
           <div class="kicker" aria-label="Highlights">
             <span>Vault in your name (Safe)</span>
-            <span>Withdrawals by signature</span>
-            <span>IBAN + card (eligibility-based)</span>
+            <span>Withdrawals by signature / co-signature</span>
+            <span>Periodic statement</span>
           </div>
 
           <div class="ctaRow">
             <a class="btn btn--primary" id="ctaCall" href="#">Book a call</a>
             <a class="btn btn--ghost" id="ctaEmail" href="#">Email</a>
-            <a class="btn" href="#performance">See performance</a>
+            <a class="btn" href="#performance">See performance & yield</a>
           </div>
         </div>
 
-        <aside class="card cardPad">
-          <div class="cardTitle">Who does what?</div>
-          <p class="cardSub">Simple: you keep the key. We operate and report back to you.</p>
+        <aside id="setup" class="card cardPad">
+          <div class="cardTitle">All-in-one (easy to start)</div>
+          <p class="cardSub">A clear setup, rules, and ongoing tracking. You see everything, you can withdraw anytime.</p>
 
-          <div class="whoGrid">
-            <div class="whoItem">
-              <strong>You</strong>
-              <span>Owner of the vault · full visibility · withdraw under the rule.</span>
+          <div class="miniGrid">
+            <div class="mini">
+              <strong>Your vault in your name (Safe)</strong>
+              <span>One mandate = one vault. No commingling.</span>
+              <div class="tag">Clear ownership</div>
             </div>
-            <div class="whoItem">
-              <strong>BlockPilot</strong>
-              <span>Allocation · execution · risk management · quarterly reporting.</span>
+            <div class="mini">
+              <strong>Simple fiat rails</strong>
+              <span>IBAN/card (eligibility-based) + guided deposits/withdrawals.</span>
+              <div class="tag">In / out</div>
             </div>
-            <div class="whoItem">
-              <strong>Control</strong>
-              <span>On-chain history + statements. No black box.</span>
+            <div class="mini">
+              <strong>Management + reporting</strong>
+              <span>Allocation + execution + regular review.</span>
+              <div class="tag">Tracking</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="cardTitle" style="margin-top:4px;">Setup (3 steps)</div>
+          <div class="miniGrid" style="margin-top:10px;">
+            <div class="mini">
+              <strong>1) Vault + withdrawal rule</strong>
+              <span>Create your Safe + signature/co-signature rule.</span>
+            </div>
+            <div class="mini">
+              <strong>2) On-ramp</strong>
+              <span>IBAN / card (eligibility), guided deposit.</span>
+            </div>
+            <div class="mini">
+              <strong>3) Strategy</strong>
+              <span>Allocation + yield + periodic statement.</span>
             </div>
           </div>
         </aside>
@@ -78,12 +106,15 @@
   <section id="performance" class="section section--tight">
     <div class="container">
       <h2 class="h2">Performance & Yield</h2>
-      <p class="p">Long-run (1–3–5y): market context + indicative (DeFi) yield by asset class. Figures are indicative.</p>
+      <p class="p">Long-run (1–3–5y): market context + indicative yield by asset class.</p>
 
       <div class="grid2" style="margin-top:18px;">
         <div class="card cardPad">
           <div class="cardTitle">Market context</div>
-          <p class="small">Token prices (EUR). TOTAL = equal-weighted BTC/ETH/BNB index (base 100).</p>
+          <p class="small">
+            Token price (EUR) to frame the market environment.
+            TOTAL = equal-weighted BTC/ETH/BNB index (base 100).
+          </p>
 
           <div class="marketTabs" style="margin-top:12px;">
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
@@ -102,13 +133,12 @@
             <div class="chartEmpty" id="marketEmpty">Loading…</div>
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
           </div>
-          <div class="small" id="totalHint" style="margin-top:10px;"></div>
-          <div class="small" id="marketMeta" style="margin-top:8px;"></div>
+          <div class="small" id="marketMeta" style="margin-top:10px;"></div>
         </div>
 
         <div class="card cardPad">
-          <div class="cardTitle">Yield (indicative)</div>
-          <p class="cardSub">Yield increases the number of tokens (compounding). If the token price rises, your € value rises on top.</p>
+          <div class="cardTitle">Yield & compounding (indicative)</div>
+          <p class="cardSub">Simply: you earn tokens (interest), then the € value moves with the token price.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -146,12 +176,13 @@
 
             <div class="simGrid">
               <div>
-                <div class="small">In tokens (compounded)</div>
+                <div class="small">In tokens (compounding)</div>
                 <div class="simRow"><div class="l">Deposit</div><div class="r" id="depTok">—</div></div>
-                <div class="simRow"><div class="l">+ yield at 1y</div><div class="r" id="y1Tok">—</div></div>
-                <div class="simRow"><div class="l">+ yield at 3y</div><div class="r" id="y3Tok">—</div></div>
-                <div class="simRow"><div class="l">+ yield at 5y</div><div class="r" id="y5Tok">—</div></div>
+                <div class="simRow"><div class="l">+ interest at 1y</div><div class="r" id="y1Tok">—</div></div>
+                <div class="simRow"><div class="l">+ interest at 3y</div><div class="r" id="y3Tok">—</div></div>
+                <div class="simRow"><div class="l">+ interest at 5y</div><div class="r" id="y5Tok">—</div></div>
               </div>
+
               <div>
                 <div class="small">Value in € (illustrative)</div>
                 <div class="simRow"><div class="l">After 1y</div><div class="r" id="v1Eur">—</div></div>
@@ -163,28 +194,6 @@
           </div>
 
           <div class="small" style="margin-top:12px;">Figures are indicative. Yield depends on market conditions and protocols.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="setup" class="section">
-    <div class="container">
-      <h2 class="h2">Setup</h2>
-      <p class="p">3 concrete steps, guided. Then: ongoing management + reporting.</p>
-
-      <div class="grid3" style="margin-top:18px;">
-        <div class="card cardPad">
-          <div class="cardTitle">1) Vault + rule</div>
-          <p class="cardSub">Create your vault (Safe) + withdrawal rule (signature/co-signature).</p>
-        </div>
-        <div class="card cardPad">
-          <div class="cardTitle">2) Rails</div>
-          <p class="cardSub">IBAN/card (eligibility) + guided deposit.</p>
-        </div>
-        <div class="card cardPad">
-          <div class="cardTitle">3) Management</div>
-          <p class="cardSub">Allocation + execution + periodic statements (performance + fees).</p>
         </div>
       </div>
     </div>
@@ -216,15 +225,13 @@
 
   <footer class="footer">
     <div class="container">
-      <div class="footerRow">
-        <a id="footerEmail" href="#" aria-label="Contact">Contact</a>
-        <span> · </span>
-        <a id="footerTerms" href="#">Terms (PDF)</a>
-        <span> · </span>
-        <a id="footerDocs" class="muted" href="#">Docs</a>
-        <span> · </span>
-        <a id="footerSignature" href="../sign.html">Signature</a>
-      </div>
+      <a id="footerEmail" href="#">toni@blockpilot.capital</a>
+      <span> · </span>
+      <a id="footerTerms" href="#" target="_blank" rel="noopener">Terms (PDF)</a>
+      <span> · </span>
+      <a id="footerDocs" class="disabled" href="#">Docs</a>
+      <span> · </span>
+      <a id="footerSignature" href="../sign.html" target="_blank" rel="noopener">Signature</a>
     </div>
   </footer>
 

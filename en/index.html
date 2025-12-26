@@ -20,11 +20,12 @@
         <div class="nav__links" aria-label="Navigation">
           <a href="#overview">Overview</a>
           <a href="#performance">Performance</a>
-          <a href="#setup">Setup</a>
+          <a href="#yield">Yield</a>
           <a href="#security">Security</a>
           <a id="navCall" class="nav__call" href="#">Call</a>
           <a id="navDocs" class="disabled" href="#">Docs</a>
-          <a id="navSignature" href="../sign.html" target="_blank" rel="noopener">Signature</a>
+          <a id="navSignature" href="../sign.html">Signature</a>
+          <a id="navCall" class="nav__call" href="#">Book</a>
         </div>
 
         <div class="lang" aria-label="Language">
@@ -39,16 +40,16 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Private digital asset management, one client at a time.</h1>
+          <h1 class="h1">BlockPilot — You keep the keys, we pilot returns and allocation.</h1>
 
           <p class="lead">
-            We operate yield and allocation for you while you keep ownership and the withdrawal signature.
+            Your crypto vault in your name, individual mandate, withdrawals approved with your signature.
           </p>
 
           <ul class="heroPoints" aria-label="Highlights">
-            <li>Your crypto vault in your name (<span class="tip" title="Safe = secure smart-wallet vault">Safe</span>)</li>
-            <li>We generate yield on your assets (<span class="tip" title="Yield = income produced by your assets">yield</span>)</li>
-            <li>Withdraw anytime with your signature</li>
+            <li>Your crypto vault (smart wallet) stays in your name</li>
+            <li>We manage yield + allocation for you</li>
+            <li>You control withdrawals with your signature</li>
           </ul>
 
           <div class="kicker" aria-label="Highlights">
@@ -59,8 +60,8 @@
 
           <div class="ctaRow">
             <a class="btn btn--primary" id="ctaCall" href="#">Book a call</a>
-            <a class="btn btn--text" href="#performance">See performance & yield</a>
-            <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
+            <a class="btn btn--text" href="#performance">See performance</a>
+            <a class="btn btn--text" id="ctaEmail" href="#">Contact</a>
           </div>
         </div>
 
@@ -115,42 +116,31 @@
           </div>
 
           <div class="periodTabs" aria-label="Period">
-            <button class="chip" type="button" data-period="30">30d</button>
-            <button class="chip" type="button" data-period="90">90d</button>
             <button class="chip" type="button" data-period="365">1y</button>
+            <button class="chip" type="button" data-period="1095">3y</button>
+            <button class="chip" type="button" data-period="1825">5y</button>
           </div>
 
           <div class="kpiRow">
-            <div class="kpi"><div class="k">30d</div><div class="v" id="kpi30d">—</div></div>
-            <div class="kpi"><div class="k">90d</div><div class="v" id="kpi90d">—</div></div>
             <div class="kpi"><div class="k">1y</div><div class="v" id="kpi1y">—</div></div>
+            <div class="kpi"><div class="k">3y</div><div class="v" id="kpi3y">—</div></div>
+            <div class="kpi"><div class="k">5y</div><div class="v" id="kpi5y">—</div></div>
           </div>
 
           <div class="chartBox" id="marketChart">
             <div class="chartEmpty" id="marketEmpty">Loading…</div>
             <div class="chartAxis" id="marketAxis"></div>
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="chartRange" id="marketRange"></div>
             <div class="chartUpdate" id="marketUpdated"></div>
           </div>
           <div class="small" id="marketMeta" style="margin-top:10px;"></div>
 
-          <div class="adoptionBox">
-            <div class="adoptionHeader">
-              <div class="cardTitle" style="margin:0; font-size:16px;">Adoption</div>
-              <div class="small">Public adoption indicator (index base 100).</div>
-            </div>
-            <div class="chartBox chartBox--mini" id="adoptionChart">
-              <div class="chartEmpty" id="adoptionEmpty">Loading…</div>
-              <div class="chartAxis" id="adoptionAxis"></div>
-              <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true"></svg>
-              <div class="chartUpdate" id="adoptionUpdated"></div>
-            </div>
-          </div>
         </div>
 
-        <div class="card cardPad">
+        <div id="yield" class="card cardPad">
           <div class="cardTitle">Yield + price + compounding</div>
-          <p class="cardSub">Tokens earned (yield), token price, then compounding.</p>
+          <p class="cardSub">You earn tokens, then $ value moves with price.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -160,7 +150,7 @@
           </div>
 
           <div class="simBox">
-            <div class="simTitle">Quick simulation</div>
+            <div class="simTitle">Quick simulation (all $)</div>
 
             <div class="formRow">
               <div>
@@ -186,42 +176,42 @@
 
             <div class="hr"></div>
 
-            <div class="simGrid simGrid--wide">
+            <div class="simGrid simGrid--stack">
               <div>
-                <div class="small">Estimated capital at 12 months (tokens)</div>
-                <div class="simRow"><div class="l">Deposit</div><div class="r" id="depTok">—</div></div>
-                <div class="simRow"><div class="l">Estimated capital</div><div class="r" id="cap12Tok">—</div></div>
+                <div class="small">Deposit</div>
+                <div class="simRow"><div class="l">Amount</div><div class="r" id="depTok">—</div></div>
               </div>
               <div>
-                <div class="small">Estimated value at 12 months</div>
-                <div class="simRow"><div class="l">Flat price</div><div class="r" id="val12Flat">—</div></div>
-                <div class="simRow"><div class="l">With price scenario</div><div class="r" id="val12Scn">—</div></div>
+                <div class="small">At 12 months</div>
+                <div class="simRow"><div class="l">Tokens with interest</div><div class="r" id="cap12Tok">—</div></div>
+                <div class="simRow"><div class="l">Value (price scenario)</div><div class="r" id="val12Scn">—</div></div>
+                <div class="simRow"><div class="l">Value flat price</div><div class="r" id="val12Flat">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
             </div>
 
-            <div class="hr"></div>
+            <button class="btn btn--ghost" type="button" id="toggleDetails" aria-expanded="false" style="width:100%;margin-top:10px;">See 1/3/5y detail</button>
 
-            <div class="simGrid simGrid--wide">
+            <div class="simGrid simGrid--wide compDetails" id="compDetails" aria-hidden="true">
               <div>
-                <div class="small">Compounding</div>
+                <div class="small">Compounding (tokens)</div>
                 <div class="simRow"><div class="l">12 months</div><div class="r" id="comp12Tok">—</div></div>
                 <div class="simRow"><div class="l">3 years</div><div class="r" id="comp3Tok">—</div></div>
                 <div class="simRow"><div class="l">5 years</div><div class="r" id="comp5Tok">—</div></div>
               </div>
               <div>
-                <div class="small">EUR equivalent (with scenario)</div>
-                <div class="simRow"><div class="l">12 months</div><div class="r" id="comp12Eur">—</div></div>
-                <div class="simRow"><div class="l">3 years</div><div class="r" id="comp3Eur">—</div></div>
-                <div class="simRow"><div class="l">5 years</div><div class="r" id="comp5Eur">—</div></div>
+                <div class="small">Estimated value (price scenario)</div>
+                <div class="simRow"><div class="l">12 months</div><div class="r" id="comp12Usd">—</div></div>
+                <div class="simRow"><div class="l">3 years</div><div class="r" id="comp3Usd">—</div></div>
+                <div class="simRow"><div class="l">5 years</div><div class="r" id="comp5Usd">—</div></div>
               </div>
             </div>
           </div>
 
           <ul class="bullets" style="margin-top:12px;">
-            <li>You accumulate tokens (yield)</li>
-            <li>If the token rises, the € value rises too</li>
-            <li>Reinvesting speeds up compounding</li>
+            <li>You accumulate tokens (reinvested income)</li>
+            <li>If price moves up, the $ value moves up too</li>
+            <li>Compounding speeds up the effect over time</li>
           </ul>
         </div>
       </div>
@@ -275,13 +265,15 @@
 
   <footer class="footer">
     <div class="container">
-      <a id="footerEmail" href="#">Email</a>
+      <span>Contact:</span> <a id="footerEmail" href="#">Email</a>
       <span> · </span>
-      <a id="footerTerms" href="#" target="_blank" rel="noopener">Terms (PDF)</a>
+      <a id="footerTerms" href="#">Terms (PDF)</a>
       <span> · </span>
       <a id="footerDocs" class="disabled" href="#">Docs</a>
       <span> · </span>
-      <a id="footerSignature" href="../sign.html" target="_blank" rel="noopener">Signature</a>
+      <a id="footerSignature" href="../sign.html">Signature</a>
+      <span> · </span>
+      <span class="small">© BlockPilot</span>
     </div>
   </footer>
 

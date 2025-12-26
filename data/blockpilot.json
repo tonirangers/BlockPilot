@@ -18,7 +18,7 @@
     "asset": "stables",
     "scenario": 0.2,
     "marketDefault": "total",
-    "marketPeriod": "365"
+    "marketPeriod": 365
   },
   "price_scenarios": [0, 0.2, 0.5],
   "fallbackPricesUSD": {

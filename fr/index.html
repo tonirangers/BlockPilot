@@ -20,11 +20,12 @@
         <div class="nav__links" aria-label="Navigation">
           <a href="#overview">Vue d’ensemble</a>
           <a href="#performance">Performance</a>
-          <a href="#setup">Mise en place</a>
+          <a href="#yield">Rendement</a>
           <a href="#security">Sécurité</a>
           <a id="navCall" class="nav__call" href="#">Appel</a>
           <a id="navDocs" class="disabled" href="#">Docs</a>
-          <a id="navSignature" href="../sign.html" target="_blank" rel="noopener">Signature</a>
+          <a id="navSignature" href="../sign.html">Signature</a>
+          <a id="navCall" class="nav__call" href="#">Réserver</a>
         </div>
 
         <div class="lang" aria-label="Language">
@@ -39,28 +40,22 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Gestion privée d’actifs numériques, en mandats individuels.</h1>
+          <h1 class="h1">BlockPilot — Vous gardez la clé, on pilote rendement et allocation.</h1>
 
           <p class="lead">
-            On gère pour vous le rendement et l’allocation, vous gardez la propriété et la signature de retrait.
+            Coffre crypto à votre nom, mandat individuel, retraits validés par votre signature.
           </p>
 
           <ul class="heroPoints" aria-label="Clés">
-            <li>Votre coffre crypto à votre nom (<span class="tip" title="Safe = coffre-fort (smart wallet)">Safe</span>)</li>
-            <li>On génère du rendement sur vos actifs (<span class="tip" title="Yield = revenu généré par vos actifs">yield</span>)</li>
+            <li>Votre coffre crypto (smart wallet) à votre nom</li>
+            <li>Rendement + allocation pilotés pour vous</li>
             <li>Retrait à la demande par votre signature</li>
           </ul>
 
-          <div class="kicker" aria-label="Highlights">
-            <span>Mandat individuel</span>
-            <span>Gestion rendement + allocation</span>
-            <span>Revue régulière</span>
-          </div>
-
           <div class="ctaRow">
             <a class="btn btn--primary" id="ctaCall" href="#">Réserver un appel</a>
-            <a class="btn btn--text" href="#performance">Voir performance & rendement</a>
-            <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
+            <a class="btn btn--text" href="#performance">Voir performance</a>
+            <a class="btn btn--text" id="ctaEmail" href="#">Contact</a>
           </div>
         </div>
 
@@ -115,21 +110,22 @@
           </div>
 
           <div class="periodTabs" aria-label="Période">
-            <button class="chip" type="button" data-period="30">30 jours</button>
-            <button class="chip" type="button" data-period="90">90 jours</button>
             <button class="chip" type="button" data-period="365">1 an</button>
+            <button class="chip" type="button" data-period="1095">3 ans</button>
+            <button class="chip" type="button" data-period="1825">5 ans</button>
           </div>
 
           <div class="kpiRow">
-            <div class="kpi"><div class="k">30 j</div><div class="v" id="kpi30d">—</div></div>
-            <div class="kpi"><div class="k">90 j</div><div class="v" id="kpi90d">—</div></div>
             <div class="kpi"><div class="k">1 an</div><div class="v" id="kpi1y">—</div></div>
+            <div class="kpi"><div class="k">3 ans</div><div class="v" id="kpi3y">—</div></div>
+            <div class="kpi"><div class="k">5 ans</div><div class="v" id="kpi5y">—</div></div>
           </div>
 
           <div class="chartBox" id="marketChart">
             <div class="chartEmpty" id="marketEmpty">Chargement…</div>
             <div class="chartAxis" id="marketAxis"></div>
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="chartRange" id="marketRange"></div>
             <div class="chartUpdate" id="marketUpdated"></div>
           </div>
           <div class="small" id="marketMeta" style="margin-top:10px;"></div>
@@ -148,7 +144,7 @@
           </div>
         </div>
 
-        <div class="card cardPad">
+        <div id="yield" class="card cardPad">
           <div class="cardTitle">Rendement + prix + intérêts composés</div>
           <p class="cardSub">Tokens gagnés (yield), prix du token, puis intérêts composés.</p>
 
@@ -186,42 +182,42 @@
 
             <div class="hr"></div>
 
-            <div class="simGrid simGrid--wide">
+            <div class="simGrid simGrid--stack">
               <div>
-                <div class="small">Capital estimé à 12 mois (tokens)</div>
-                <div class="simRow"><div class="l">Dépôt</div><div class="r" id="depTok">—</div></div>
-                <div class="simRow"><div class="l">Capital estimé</div><div class="r" id="cap12Tok">—</div></div>
+                <div class="small">Dépôt</div>
+                <div class="simRow"><div class="l">Montant déposé</div><div class="r" id="depTok">—</div></div>
               </div>
               <div>
-                <div class="small">Valeur estimée à 12 mois</div>
-                <div class="simRow"><div class="l">Prix plat</div><div class="r" id="val12Flat">—</div></div>
-                <div class="simRow"><div class="l">Avec scénario prix</div><div class="r" id="val12Scn">—</div></div>
+                <div class="small">À 12 mois</div>
+                <div class="simRow"><div class="l">Tokens avec intérêts</div><div class="r" id="cap12Tok">—</div></div>
+                <div class="simRow"><div class="l">Valeur (scénario prix)</div><div class="r" id="val12Scn">—</div></div>
+                <div class="simRow"><div class="l">Valeur prix plat</div><div class="r" id="val12Flat">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
             </div>
 
-            <div class="hr"></div>
+            <button class="btn btn--ghost" type="button" id="toggleDetails" aria-expanded="false" style="width:100%;margin-top:10px;">Voir le détail 1/3/5 ans</button>
 
-            <div class="simGrid simGrid--wide">
+            <div class="simGrid simGrid--wide compDetails" id="compDetails" aria-hidden="true">
               <div>
-                <div class="small">Intérêts composés</div>
+                <div class="small">Intérêts composés (tokens)</div>
                 <div class="simRow"><div class="l">12 mois</div><div class="r" id="comp12Tok">—</div></div>
                 <div class="simRow"><div class="l">3 ans</div><div class="r" id="comp3Tok">—</div></div>
                 <div class="simRow"><div class="l">5 ans</div><div class="r" id="comp5Tok">—</div></div>
               </div>
               <div>
-                <div class="small">Équivalent € (avec scénario prix)</div>
-                <div class="simRow"><div class="l">12 mois</div><div class="r" id="comp12Eur">—</div></div>
-                <div class="simRow"><div class="l">3 ans</div><div class="r" id="comp3Eur">—</div></div>
-                <div class="simRow"><div class="l">5 ans</div><div class="r" id="comp5Eur">—</div></div>
+                <div class="small">Valeur estimée (scénario prix)</div>
+                <div class="simRow"><div class="l">12 mois</div><div class="r" id="comp12Usd">—</div></div>
+                <div class="simRow"><div class="l">3 ans</div><div class="r" id="comp3Usd">—</div></div>
+                <div class="simRow"><div class="l">5 ans</div><div class="r" id="comp5Usd">—</div></div>
               </div>
             </div>
           </div>
 
           <ul class="bullets" style="margin-top:12px;">
-            <li>Vous accumulez des tokens (yield)</li>
-            <li>Si le token monte, la valeur € augmente aussi</li>
-            <li>En réinvestissant, les intérêts composés accélèrent</li>
+            <li>Vous accumulez des tokens (revenus réinvestis)</li>
+            <li>Si le token monte, la valeur $ augmente aussi</li>
+            <li>Les intérêts composés accélèrent l’effet dans le temps</li>
           </ul>
         </div>
       </div>
@@ -275,13 +271,15 @@
 
   <footer class="footer">
     <div class="container">
-      <a id="footerEmail" href="#">Email</a>
+      <span>Contact :</span> <a id="footerEmail" href="#">Email</a>
       <span> · </span>
-      <a id="footerTerms" href="#" target="_blank" rel="noopener">Conditions (PDF)</a>
+      <a id="footerTerms" href="#">Conditions (PDF)</a>
       <span> · </span>
       <a id="footerDocs" class="disabled" href="#">Docs</a>
       <span> · </span>
-      <a id="footerSignature" href="../sign.html" target="_blank" rel="noopener">Signature</a>
+      <a id="footerSignature" href="../sign.html">Signature</a>
+      <span> · </span>
+      <span class="small">© BlockPilot</span>
     </div>
   </footer>
 

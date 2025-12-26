@@ -16,13 +16,9 @@
     if (!isFinite(v)) return "—";
     return new Intl.NumberFormat(undefined, { style:"currency", currency:"USD", maximumFractionDigits:max }).format(v);
   };
-  const fmtEur = (v, max=0) => {
-    if (!isFinite(v)) return "—";
-    return new Intl.NumberFormat(undefined, { style:"currency", currency:"EUR", maximumFractionDigits:max }).format(v);
-  };
   const fmtDate = (ts) => {
     const d=new Date(ts);
-    return d.toLocaleDateString(undefined,{day:"2-digit",month:"short"});
+    return d.toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"});
   };
 
   const LANG = document.body?.dataset?.lang || "fr";
@@ -311,19 +307,21 @@
     const empty=$("#marketEmpty");
     const svg=$("#marketSvg");
     const meta=$("#marketMeta");
-    const k30=$("#kpi30d");
-    const k90=$("#kpi90d");
     const k1=$("#kpi1y");
+    const k3=$("#kpi3y");
+    const k5=$("#kpi5y");
     const axis=$("#marketAxis");
     const upd=$("#marketUpdated");
+    const range=$("#marketRange");
 
     if (!series || series.length<2) {
       if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
       if (meta) meta.textContent="";
       if (svg) svg.innerHTML="";
       if (axis) axis.innerHTML="";
-      [k30,k90,k1].forEach(el=>{ if (el) el.textContent="—"; });
+      [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       if (upd) upd.textContent="";
+      if (range) range.textContent="";
       return;
     }
 
@@ -332,12 +330,12 @@
     const windowed = sliceWindow(series, periodDays || 365);
     const viewSeries = windowed.length >= 2 ? windowed : series;
 
-    const r30=computeReturn(series,30);
-    const r90=computeReturn(series,90);
     const r1=computeReturn(series,365);
-    if (k30) k30.textContent=fmtPct(r30);
-    if (k90) k90.textContent=fmtPct(r90);
+    const r3=computeReturn(series,1095);
+    const r5=computeReturn(series,1825);
     if (k1) k1.textContent=fmtPct(r1);
+    if (k3) k3.textContent=fmtPct(r3);
+    if (k5) k5.textContent=fmtPct(r5);
 
     drawSvgLine(svg, sampleSeries(viewSeries));
     setAxisLabels(axis, viewSeries);
@@ -355,6 +353,11 @@
     if (upd) {
       const ts = updatedAt || last[0];
       upd.textContent = `${T.lastUpdated || "Dernière mise à jour"}: ${fmtDate(ts)}`;
+    }
+    if (range) {
+      const first=viewSeries[0][0];
+      const lbl = LANG === "fr" ? "Période" : "Range";
+      range.textContent=`${lbl}: ${fmtDate(first)} – ${fmtDate(last[0])}`;
     }
   }
 
@@ -378,7 +381,7 @@
   }
 
   function initCalc(cfg, pricesUSD, yields) {
-    const amount=$("#amountEUR");
+    const amount=$("#amountUSD");
     const assetSel=$("#assetSel");
     const stableNote=$("#stableScenarioNote");
     const scenarioWrap=$("#priceScenarios");
@@ -390,9 +393,11 @@
     const comp12Tok=$("#comp12Tok");
     const comp3Tok=$("#comp3Tok");
     const comp5Tok=$("#comp5Tok");
-    const comp12Eur=$("#comp12Eur");
-    const comp3Eur=$("#comp3Eur");
-    const comp5Eur=$("#comp5Eur");
+    const comp12Usd=$("#comp12Usd");
+    const comp3Usd=$("#comp3Usd");
+    const comp5Usd=$("#comp5Usd");
+    const compBox=$("#compDetails");
+    const compToggle=$("#toggleDetails");
     const priceMeta=$("#priceMeta");
 
     const scenarios = Array.isArray(cfg?.price_scenarios) && cfg.price_scenarios.length ? cfg.price_scenarios : [0,0.2,0.5];
@@ -432,7 +437,7 @@
     }
 
     function recalc() {
-      const eur=Number(String(amount?.value ?? "").replace(",", "."));
+      const usd=Number(String(amount?.value ?? "").replace(",", "."));
       const asset=assetSel?.value || "stables";
       const apr=Number(yields?.[asset] ?? 0);
       const px=asset==="stables" ? 1 : Number(pricesUSD?.[asset] ?? 0);
@@ -443,13 +448,13 @@
       setChipsEnabled(isStable);
       setActiveChip("#priceScenarios .chip", String(scenario));
 
-      if (!eur || eur<=0 || !isFinite(eur) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
-        [depTok,cap12Tok,val12Flat,val12Scn,comp12Tok,comp3Tok,comp5Tok,comp12Eur,comp3Eur,comp5Eur].forEach(el => { if (el) el.textContent="—"; });
+      if (!usd || usd<=0 || !isFinite(usd) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
+        [depTok,cap12Tok,val12Flat,val12Scn,comp12Tok,comp3Tok,comp5Tok,comp12Usd,comp3Usd,comp5Usd].forEach(el => { if (el) el.textContent="—"; });
         if (priceMeta) priceMeta.textContent="";
         return;
       }
 
-      const principalTok=eur/px;
+      const principalTok=usd/px;
       const tok1=computeTokens(principalTok, apr, 1);
       const tok3=computeTokens(principalTok, apr, 3);
       const tok5=computeTokens(principalTok, apr, 5);
@@ -462,16 +467,16 @@
 
       const flatVal = tok1*px;
       const scnVal = tok1*px*priceGrowth(1);
-      if (val12Flat) val12Flat.textContent=fmtEur(flatVal,0);
-      if (val12Scn) val12Scn.textContent=fmtEur(scnVal,0);
+      if (val12Flat) val12Flat.textContent=fmtUsd(flatVal,0);
+      if (val12Scn) val12Scn.textContent=fmtUsd(scnVal,0);
 
       if (comp12Tok) comp12Tok.textContent=`${fmtNum(tok1, maxDec)} ${unit}`;
       if (comp3Tok) comp3Tok.textContent=`${fmtNum(tok3, maxDec)} ${unit}`;
       if (comp5Tok) comp5Tok.textContent=`${fmtNum(tok5, maxDec)} ${unit}`;
 
-      if (comp12Eur) comp12Eur.textContent=fmtEur(tok1*px*priceGrowth(1),0);
-      if (comp3Eur) comp3Eur.textContent=fmtEur(tok3*px*priceGrowth(3),0);
-      if (comp5Eur) comp5Eur.textContent=fmtEur(tok5*px*priceGrowth(5),0);
+      if (comp12Usd) comp12Usd.textContent=fmtUsd(tok1*px*priceGrowth(1),0);
+      if (comp3Usd) comp3Usd.textContent=fmtUsd(tok3*px*priceGrowth(3),0);
+      if (comp5Usd) comp5Usd.textContent=fmtUsd(tok5*px*priceGrowth(5),0);
 
       const pxTxt = asset==="stables"
         ? T.stableHint
@@ -480,7 +485,7 @@
       if (priceMeta) priceMeta.textContent=pxTxt;
     }
 
-    if (amount) amount.value=String(cfg?.defaults?.amountEUR ?? 10000);
+    if (amount) amount.value=String(cfg?.defaults?.amountUSD ?? 10000);
     if (assetSel) assetSel.value=cfg?.defaults?.asset ?? "stables";
 
     chips.forEach(ch => ch.addEventListener("click", () => {
@@ -493,6 +498,13 @@
 
     if (amount) amount.addEventListener("input", recalc);
     if (assetSel) assetSel.addEventListener("change", recalc);
+
+    if (compToggle && compBox){
+      compToggle.addEventListener("click", () => {
+        const open = compBox.classList.toggle("is-open");
+        compToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
 
     recalc();
   }
@@ -514,7 +526,7 @@
     const callUrl=cfg?.links?.bookCall || "";
     const ctaCall=$("#ctaCall");
     if (ctaCall) {
-      if (callUrl) ctaCall.href=callUrl, ctaCall.target="_blank", ctaCall.rel="noopener";
+      if (callUrl) ctaCall.href=callUrl;
       else ctaCall.href=mailto;
     }
 
@@ -525,8 +537,8 @@
     const signature=cfg?.links?.signature || "../sign.html";
     const navSignature=$("#navSignature");
     const footerSignature=$("#footerSignature");
-    if (navSignature) navSignature.href=resolveHref(signature), navSignature.target="_blank", navSignature.rel="noopener";
-    if (footerSignature) footerSignature.href=resolveHref(signature), footerSignature.target="_blank", footerSignature.rel="noopener";
+    if (navSignature) navSignature.href=resolveHref(signature);
+    if (footerSignature) footerSignature.href=resolveHref(signature);
 
     const docs=cfg?.links?.docs || "";
     const navDocs=$("#navDocs");
@@ -534,7 +546,7 @@
     const navCall=$("#navCall");
 
     if (navCall) {
-      if (callUrl) navCall.href=callUrl, navCall.target="_blank", navCall.rel="noopener";
+      if (callUrl) navCall.href=callUrl;
       else navCall.href=mailto;
     }
 
@@ -661,12 +673,6 @@
       [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
       { series:[] }
     );
-    const adoption = await firstJSON(
-      [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
-      { series:[] }
-    );
-    setAdoptionUI(normalizeSeriesDaily(adoption.series||[]), adoption.meta||{});
-
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }

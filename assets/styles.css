@@ -229,10 +229,9 @@ img{max-width:100%; display:block}
   padding:14px;
   text-align:center;
 }
+.chartRange{position:absolute; left:12px; bottom:10px; font-size:12px; color:rgba(13,35,31,.55);}
 .chartUpdate{position:absolute; right:12px; bottom:10px; font-size:12px; color:rgba(13,35,31,.55);}
 .chartBox--mini{height:220px; margin-top:10px;}
-.adoptionBox{margin-top:14px;}
-.adoptionHeader{display:flex; flex-direction:column; gap:2px;}
 
 .yieldCards{display:grid; grid-template-columns: repeat(2,1fr); gap:10px}
 .ycard{
@@ -269,7 +268,8 @@ img{max-width:100%; display:block}
 .simTitle{font-weight:950; margin:0 0 8px; font-size:16px}
 .simGrid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
 .simGrid--wide{grid-template-columns: 1.1fr 0.9fr;}
-.simRow{
+.simGrid--stack{grid-template-columns: 1fr;}
+.simRow{ 
   display:flex; align-items:baseline; justify-content:space-between;
   border-bottom:1px dashed rgba(13,35,31,.14);
   padding:8px 0;
@@ -278,6 +278,8 @@ img{max-width:100%; display:block}
 .simRow:last-child{border-bottom:0}
 .simRow .l{color:rgba(13,35,31,.62); font-weight:900}
 .simRow .r{font-size:18px; font-weight:1000}
+.compDetails{display:none;}
+.compDetails.is-open{display:grid;}
 
 .scenarios{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center}
 .scenarioChips{display:flex; gap:8px; flex-wrap:wrap;}

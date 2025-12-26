@@ -1,7 +1,5 @@
-// data/market.json (optionnel, peut rester vide)
-{
-  "btc": [],
-  "eth": [],
-  "bnb": [],
-  "total": []
-}
+node -v
+node scripts/update_market.js
+git add data/market.json data/blockpilot.json
+git commit -m "Fix JSON + update market cache"
+git push

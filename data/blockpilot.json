@@ -1,12 +1,13 @@
-// data/blockpilot.json
 {
+  "currency": "USD",
   "links": {
     "bookCall": "",
     "email": "toni@blockpilot.capital",
     "emailSubject": "BlockPilot — demande d’informations",
     "termsPdf": "../BPC_Terms.pdf",
     "docs": "",
-    "signature": "../sign.html"
+    "signature": "../sign.html",
+    "footerEmailLabel": "Contact"
   },
   "yields": {
     "stables": 0.1,
@@ -15,13 +16,13 @@
     "bnb": 0.13
   },
   "defaults": {
-    "amountEUR": 10000,
+    "amount": 10000,
     "asset": "stables",
-    "scenario": 0
+    "scenario": 0.2
   },
-  "fallbackPricesEUR": {
-    "btc": 90000,
-    "eth": 3000,
-    "bnb": 550
+  "fallbackPrices": {
+    "btc": 100000,
+    "eth": 4000,
+    "bnb": 700
   }
 }

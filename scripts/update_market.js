@@ -1,22 +1,28 @@
-#!/usr/bin/env node
-const fs=require("fs"), path=require("path");
-const root=path.resolve(__dirname,"..");
-const cfg=JSON.parse(fs.readFileSync(path.join(root,"data","blockpilot.json"),"utf8"));
-const vs=String(cfg.currency||"USD").toLowerCase();
+name: Update market data
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 2 * * *"
 
-const ids={btc:"bitcoin",eth:"ethereum",bnb:"binancecoin"};
+permissions:
+  contents: write
 
-async function series(id){
-  const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs}&days=1825&interval=daily`;
-  const r=await fetch(url,{headers:{accept:"application/json"}});
-  if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
-  const j=await r.json();
-  return (j.prices||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
-}
-
-(async()=>{
-  const out={meta:{source:"CoinGecko",vs,updatedAt:new Date().toISOString()},btc:[],eth:[],bnb:[],total:[]};
-  for(const [sym,id] of Object.entries(ids)) out[sym]=await series(id);
-  fs.writeFileSync(path.join(root,"data","market.json"), JSON.stringify(out));
-  console.log("updated data/market.json");
-})().catch(e=>{console.error(e);process.exit(1);});
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node scripts/update_market.js
+      - run: |
+          if git diff --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "market-bot"
+          git config user.email "market-bot@users.noreply.github.com"
+          git add data/market.json
+          git commit -m "chore: update market.json"
+          git push

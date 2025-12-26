@@ -1,3 +1,4 @@
+<!-- en/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -16,7 +17,7 @@
 
         <div class="nav__links" aria-label="Navigation">
           <a href="#overview">Overview</a>
-          <a href="#performance">Performance & yield</a>
+          <a href="#performance">Performance</a>
           <a href="#setup">Setup</a>
           <a href="#security">Security</a>
           <a id="navDocs" class="disabled" href="#">Docs</a>
@@ -38,15 +39,14 @@
           <h1 class="h1">BlockPilot — Private digital asset management, one client at a time.</h1>
 
           <p class="lead">
-            We manage your returns (interest + allocation + risk management) while you keep ownership,
+            We manage returns (interest + allocation + risk management) while you keep ownership,
             on-chain transparency, and the right to withdraw.
             <br><br>
-            Your crypto vault in your name (Safe). IBAN + card + guided deposits/withdrawals.
-            Toni runs yield + allocation + risk, you keep the key.
+            Toni operates strategies. You keep the key to your vault (Safe).
           </p>
 
           <div class="kicker" aria-label="Highlights">
-            <span>1:1 mandate</span>
+            <span>Individual mandate</span>
             <span>Yield + allocation</span>
             <span>Regular review</span>
           </div>
@@ -60,12 +60,12 @@
 
         <aside id="setup" class="card cardPad">
           <div class="cardTitle">How it works</div>
-          <p class="cardSub">3 steps, then ongoing tracking.</p>
+          <p class="cardSub">3 steps, then regular tracking.</p>
 
-          <div class="miniGrid" style="margin-top:10px;">
+          <div class="miniGrid">
             <div class="mini">
               <strong>1) Safe vault + withdrawal rule</strong>
-              <span>Your Safe + signature/co-signature rule.</span>
+              <span>Safe in your name + signature/co-signature rule.</span>
             </div>
             <div class="mini">
               <strong>2) Deposit (IBAN / card)</strong>
@@ -78,10 +78,11 @@
           </div>
 
           <div class="hr"></div>
-          <div class="badgeRow" aria-label="Guarantees">
-            <span class="badge">1 client = 1 Safe</span>
-            <span class="badge">Withdraw by rule</span>
-            <span class="badge">On-chain + statement</span>
+
+          <div class="kicker" aria-label="Setup tags">
+            <span>1 client = 1 Safe</span>
+            <span>Withdraw by rule</span>
+            <span>On-chain + statement</span>
           </div>
         </aside>
       </div>
@@ -90,7 +91,7 @@
 
   <section id="performance" class="section section--tight">
     <div class="container">
-      <h2 class="h2">Performance & yield</h2>
+      <h2 class="h2">Performance</h2>
       <p class="p">Long-run (1–3–5y): market context + indicative yield by asset class.</p>
 
       <div class="grid2" style="margin-top:18px;">
@@ -123,7 +124,7 @@
 
         <div class="card cardPad">
           <div class="cardTitle">Yield & compounding (indicative)</div>
-          <p class="cardSub">You earn tokens (interest), then the $ value moves with the token price.</p>
+          <p class="cardSub">You earn tokens (interest), then the $ value moves with token price.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -138,7 +139,7 @@
             <div class="formRow">
               <div>
                 <div class="small" style="margin-bottom:6px;">Amount ($)</div>
-                <input class="input" id="amountFiat" inputmode="decimal" placeholder="10000" />
+                <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Asset</div>
@@ -153,8 +154,9 @@
 
             <div class="scenarios" aria-label="Price scenario">
               <button class="chip" type="button" data-scn="0">Flat price</button>
-              <button class="chip" type="button" data-scn="0.20">+20%/yr</button>
-              <button class="chip" type="button" data-scn="0.50">+50%/yr</button>
+              <button class="chip" type="button" data-scn="0.20">+20%</button>
+              <button class="chip" type="button" data-scn="0.50">+50%</button>
+              <span id="stableScenarioNote">Stables: no price scenario.</span>
             </div>
 
             <div class="hr"></div>
@@ -170,9 +172,9 @@
 
               <div>
                 <div class="small">Value in $ (illustrative)</div>
-                <div class="simRow"><div class="l">After 1y</div><div class="r" id="v1Fiat">—</div></div>
-                <div class="simRow"><div class="l">After 3y</div><div class="r" id="v3Fiat">—</div></div>
-                <div class="simRow"><div class="l">After 5y</div><div class="r" id="v5Fiat">—</div></div>
+                <div class="simRow"><div class="l">After 1y</div><div class="r" id="v1Usd">—</div></div>
+                <div class="simRow"><div class="l">After 3y</div><div class="r" id="v3Usd">—</div></div>
+                <div class="simRow"><div class="l">After 5y</div><div class="r" id="v5Usd">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
             </div>
@@ -208,19 +210,21 @@
 
       <div class="grid2" style="margin-top:16px;">
         <div class="card cardPad">
-          <div class="cardTitle">What we do</div>
-          <ul class="ul">
-            <li>Set up the Safe + withdrawal rule.</li>
-            <li>Execute the strategy (allocation, swaps, claims…).</li>
-            <li>Regular review + periodic statement.</li>
+          <div class="cardTitle">Why 1 client = 1 Safe</div>
+          <ul class="bullets">
+            <li>Isolated risk: no commingling with other clients.</li>
+            <li>You stay owner/signer: we can’t withdraw without you.</li>
+            <li>Auditable: everything is verifiable (Zeal / DeBank / Etherscan).</li>
+            <li>Simple withdrawals: you sign, it moves.</li>
           </ul>
         </div>
         <div class="card cardPad">
-          <div class="cardTitle">What we can’t do without you</div>
-          <ul class="ul">
-            <li>Withdraw externally if the rule requires your signature/co-signature.</li>
-            <li>Change the withdrawal rule once it’s set.</li>
-            <li>Hide history: everything is on-chain.</li>
+          <div class="cardTitle">Security modules (optional)</div>
+          <ul class="bullets">
+            <li>Co-signature (threshold adjustable).</li>
+            <li>Amount limits / execution rules.</li>
+            <li>Time-lock when needed.</li>
+            <li>Guard / monitoring depending on risk profile.</li>
           </ul>
         </div>
       </div>
@@ -229,7 +233,7 @@
 
   <footer class="footer">
     <div class="container">
-      <a id="footerEmail" href="#">Contact</a>
+      <a id="footerEmail" href="#">Email</a>
       <span> · </span>
       <a id="footerTerms" href="#" target="_blank" rel="noopener">Terms (PDF)</a>
       <span> · </span>

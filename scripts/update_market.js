@@ -94,23 +94,45 @@ function computeTotalEqualWeighted(btc,eth,bnb){
   return out;
 }
 
+async function seriesBinance(symbol, days=1825){
+  const end=Date.now();
+  let start=end-days*DAY;
+  const out=[];
+  while(start<end){
+    const end2=Math.min(end, start+1000*DAY-1);
+    const url=`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&startTime=${start}&endTime=${end2}&limit=1000`;
+    const j=await getJSON(url, {}, 5);
+    if(!Array.isArray(j)||!j.length) break;
+    for(const k of j){
+      const t=dayTs(k[0]);
+      const close=Number(k[4]);
+      if(isFinite(t)&&isFinite(close)) out.push([t,close]);
+    }
+    const lastOpen=Number(j[j.length-1]?.[0]);
+    start=isFinite(lastOpen)?(lastOpen+DAY):(end2+1);
+    if(j.length<1000) break;
+    await sleep(120);
+  }
+  return normalizeSeriesDaily(out);
+}
+
 (async()=>{
   const cfg=readCfg();
-  const vs=String(cfg.currency||"USD").toLowerCase();
-  const ids={btc:"bitcoin",eth:"ethereum",bnb:"binancecoin"};
+  const nowIso=new Date().toISOString();
 
-  const apiKey=process.env.COINGECKO_API_KEY || process.env.CG_PRO_API_KEY || "";
-  const headers=apiKey ? {"x-cg-pro-api-key":apiKey} : {};
+  const out={
+    meta:{
+      source:{prices:"Binance", total:"computed"},
+      vs:"usd",
+      updatedAt:nowIso,
+      totalKind:"index"
+    },
+    btc:[],eth:[],bnb:[],total:[]
+  };
 
-  async function series(id){
-    const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${vs}&days=1825&interval=daily`;
-    const j=await getJSON(url, headers, 5);
-    return normalizeSeriesDaily((j.prices||[]).map(p=>[Number(p[0]),Number(p[1])]));
-  }
-
-  const out={meta:{source:"CoinGecko",vs,updatedAt:new Date().toISOString()},btc:[],eth:[],bnb:[],total:[]};
-
-  for (const [sym,id] of Object.entries(ids)) out[sym]=await series(id);
+  out.btc=await seriesBinance("BTCUSDT");
+  out.eth=await seriesBinance("ETHUSDT");
+  out.bnb=await seriesBinance("BNBUSDT");
   out.total=computeTotalEqualWeighted(out.btc,out.eth,out.bnb);
 
   fs.writeFileSync(outPath, JSON.stringify(out));

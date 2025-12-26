@@ -1,4 +1,3 @@
-<!-- fr/index.html -->
 <!doctype html>
 <html lang="fr">
 <head>
@@ -17,7 +16,7 @@
 
         <div class="nav__links" aria-label="Navigation">
           <a href="#overview">Vue d’ensemble</a>
-          <a href="#performance">Performance & Yield</a>
+          <a href="#performance">Performance & rendement</a>
           <a href="#setup">Mise en place</a>
           <a href="#security">Sécurité</a>
           <a id="navDocs" class="disabled" href="#">Docs</a>
@@ -47,56 +46,42 @@
           </p>
 
           <div class="kicker" aria-label="Highlights">
-            <span>Coffre à votre nom (Safe)</span>
-            <span>Retraits par signature / co-signature</span>
-            <span>Relevé périodique</span>
+            <span>Mandat individuel</span>
+            <span>Gestion rendement + allocation</span>
+            <span>Revue régulière</span>
           </div>
 
           <div class="ctaRow">
-            <a class="btn btn--primary" id="ctaCall" href="#">Book a call</a>
+            <a class="btn btn--primary" id="ctaCall" href="#">Réserver un appel</a>
             <a class="btn btn--ghost" id="ctaEmail" href="#">Email</a>
-            <a class="btn" href="#performance">Voir performance & yield</a>
+            <a class="btn" href="#performance">Voir performance & rendement</a>
           </div>
         </div>
 
         <aside id="setup" class="card cardPad">
-          <div class="cardTitle">Le “tout-en-un” (simple pour débuter)</div>
-          <p class="cardSub">Un setup clair, des règles, et un suivi. Vous voyez tout, vous pouvez retirer quand vous voulez.</p>
+          <div class="cardTitle">Comment ça marche</div>
+          <p class="cardSub">3 étapes, puis un suivi régulier.</p>
 
-          <div class="miniGrid">
+          <div class="miniGrid" style="margin-top:10px;">
             <div class="mini">
-              <strong>Un coffre à votre nom (Safe)</strong>
-              <span>Un mandat = un coffre. Pas de mélange entre clients.</span>
-              <div class="tag">Propriété claire</div>
+              <strong>1) Coffre Safe + règle de retrait</strong>
+              <span>Safe à votre nom + règle signature/cosignature.</span>
             </div>
             <div class="mini">
-              <strong>Rails fiat simples</strong>
-              <span>IBAN/carte (selon éligibilité) + dépôts/retraits accompagnés.</span>
-              <div class="tag">Entrées / sorties</div>
+              <strong>2) Dépôt (IBAN / carte)</strong>
+              <span>Selon éligibilité, dépôt accompagné.</span>
             </div>
             <div class="mini">
-              <strong>Pilotage + reporting</strong>
-              <span>Allocation + exécution + revue régulière.</span>
-              <div class="tag">Suivi</div>
+              <strong>3) Stratégie + relevé</strong>
+              <span>Allocation + rendement + revue régulière.</span>
             </div>
           </div>
 
           <div class="hr"></div>
-
-          <div class="cardTitle" style="margin-top:4px;">Mise en place (3 étapes)</div>
-          <div class="miniGrid" style="margin-top:10px;">
-            <div class="mini">
-              <strong>1) Coffre + règle de retrait</strong>
-              <span>Création du Safe à votre nom + règle de signature/cosignature.</span>
-            </div>
-            <div class="mini">
-              <strong>2) On-ramp</strong>
-              <span>IBAN / carte (selon éligibilité), dépôt accompagné.</span>
-            </div>
-            <div class="mini">
-              <strong>3) Stratégie</strong>
-              <span>Allocation + rendement + relevé périodique.</span>
-            </div>
+          <div class="badgeRow" aria-label="Guarantees">
+            <span class="badge">1 client = 1 Safe</span>
+            <span class="badge">Retrait selon règle</span>
+            <span class="badge">On-chain + relevé</span>
           </div>
         </aside>
       </div>
@@ -105,14 +90,14 @@
 
   <section id="performance" class="section section--tight">
     <div class="container">
-      <h2 class="h2">Performance & Yield</h2>
+      <h2 class="h2">Performance & rendement</h2>
       <p class="p">Données “long run” (1–3–5 ans) : contexte marché + rendement estimatif par classe d’actifs. Chiffres indicatifs.</p>
 
       <div class="grid2" style="margin-top:18px;">
         <div class="card cardPad">
           <div class="cardTitle">Contexte marché</div>
           <p class="small">
-            Prix du token (EUR) pour situer l’environnement.
+            Prix du token ($) pour situer l’environnement.
             TOTAL = indice égal-pondéré BTC/ETH/BNB (base 100).
           </p>
 
@@ -137,8 +122,8 @@
         </div>
 
         <div class="card cardPad">
-          <div class="cardTitle">Yield & intérêts composés (estimatif)</div>
-          <p class="cardSub">Simplement : vous gagnez des tokens (intérêts), puis la valeur en € varie avec le prix du token.</p>
+          <div class="cardTitle">Rendement & intérêts composés (indicatif)</div>
+          <p class="cardSub">Simplement : vous gagnez des tokens (intérêts), puis la valeur en $ varie avec le prix du token.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -152,8 +137,8 @@
 
             <div class="formRow">
               <div>
-                <div class="small" style="margin-bottom:6px;">Montant (€)</div>
-                <input class="input" id="amountEUR" inputmode="decimal" placeholder="10000" />
+                <div class="small" style="margin-bottom:6px;">Montant ($)</div>
+                <input class="input" id="amountFiat" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Actif</div>
@@ -167,9 +152,9 @@
             </div>
 
             <div class="scenarios" aria-label="Price scenario">
-              <button class="chip" type="button" data-scn="0">Prix constant</button>
-              <button class="chip" type="button" data-scn="0.20">+20%</button>
-              <button class="chip" type="button" data-scn="0.50">+50%</button>
+              <button class="chip" type="button" data-scn="0">Prix stable</button>
+              <button class="chip" type="button" data-scn="0.20">+20%/an</button>
+              <button class="chip" type="button" data-scn="0.50">+50%/an</button>
             </div>
 
             <div class="hr"></div>
@@ -184,10 +169,10 @@
               </div>
 
               <div>
-                <div class="small">Valeur en € (illustratif)</div>
-                <div class="simRow"><div class="l">Après 1 an</div><div class="r" id="v1Eur">—</div></div>
-                <div class="simRow"><div class="l">Après 3 ans</div><div class="r" id="v3Eur">—</div></div>
-                <div class="simRow"><div class="l">Après 5 ans</div><div class="r" id="v5Eur">—</div></div>
+                <div class="small">Valeur en $ (illustratif)</div>
+                <div class="simRow"><div class="l">Après 1 an</div><div class="r" id="v1Fiat">—</div></div>
+                <div class="simRow"><div class="l">Après 3 ans</div><div class="r" id="v3Fiat">—</div></div>
+                <div class="simRow"><div class="l">Après 5 ans</div><div class="r" id="v5Fiat">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
             </div>
@@ -220,12 +205,31 @@
           </div>
         </div>
       </div>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="card cardPad">
+          <div class="cardTitle">Ce qu’on fait</div>
+          <ul class="ul">
+            <li>Mise en place du Safe + règle de retrait.</li>
+            <li>Exécution de la stratégie (allocation, swaps, claims…).</li>
+            <li>Revue régulière + relevé périodique.</li>
+          </ul>
+        </div>
+        <div class="card cardPad">
+          <div class="cardTitle">Ce qu’on ne peut pas faire sans vous</div>
+          <ul class="ul">
+            <li>Retirer vers l’extérieur si la règle exige votre signature/co-signature.</li>
+            <li>Changer la règle de retrait une fois définie.</li>
+            <li>Masquer l’historique: tout est visible on-chain.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
   <footer class="footer">
     <div class="container">
-      <a id="footerEmail" href="#">toni@blockpilot.capital</a>
+      <a id="footerEmail" href="#">Contact</a>
       <span> · </span>
       <a id="footerTerms" href="#" target="_blank" rel="noopener">Conditions (PDF)</a>
       <span> · </span>

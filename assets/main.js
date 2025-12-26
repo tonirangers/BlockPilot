@@ -46,6 +46,20 @@
   };
   const T = I18N[LANG] || I18N.fr;
 
+  const SCRIPT_URL = (() => {
+    try {
+      if (document.currentScript?.src) return new URL(document.currentScript.src, location.href);
+      const s = document.querySelector('script[src*="assets/main.js"],script[src$="/main.js"]');
+      if (s?.src) return new URL(s.src, location.href);
+    } catch {}
+    return new URL(location.href);
+  })();
+  const ROOT = (() => {
+    try { return new URL("../", SCRIPT_URL); } catch { return new URL("./", location.href); }
+  })();
+  const fromRoot = (p) => new URL(String(p).replace(/^\/+/,""), ROOT).toString();
+  const resolveHref = (p) => { try { return new URL(p, location.href).toString(); } catch { return p; } };
+
   async function fetchJSON(url, timeoutMs=9000) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -181,6 +195,8 @@
   }
 
   async function loadMarketSeriesLive(sym) {
+    if (location.protocol === "file:") return [];
+
     const cacheKey="bp_mkt_"+sym+"_usd_v1";
     const cachedRaw=localStorage.getItem(cacheKey);
     const now=Date.now();
@@ -422,13 +438,13 @@
 
     const terms=cfg?.links?.termsPdf || "../BPC_Terms.pdf";
     const footerTerms=$("#footerTerms");
-    if (footerTerms) footerTerms.href=terms;
+    if (footerTerms) footerTerms.href=resolveHref(terms);
 
     const signature=cfg?.links?.signature || "../sign.html";
     const navSignature=$("#navSignature");
     const footerSignature=$("#footerSignature");
-    if (navSignature) navSignature.href=signature, navSignature.target="_blank", navSignature.rel="noopener";
-    if (footerSignature) footerSignature.href=signature, footerSignature.target="_blank", footerSignature.rel="noopener";
+    if (navSignature) navSignature.href=resolveHref(signature), navSignature.target="_blank", navSignature.rel="noopener";
+    if (footerSignature) footerSignature.href=resolveHref(signature), footerSignature.target="_blank", footerSignature.rel="noopener";
 
     const docs=cfg?.links?.docs || "";
     const navDocs=$("#navDocs");
@@ -436,9 +452,9 @@
 
     if (docs) {
       setDisabledLink(navDocs, false);
-      if (navDocs) navDocs.href=docs, navDocs.target="_blank", navDocs.rel="noopener";
+      if (navDocs) navDocs.href=resolveHref(docs), navDocs.target="_blank", navDocs.rel="noopener";
       setDisabledLink(footerDocs, false);
-      if (footerDocs) footerDocs.href=docs, footerDocs.target="_blank", footerDocs.rel="noopener";
+      if (footerDocs) footerDocs.href=resolveHref(docs), footerDocs.target="_blank", footerDocs.rel="noopener";
     } else {
       setDisabledLink(navDocs, true);
       setDisabledLink(footerDocs, true);
@@ -492,7 +508,7 @@
     initMobileMenu();
 
     const cfg = await firstJSON(
-      ["../data/blockpilot.json","./data/blockpilot.json","/data/blockpilot.json"],
+      [fromRoot("data/blockpilot.json"), "../data/blockpilot.json","./data/blockpilot.json"],
       {}
     );
 
@@ -513,7 +529,7 @@
       let series=[], source="", isIndex=false;
 
       const cache = await firstJSON(
-        ["../data/market.json","./data/market.json","/data/market.json"],
+        [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
         null
       );
 
@@ -522,11 +538,18 @@
       );
 
       if (sym === "total") {
-        const cb = cacheSeries("btc");
-        const ce = cacheSeries("eth");
-        const cn = cacheSeries("bnb");
-        series = computeTotalEqualWeighted(cb, ce, cn);
-        if (series.length) { source = cache?.meta?.source ? "cache:"+cache.meta.source : "cache"; isIndex=true; }
+        const ct = cacheSeries("total");
+        if (ct.length) {
+          series = ct;
+          source = cache?.meta?.source ? "cache:"+cache.meta.source : "cache";
+          isIndex = true;
+        } else {
+          const cb = cacheSeries("btc");
+          const ce = cacheSeries("eth");
+          const cn = cacheSeries("bnb");
+          series = computeTotalEqualWeighted(cb, ce, cn);
+          if (series.length) { source = cache?.meta?.source ? "cache:"+cache.meta.source : "cache"; isIndex=true; }
+        }
       } else {
         series = cacheSeries(sym);
         if (series.length) source = cache?.meta?.source ? "cache:"+cache.meta.source : "cache";

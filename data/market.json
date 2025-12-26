@@ -1,5 +1,5 @@
-// data/market.json (optionnel, peut rester vide)
 {
+  "meta": { "source": "build-cache", "vs": "usd", "updatedAt": "" },
   "btc": [],
   "eth": [],
   "bnb": [],

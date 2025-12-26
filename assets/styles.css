@@ -169,6 +169,17 @@ img{max-width:100%; display:block}
   color:rgba(13,35,31,.70);
 }
 
+.badgeRow{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+.badge{
+  display:inline-flex;
+  border:1px solid rgba(13,35,31,.12);
+  background:rgba(255,255,255,.70);
+  border-radius:999px;
+  padding:8px 12px;
+  font-weight:900;
+  color:rgba(13,35,31,.72);
+}
+
 .grid2{display:grid; grid-template-columns: 1.1fr .9fr; gap:18px}
 .grid3{display:grid; grid-template-columns: repeat(3,1fr); gap:16px}
 
@@ -176,6 +187,9 @@ img{max-width:100%; display:block}
 .p{margin:0; color:rgba(13,35,31,.70); font-weight:650; font-size:18px}
 .muted{color:rgba(13,35,31,.62)}
 .small{font-size:14px; color:rgba(13,35,31,.55); font-weight:650}
+
+.ul{margin:10px 0 0; padding-left:18px; color:rgba(13,35,31,.70); font-weight:650}
+.ul li{margin:6px 0}
 
 .marketTabs{display:flex; gap:10px; flex-wrap:wrap; margin:0 0 14px}
 .tabBtn{
@@ -219,7 +233,7 @@ img{max-width:100%; display:block}
   text-align:center;
 }
 
-.yieldCards{display:grid; grid-template-columns: repeat(3,1fr); gap:10px}
+.yieldCards{display:grid; grid-template-columns: repeat(2,1fr); gap:10px}
 .ycard{
   border:1px solid var(--line);
   border-radius:var(--radius2);
@@ -294,7 +308,6 @@ img{max-width:100%; display:block}
   .hero__grid{grid-template-columns:1fr}
   .h1{font-size:46px}
   .grid2{grid-template-columns:1fr}
-  .yieldCards{grid-template-columns: repeat(2,1fr)}
 }
 @media (max-width: 560px){
   .brand__logo{width:64px;height:64px}

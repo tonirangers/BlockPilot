@@ -518,7 +518,7 @@
     });
   }
 
-    async function init() {
+  async function init() {
     enableSmoothScroll();
     initMobileMenu();
 
@@ -541,10 +541,7 @@
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
-      if (empty) {
-        empty.style.display="flex";
-        empty.textContent=T.loading;
-      }
+      if (empty) empty.style.display="flex", empty.textContent=T.loading;
 
       let series=[], source="", isIndex=false;
 
@@ -571,6 +568,7 @@
       if (sym === "total") {
         const ct = cacheSeries("total");
         if (ct.length >= MIN_CACHE_POINTS) {
+        if (ct.length) {
           series = ct;
           const s = getSrc(cache?.meta);
           source = s ? "cache:"+s : "cache";
@@ -582,6 +580,8 @@
           const computed = computeTotalEqualWeighted(cb, ce, cn);
           if (computed.length >= MIN_CACHE_POINTS) {
             series = computed;
+          series = computeTotalEqualWeighted(cb, ce, cn);
+          if (series.length) {
             const s = getSrc(cache?.meta);
             source = s ? "cache:"+s : "cache";
             isIndex=true;
@@ -646,6 +646,29 @@
             const s = getSrc(cache?.meta);
             source = s ? "cache:"+s : "cache";
           }
+        }
+      }
+
+        series = cacheSeries(sym);
+        if (series.length) {
+          const s = getSrc(cache?.meta);
+          source = s ? "cache:"+s : "cache";
+        }
+      }
+
+      if (!series.length) {
+        if (sym === "total") {
+          const [b,e,n] = await Promise.all([
+            loadMarketSeriesLive("btc"),
+            loadMarketSeriesLive("eth"),
+            loadMarketSeriesLive("bnb")
+          ]);
+          series = computeTotalEqualWeighted(b,e,n);
+          source = series.length ? "Binance (live)" : "";
+          isIndex = true;
+        } else {
+          series = await loadMarketSeriesLive(sym);
+          source = series.length ? "Binance (live)" : "";
         }
       }
 

@@ -564,6 +564,12 @@
           null
         );
 
+        const cacheSourceTag = (cache?.meta?.source && getSrc(cache.meta)) || "";
+        const cacheSourceKind = String(cacheSourceTag || "").toLowerCase();
+        const cacheUpdatedMs = Date.parse(cache?.meta?.updatedAt);
+        const cacheIsStale = isFinite(cacheUpdatedMs) ? ((Date.now() - cacheUpdatedMs) > 3*DAY) : true;
+        const cacheIsSynthetic = cacheSourceKind.includes("synthetic") || cacheSourceKind.includes("offline");
+
         const cacheSeries = (k) => normalizeSeriesDaily(
           (cache?.[k] || []).map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]))
         );
@@ -597,7 +603,7 @@
           source = s ? "cache:"+s : "cache";
         }
 
-        const needLive = series.length < MIN_CACHE_POINTS;
+        const needLive = cacheIsSynthetic || cacheIsStale || (series.length < MIN_CACHE_POINTS);
         if (needLive) {
           if (sym === "total") {
             const [b,e,n] = await Promise.all([

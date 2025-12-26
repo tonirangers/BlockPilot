@@ -1,4 +1,4 @@
-// data/market.json
+// data/market.json (optionnel, peut rester vide)
 {
   "btc": [],
   "eth": [],

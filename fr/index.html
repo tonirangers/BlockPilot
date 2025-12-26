@@ -22,6 +22,7 @@
           <a href="#performance">Performance</a>
           <a href="#yield">Rendement</a>
           <a href="#security">Sécurité</a>
+          <a id="navCall" class="nav__call" href="#">Appel</a>
           <a id="navDocs" class="disabled" href="#">Docs</a>
           <a id="navSignature" href="../sign.html">Signature</a>
           <a id="navCall" class="nav__call" href="#">Réserver</a>
@@ -128,6 +129,19 @@
             <div class="chartUpdate" id="marketUpdated"></div>
           </div>
           <div class="small" id="marketMeta" style="margin-top:10px;"></div>
+
+          <div class="adoptionBox">
+            <div class="adoptionHeader">
+              <div class="cardTitle" style="margin:0; font-size:16px;">Adoption</div>
+              <div class="small">Indicateur public d’adoption (index base 100).</div>
+            </div>
+            <div class="chartBox chartBox--mini" id="adoptionChart">
+              <div class="chartEmpty" id="adoptionEmpty">Chargement…</div>
+              <div class="chartAxis" id="adoptionAxis"></div>
+              <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="chartUpdate" id="adoptionUpdated"></div>
+            </div>
+          </div>
         </div>
 
         <div id="yield" class="card cardPad">
@@ -146,8 +160,8 @@
 
             <div class="formRow">
               <div>
-                <div class="small" style="margin-bottom:6px;">Montant ($)</div>
-                <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
+                <div class="small" style="margin-bottom:6px;">Montant (€)</div>
+                <input class="input" id="amountEUR" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Actif</div>

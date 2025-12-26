@@ -12,9 +12,17 @@
     if (!isFinite(v)) return "—";
     return new Intl.NumberFormat(undefined, { maximumFractionDigits: max }).format(v);
   };
-  const fmtUsd = (v) => {
+  const fmtUsd = (v, max=0) => {
     if (!isFinite(v)) return "—";
-    return new Intl.NumberFormat(undefined, { style:"currency", currency:"USD", maximumFractionDigits:0 }).format(v);
+    return new Intl.NumberFormat(undefined, { style:"currency", currency:"USD", maximumFractionDigits:max }).format(v);
+  };
+  const fmtEur = (v, max=0) => {
+    if (!isFinite(v)) return "—";
+    return new Intl.NumberFormat(undefined, { style:"currency", currency:"EUR", maximumFractionDigits:max }).format(v);
+  };
+  const fmtDate = (ts) => {
+    const d=new Date(ts);
+    return d.toLocaleDateString(undefined,{day:"2-digit",month:"short"});
   };
 
   const LANG = document.body?.dataset?.lang || "fr";
@@ -29,7 +37,9 @@
       stableScenarioNote: "Stables : pas de scénario de prix.",
       contactLabel: "Email",
       menu: "Menu",
-      close: "Fermer"
+      close: "Fermer",
+      lastUpdated: "Dernière mise à jour",
+      adoptionUnavailable: "Données adoption indisponibles."
     },
     en: {
       loading: "Loading…",
@@ -41,7 +51,9 @@
       stableScenarioNote: "Stables: no price scenario.",
       contactLabel: "Email",
       menu: "Menu",
-      close: "Close"
+      close: "Close",
+      lastUpdated: "Last updated",
+      adoptionUnavailable: "Adoption data unavailable."
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -265,43 +277,72 @@
     return out;
   }
 
-  function setMarketUI({ series, source, isIndex }) {
+  function computeReturn(series, days){
+    if (!series || !series.length) return NaN;
+    const last=series[series.length-1];
+    const p=nearestByTime(series, last[0]-days*DAY);
+    if (!p) return NaN;
+    return (last[1]/p[1])-1;
+  }
+
+  function sliceWindow(series, days){
+    if (!series || !series.length) return [];
+    const last=series[series.length-1]?.[0] || Date.now();
+    const min=last - days*DAY;
+    return series.filter(p=>p[0]>=min);
+  }
+
+  function setAxisLabels(el, series){
+    if (!el) return;
+    el.innerHTML="";
+    if (!series || !series.length) return;
+    const first=series[0][0], last=series[series.length-1][0];
+    const mid=first + (last-first)/2;
+    [first,mid,last].forEach((ts,i)=>{
+      const span=document.createElement("span");
+      span.textContent=fmtDate(ts);
+      span.className="axisTick";
+      span.style.left = (i===0?0:i===1?50:100)+"%";
+      el.appendChild(span);
+    });
+  }
+
+  function setMarketUI({ series, source, isIndex, updatedAt, periodDays }) {
     const empty=$("#marketEmpty");
     const svg=$("#marketSvg");
     const meta=$("#marketMeta");
+    const k30=$("#kpi30d");
+    const k90=$("#kpi90d");
     const k1=$("#kpi1y");
-    const k3=$("#kpi3y");
-    const k5=$("#kpi5y");
+    const axis=$("#marketAxis");
+    const upd=$("#marketUpdated");
 
     if (!series || series.length<2) {
       if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
       if (meta) meta.textContent="";
       if (svg) svg.innerHTML="";
-      if (k1) k1.textContent="—";
-      if (k3) k3.textContent="—";
-      if (k5) k5.textContent="—";
+      if (axis) axis.innerHTML="";
+      [k30,k90,k1].forEach(el=>{ if (el) el.textContent="—"; });
+      if (upd) upd.textContent="";
       return;
     }
 
     if (empty) empty.style.display="none";
 
-    const last=series[series.length-1];
-    const nowTs=last[0];
+    const windowed = sliceWindow(series, periodDays || 365);
+    const viewSeries = windowed.length >= 2 ? windowed : series;
 
-    const p1=nearestByTime(series, nowTs-365*DAY);
-    const p3=nearestByTime(series, nowTs-3*365*DAY);
-    const p5=nearestByTime(series, nowTs-5*365*DAY);
-
-    const r1=p1 ? (last[1]/p1[1]-1) : NaN;
-    const r3=p3 ? (last[1]/p3[1]-1) : NaN;
-    const r5=p5 ? (last[1]/p5[1]-1) : NaN;
-
+    const r30=computeReturn(series,30);
+    const r90=computeReturn(series,90);
+    const r1=computeReturn(series,365);
+    if (k30) k30.textContent=fmtPct(r30);
+    if (k90) k90.textContent=fmtPct(r90);
     if (k1) k1.textContent=fmtPct(r1);
-    if (k3) k3.textContent=fmtPct(r3);
-    if (k5) k5.textContent=fmtPct(r5);
 
-    drawSvgLine(svg, sampleSeries(series));
+    drawSvgLine(svg, sampleSeries(viewSeries));
+    setAxisLabels(axis, viewSeries);
 
+    const last=viewSeries[viewSeries.length-1];
     const d=new Date(last[0]);
     const dt=d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
 
@@ -310,6 +351,10 @@
       meta.textContent = isIndex
         ? T.lastIndexValue(valTxt, dt, source)
         : T.lastValue(valTxt, dt, source);
+    }
+    if (upd) {
+      const ts = updatedAt || last[0];
+      upd.textContent = `${T.lastUpdated || "Dernière mise à jour"}: ${fmtDate(ts)}`;
     }
   }
 
@@ -333,27 +378,43 @@
   }
 
   function initCalc(cfg, pricesUSD, yields) {
-    const amount=$("#amountUSD");
+    const amount=$("#amountEUR");
     const assetSel=$("#assetSel");
-    const chips=$$(".scenarios .chip");
-    const chipWrap=$(".scenarios");
     const stableNote=$("#stableScenarioNote");
+    const scenarioWrap=$("#priceScenarios");
 
     const depTok=$("#depTok");
-    const y1Tok=$("#y1Tok");
-    const y3Tok=$("#y3Tok");
-    const y5Tok=$("#y5Tok");
-    const v1Usd=$("#v1Usd");
-    const v3Usd=$("#v3Usd");
-    const v5Usd=$("#v5Usd");
+    const cap12Tok=$("#cap12Tok");
+    const val12Flat=$("#val12Flat");
+    const val12Scn=$("#val12Scn");
+    const comp12Tok=$("#comp12Tok");
+    const comp3Tok=$("#comp3Tok");
+    const comp5Tok=$("#comp5Tok");
+    const comp12Eur=$("#comp12Eur");
+    const comp3Eur=$("#comp3Eur");
+    const comp5Eur=$("#comp5Eur");
     const priceMeta=$("#priceMeta");
 
-    let scenario=Number(cfg?.defaults?.scenario ?? 0.20);
+    const scenarios = Array.isArray(cfg?.price_scenarios) && cfg.price_scenarios.length ? cfg.price_scenarios : [0,0.2,0.5];
+    let scenario=Number(cfg?.defaults?.scenario ?? scenarios[1] ?? 0.2);
 
-    const symLabel=(a)=>a==="stables" ? "STABLE" : a.toUpperCase();
+    function renderScenarioChips(){
+      if (!scenarioWrap) return [];
+      scenarioWrap.innerHTML="";
+      return scenarios.map(v=>{
+        const btn=document.createElement("button");
+        btn.type="button";
+        btn.className="chip";
+        btn.dataset.scn=String(v);
+        btn.textContent = v===0 ? (LANG==="fr"?"Prix plat":"Flat price") : `+${(v*100).toFixed(0)}%/an`;
+        scenarioWrap.appendChild(btn);
+        return btn;
+      });
+    }
+
+    const chips = renderScenarioChips();
 
     function setChipsEnabled(isStable) {
-      if (!chips.length) return;
       chips.forEach(ch => {
         const scn=Number(ch.dataset.scn ?? 0);
         const dis = isStable && scn !== 0;
@@ -363,11 +424,15 @@
         else ch.removeAttribute("aria-disabled");
       });
       if (stableNote) stableNote.style.display = isStable ? "block" : "none";
-      if (chipWrap) chipWrap.classList.toggle("is-stable", !!isStable);
+      if (scenarioWrap) scenarioWrap.classList.toggle("is-stable", !!isStable);
+    }
+
+    function priceGrowth(years){
+      return Math.pow(1+scenario, years);
     }
 
     function recalc() {
-      const usd=Number(String(amount?.value ?? "").replace(",", "."));
+      const eur=Number(String(amount?.value ?? "").replace(",", "."));
       const asset=assetSel?.value || "stables";
       const apr=Number(yields?.[asset] ?? 0);
       const px=asset==="stables" ? 1 : Number(pricesUSD?.[asset] ?? 0);
@@ -376,35 +441,37 @@
       if (isStable && scenario !== 0) scenario = 0;
 
       setChipsEnabled(isStable);
-      setActiveChip(".scenarios .chip", String(scenario));
+      setActiveChip("#priceScenarios .chip", String(scenario));
 
-      if (!usd || usd<=0 || !isFinite(usd) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
-        [depTok,y1Tok,y3Tok,y5Tok,v1Usd,v3Usd,v5Usd].forEach(el => { if (el) el.textContent="—"; });
+      if (!eur || eur<=0 || !isFinite(eur) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
+        [depTok,cap12Tok,val12Flat,val12Scn,comp12Tok,comp3Tok,comp5Tok,comp12Eur,comp3Eur,comp5Eur].forEach(el => { if (el) el.textContent="—"; });
         if (priceMeta) priceMeta.textContent="";
         return;
       }
 
-      const principalTok=usd/px;
+      const principalTok=eur/px;
       const tok1=computeTokens(principalTok, apr, 1);
       const tok3=computeTokens(principalTok, apr, 3);
       const tok5=computeTokens(principalTok, apr, 5);
 
-      const i1=tok1-principalTok;
-      const i3=tok3-principalTok;
-      const i5=tok5-principalTok;
-
-      const maxDec=asset==="stables" ? 2 : 6;
-      const unit=symLabel(asset);
+      const unit=asset==="stables"?"STABLE":asset.toUpperCase();
+      const maxDec=asset==="stables"?2:6;
 
       if (depTok) depTok.textContent=`${fmtNum(principalTok, maxDec)} ${unit}`;
-      if (y1Tok) y1Tok.textContent=`+${fmtNum(i1, maxDec)} ${unit}`;
-      if (y3Tok) y3Tok.textContent=`+${fmtNum(i3, maxDec)} ${unit}`;
-      if (y5Tok) y5Tok.textContent=`+${fmtNum(i5, maxDec)} ${unit}`;
+      if (cap12Tok) cap12Tok.textContent=`${fmtNum(tok1, maxDec)} ${unit}`;
 
-      const pxScn=px*(1+scenario);
-      if (v1Usd) v1Usd.textContent=fmtUsd(tok1*pxScn);
-      if (v3Usd) v3Usd.textContent=fmtUsd(tok3*pxScn);
-      if (v5Usd) v5Usd.textContent=fmtUsd(tok5*pxScn);
+      const flatVal = tok1*px;
+      const scnVal = tok1*px*priceGrowth(1);
+      if (val12Flat) val12Flat.textContent=fmtEur(flatVal,0);
+      if (val12Scn) val12Scn.textContent=fmtEur(scnVal,0);
+
+      if (comp12Tok) comp12Tok.textContent=`${fmtNum(tok1, maxDec)} ${unit}`;
+      if (comp3Tok) comp3Tok.textContent=`${fmtNum(tok3, maxDec)} ${unit}`;
+      if (comp5Tok) comp5Tok.textContent=`${fmtNum(tok5, maxDec)} ${unit}`;
+
+      if (comp12Eur) comp12Eur.textContent=fmtEur(tok1*px*priceGrowth(1),0);
+      if (comp3Eur) comp3Eur.textContent=fmtEur(tok3*px*priceGrowth(3),0);
+      if (comp5Eur) comp5Eur.textContent=fmtEur(tok5*px*priceGrowth(5),0);
 
       const pxTxt = asset==="stables"
         ? T.stableHint
@@ -413,14 +480,14 @@
       if (priceMeta) priceMeta.textContent=pxTxt;
     }
 
-    if (amount) amount.value=String(cfg?.defaults?.amountUSD ?? 10000);
+    if (amount) amount.value=String(cfg?.defaults?.amountEUR ?? 10000);
     if (assetSel) assetSel.value=cfg?.defaults?.asset ?? "stables";
 
     chips.forEach(ch => ch.addEventListener("click", () => {
       const asset=assetSel?.value || "stables";
       if (asset==="stables") return;
       scenario=Number(ch.dataset.scn ?? 0);
-      setActiveChip(".scenarios .chip", String(scenario));
+      setActiveChip("#priceScenarios .chip", String(scenario));
       recalc();
     }));
 
@@ -464,6 +531,12 @@
     const docs=cfg?.links?.docs || "";
     const navDocs=$("#navDocs");
     const footerDocs=$("#footerDocs");
+    const navCall=$("#navCall");
+
+    if (navCall) {
+      if (callUrl) navCall.href=callUrl, navCall.target="_blank", navCall.rel="noopener";
+      else navCall.href=mailto;
+    }
 
     if (docs) {
       setDisabledLink(navDocs, false);
@@ -518,138 +591,143 @@
     });
   }
 
-    async function init() {
-      enableSmoothScroll();
-      initMobileMenu();
+  async function loadTotalExStableSnapshot(){
+    if (location.protocol === "file:") return null;
+    try {
+      const global = await fetchJSON("https://api.coingecko.com/api/v3/global", 9000);
+      const stableIds=["tether","usd-coin","dai","first-digital-usd","frax","true-usd","usdd"];
+      const ids=stableIds.join(",");
+      const st = await fetchJSON(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=50&page=1&sparkline=false`, 9000);
+      const total = Number(global?.data?.total_market_cap?.usd);
+      const change = Number(global?.data?.market_cap_change_percentage_24h_usd);
+      const stableCap = Array.isArray(st) ? st.reduce((s,c)=>s+Number(c?.market_cap||0),0) : 0;
+      if (!isFinite(total) || total<=0 || !isFinite(stableCap)) return null;
+      const value = total - stableCap;
+      const updatedAt = Number(global?.data?.updated_at)*1000 || Date.now();
+      return { value, change24h: change, updatedAt, source:"CoinGecko" };
+    } catch { return null; }
+  }
 
-      const cfg = await firstJSON(
-        [fromRoot("data/blockpilot.json"), "../data/blockpilot.json","./data/blockpilot.json"],
-        {}
-      );
+  function setAdoptionUI(series, meta){
+    const empty=$("#adoptionEmpty");
+    const svg=$("#adoptionSvg");
+    const axis=$("#adoptionAxis");
+    const upd=$("#adoptionUpdated");
+    if (!series || series.length<2){
+      if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
+      if (svg) svg.innerHTML="";
+      if (axis) axis.innerHTML="";
+      if (upd) upd.textContent="";
+      return;
+    }
+    if (empty) empty.style.display="none";
+    drawSvgLine(svg, sampleSeries(series));
+    setAxisLabels(axis, series);
+    if (upd){
+      const ts = Date.parse(meta?.last_updated) || series[series.length-1][0];
+      upd.textContent = `${T.lastUpdated || "Last updated"}: ${fmtDate(ts)}`;
+    }
+  }
 
-      applyLinks(cfg);
+  async function init() {
+    enableSmoothScroll();
+    initMobileMenu();
 
-      const yields = fillApr(cfg);
-      const pricesUSD = await loadPricesUSD(cfg);
-      initCalc(cfg, pricesUSD, yields);
+    const cfg = await firstJSON(
+      [fromRoot("data/blockpilot.json"), "../data/blockpilot.json","./data/blockpilot.json"],
+      {}
+    );
 
-      const marketBtns = $$('[data-market]');
-      let active = (cfg?.defaults?.marketDefault || "total");
-      setActiveTab("[data-market]", active);
+    applyLinks(cfg);
 
-      const MIN_CACHE_POINTS = 120; // ~4 months of dailies; anything shorter tries live data
+    const yields = fillApr(cfg);
+    const pricesUSD = await loadPricesUSD(cfg);
+    initCalc(cfg, pricesUSD, yields);
 
-      async function refresh(sym) {
-        const empty=$("#marketEmpty");
-        if (empty) {
-          empty.style.display="flex";
-          empty.textContent=T.loading;
-        }
+    const marketBtns = $$('[data-market]');
+    const periodBtns = $$('[data-period]');
+    const storedMarket = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || "total";
+    const storedPeriod = Number(localStorage.getItem("bp_market_period")) || Number(cfg?.defaults?.marketPeriod || 365);
+    let active = storedMarket;
+    let periodDays = storedPeriod;
+    setActiveTab("[data-market]", active);
+    setActiveChip("[data-period]", String(periodDays));
 
-        let series=[], source="", isIndex=false;
+    const cacheMarket = await firstJSON(
+      [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
+      null
+    );
+    const cacheTotalEx = await firstJSON(
+      [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
+      { series:[] }
+    );
+    const adoption = await firstJSON(
+      [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
+      { series:[] }
+    );
+    setAdoptionUI(normalizeSeriesDaily(adoption.series||[]), adoption.meta||{});
 
-        const getSrc=(meta)=>{
-          const src=meta?.source;
-          if (typeof src === "string") return src;
-          if (src && typeof src === "object") {
-            if (sym === "total" && src.total) return src.total;
-            if (src.prices) return src.prices;
-            if (src[sym]) return src[sym];
-          }
-          return "";
-        };
-
-        const cache = await firstJSON(
-          [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
-          null
-        );
-
-        const cacheSourceTag = (cache?.meta?.source && getSrc(cache.meta)) || "";
-        const cacheSourceKind = String(cacheSourceTag || "").toLowerCase();
-        const cacheUpdatedMs = Date.parse(cache?.meta?.updatedAt);
-        const cacheIsStale = isFinite(cacheUpdatedMs) ? ((Date.now() - cacheUpdatedMs) > 3*DAY) : true;
-        const cacheIsSynthetic = cacheSourceKind.includes("synthetic") || cacheSourceKind.includes("offline");
-
-        const cacheSeries = (k) => normalizeSeriesDaily(
-          (cache?.[k] || []).map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]))
-        );
-
-        function useCacheOrIndex() {
-          if (sym === "total") {
-            const ct = cacheSeries("total");
-            if (ct.length >= MIN_CACHE_POINTS) {
-              return { series: ct, isIndex: true };
-            }
-            const cb = cacheSeries("btc");
-            const ce = cacheSeries("eth");
-            const cn = cacheSeries("bnb");
-            const computed = computeTotalEqualWeighted(cb, ce, cn);
-            if (computed.length >= MIN_CACHE_POINTS) {
-              return { series: computed, isIndex: true };
-            }
-            return { series: [] };
-          }
-
-          const cs = cacheSeries(sym);
-          if (cs.length >= MIN_CACHE_POINTS) return { series: cs, isIndex: false };
-          return { series: [] };
-        }
-
-        const cachePick = useCacheOrIndex();
-        series = cachePick.series;
-        isIndex = !!cachePick.isIndex;
-        if (series.length) {
-          const s = getSrc(cache?.meta);
-          source = s ? "cache:"+s : "cache";
-        }
-
-        const needLive = cacheIsSynthetic || cacheIsStale || (series.length < MIN_CACHE_POINTS);
-        if (needLive) {
-          if (sym === "total") {
-            const [b,e,n] = await Promise.all([
-              loadMarketSeriesLive("btc"),
-              loadMarketSeriesLive("eth"),
-              loadMarketSeriesLive("bnb")
-            ]);
-            const liveTotal = computeTotalEqualWeighted(b,e,n);
-            if (liveTotal.length) {
-              series = liveTotal;
-              source = "Binance (live)";
-              isIndex = true;
-            }
-          } else {
-            const live = await loadMarketSeriesLive(sym);
-            if (live.length) {
-              series = live;
-              source = "Binance (live)";
-            }
-          }
-        }
-
-        if (!series.length) {
-          const fallback = useCacheOrIndex();
-          series = fallback.series;
-          isIndex = !!fallback.isIndex;
-          if (series.length) {
-            const s = getSrc(cache?.meta);
-            source = s ? "cache:"+s : "cache";
-          }
-        }
-
-        setMarketUI({ series, source, isIndex });
-      }
-
-      marketBtns.forEach(b => b.addEventListener("click", async () => {
-        const sym=b.dataset.market;
-        if (!sym || sym===active) return;
-        active=sym;
-        setActiveTab("[data-market]", active);
-        await refresh(active);
-      }));
-
-      await refresh(active);
+    function cacheSeries(k){
+      return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }
 
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-    else init();
+    async function refresh(sym) {
+      const empty=$("#marketEmpty");
+      if (empty) { empty.style.display="flex"; empty.textContent=T.loading; }
+      let series=[], source="", isIndex=sym==="total", updatedAt=Date.now();
+
+      if (sym === "total") {
+        const fallbackSeries = normalizeSeriesDaily((cacheTotalEx?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
+        series = fallbackSeries;
+        source = cacheTotalEx?.meta?.source || "cache";
+        updatedAt = Date.parse(cacheTotalEx?.meta?.last_updated) || updatedAt;
+
+        const snap = await loadTotalExStableSnapshot();
+        if (snap && isFinite(snap.value)) {
+          const lastTs = series[series.length-1]?.[0] || 0;
+          const point=[Date.now(), Number((snap.value/1e9).toFixed(2))];
+          if (point[0] > lastTs) series = series.concat([point]);
+          source = snap.source || "live";
+          updatedAt = snap.updatedAt || point[0];
+        }
+      } else {
+        const cache = cacheSeries(sym);
+        series = cache;
+        source = cacheMarket?.meta?.source || "cache";
+        updatedAt = Date.parse(cacheMarket?.meta?.updatedAt) || updatedAt;
+
+        const live = await loadMarketSeriesLive(sym);
+        if (live.length) {
+          series = live;
+          source = "Binance (live)";
+          updatedAt = live[live.length-1][0];
+        }
+      }
+
+      setMarketUI({ series, source, isIndex, updatedAt, periodDays });
+    }
+
+    marketBtns.forEach(b => b.addEventListener("click", async () => {
+      const sym=b.dataset.market;
+      if (!sym || sym===active) return;
+      active=sym;
+      localStorage.setItem("bp_market_sel", sym);
+      setActiveTab("[data-market]", active);
+      await refresh(active);
+    }));
+
+    periodBtns.forEach(b => b.addEventListener("click", async () => {
+      const d=Number(b.dataset.period||0);
+      if (!d || d===periodDays) return;
+      periodDays=d;
+      localStorage.setItem("bp_market_period", String(periodDays));
+      setActiveChip("[data-period]", String(periodDays));
+      await refresh(active);
+    }));
+
+    await refresh(active);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
   })();

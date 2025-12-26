@@ -28,6 +28,8 @@
       priceHint: (px, unit, scn) => `Prix utilisé : ~${px} $/${unit}. Scénario : ${scn ? "+" + (scn*100).toFixed(0) + "%" : "prix constant"}.`,
       stableScenarioNote: "Stables : pas de scénario de prix.",
       contactLabel: "Email",
+      menu: "Menu",
+      close: "Fermer"
     },
     en: {
       loading: "Loading…",
@@ -38,6 +40,8 @@
       priceHint: (px, unit, scn) => `Price used: ~$${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "flat price"}.`,
       stableScenarioNote: "Stables: no price scenario.",
       contactLabel: "Email",
+      menu: "Menu",
+      close: "Close"
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -53,8 +57,12 @@
       clearTimeout(t);
     }
   }
-  async function safeJSON(url, fallback=null) {
-    try { return await fetchJSON(url); } catch { return fallback; }
+
+  async function firstJSON(urls, fallback=null) {
+    for (const u of urls) {
+      try { return await fetchJSON(u); } catch {}
+    }
+    return fallback;
   }
 
   function setDisabledLink(a, disabled) {
@@ -140,7 +148,7 @@
       const t = dayTs(p?.[0]);
       const v = Number(p?.[1]);
       if (!isFinite(t) || !isFinite(v)) continue;
-      m.set(t, v); // keep last for the day
+      m.set(t, v);
     }
     return [...m.entries()].sort((a,b)=>a[0]-b[0]);
   }
@@ -159,7 +167,8 @@
     const fall = cfg?.fallbackPricesUSD || { btc:100000, eth:3500, bnb:650 };
     const ids="bitcoin,ethereum,binancecoin";
     const url=`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
-    const res=await safeJSON(url,null);
+    let res=null;
+    try { res=await fetchJSON(url, 8000); } catch {}
 
     const prices={
       btc: res?.bitcoin?.usd ?? fall.btc ?? 0,
@@ -171,7 +180,7 @@
     return prices;
   }
 
-  async function loadMarketSeriesRaw(sym) {
+  async function loadMarketSeriesLive(sym) {
     const cacheKey="bp_mkt_"+sym+"_usd_v1";
     const cachedRaw=localStorage.getItem(cacheKey);
     const now=Date.now();
@@ -187,7 +196,8 @@
     if (!id) return [];
 
     const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=1825&interval=daily`;
-    const res=await safeJSON(url,null);
+    let res=null;
+    try { res=await fetchJSON(url, 9000); } catch { res=null; }
     const series=normalizeSeriesDaily((res?.prices||[])
       .map(p=>[Number(p[0]),Number(p[1])])
       .filter(p=>isFinite(p[0]) && isFinite(p[1]))
@@ -377,7 +387,7 @@
 
     chips.forEach(ch => ch.addEventListener("click", () => {
       const asset=assetSel?.value || "stables";
-      if (asset==="stables") return; // stable forces 0
+      if (asset==="stables") return;
       scenario=Number(ch.dataset.scn ?? 0);
       setActiveChip(".scenarios .chip", String(scenario));
       recalc();
@@ -427,7 +437,6 @@
     if (docs) {
       setDisabledLink(navDocs, false);
       if (navDocs) navDocs.href=docs, navDocs.target="_blank", navDocs.rel="noopener";
-
       setDisabledLink(footerDocs, false);
       if (footerDocs) footerDocs.href=docs, footerDocs.target="_blank", footerDocs.rel="noopener";
     } else {
@@ -449,18 +458,47 @@
         e.preventDefault();
         const top=el.getBoundingClientRect().top + window.scrollY - offset();
         window.scrollTo({ top, behavior:"smooth" });
+        if (document.body.classList.contains("menu-open")) {
+          document.body.classList.remove("menu-open");
+          const t=$("#navToggle");
+          if (t) t.setAttribute("aria-expanded","false");
+        }
       });
+    });
+  }
+
+  function initMobileMenu() {
+    const toggle=$("#navToggle");
+    if (!toggle) return;
+    toggle.textContent = T.menu;
+    toggle.addEventListener("click", () => {
+      const open = !document.body.classList.contains("menu-open");
+      document.body.classList.toggle("menu-open", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.textContent = open ? T.close : T.menu;
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 860 && document.body.classList.contains("menu-open")) {
+        document.body.classList.remove("menu-open");
+        toggle.setAttribute("aria-expanded","false");
+        toggle.textContent = T.menu;
+      }
     });
   }
 
   async function init() {
     enableSmoothScroll();
+    initMobileMenu();
 
-    const cfg = await safeJSON("../data/blockpilot.json", null) || {};
+    const cfg = await firstJSON(
+      ["../data/blockpilot.json","./data/blockpilot.json","/data/blockpilot.json"],
+      {}
+    );
+
     applyLinks(cfg);
 
     const yields = fillApr(cfg);
-
     const pricesUSD = await loadPricesUSD(cfg);
     initCalc(cfg, pricesUSD, yields);
 
@@ -474,31 +512,39 @@
 
       let series=[], source="", isIndex=false;
 
+      const cache = await firstJSON(
+        ["../data/market.json","./data/market.json","/data/market.json"],
+        null
+      );
+
+      const cacheSeries = (k) => normalizeSeriesDaily(
+        (cache?.[k] || []).map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]))
+      );
+
       if (sym === "total") {
-        const [b,e,n] = await Promise.all([
-          loadMarketSeriesRaw("btc"),
-          loadMarketSeriesRaw("eth"),
-          loadMarketSeriesRaw("bnb")
-        ]);
-        series = computeTotalEqualWeighted(b,e,n);
-        source = series.length ? "composite" : "";
-        isIndex = true;
-
-        if (!series.length) {
-          const cache = await safeJSON("../data/market.json", null);
-          const arr = cache?.total || [];
-          series = normalizeSeriesDaily(arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1])));
-          if (series.length) source="cache", isIndex=true;
-        }
+        const cb = cacheSeries("btc");
+        const ce = cacheSeries("eth");
+        const cn = cacheSeries("bnb");
+        series = computeTotalEqualWeighted(cb, ce, cn);
+        if (series.length) { source = cache?.meta?.source ? "cache:"+cache.meta.source : "cache"; isIndex=true; }
       } else {
-        series = await loadMarketSeriesRaw(sym);
-        source = series.length ? "CoinGecko" : "";
+        series = cacheSeries(sym);
+        if (series.length) source = cache?.meta?.source ? "cache:"+cache.meta.source : "cache";
+      }
 
-        if (!series.length) {
-          const cache = await safeJSON("../data/market.json", null);
-          const arr = cache?.[sym] || [];
-          series = normalizeSeriesDaily(arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1])));
-          if (series.length) source="cache";
+      if (!series.length) {
+        if (sym === "total") {
+          const [b,e,n] = await Promise.all([
+            loadMarketSeriesLive("btc"),
+            loadMarketSeriesLive("eth"),
+            loadMarketSeriesLive("bnb")
+          ]);
+          series = computeTotalEqualWeighted(b,e,n);
+          source = series.length ? "CoinGecko (live)" : "";
+          isIndex = true;
+        } else {
+          series = await loadMarketSeriesLive(sym);
+          source = series.length ? "CoinGecko (live)" : "";
         }
       }
 

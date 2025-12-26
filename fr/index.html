@@ -25,8 +25,8 @@
         </div>
 
         <div class="lang" aria-label="Language">
-          <a class="pill is-active" href="../fr/" data-lang-btn="fr">FR</a>
-          <a class="pill " href="../en/" data-lang-btn="en">EN</a>
+          <a class="pill is-active" href="../fr/">FR</a>
+          <a class="pill" href="../en/">EN</a>
         </div>
       </nav>
     </div>
@@ -36,13 +36,13 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Gestion privée d’actifs numériques, en mandats individuels.</h1>
-          <p class="lead">On met en place votre “compte crypto” (coffre + règles + rails), puis on fait travailler vos actifs. Vous gardez le contrôle final : visibilité et retraits possibles selon la règle convenue.</p>
+          <h1 class="h1">BlockPilot — Gestion privée d’actifs numériques.</h1>
+          <p class="lead">On met en place votre coffre et une règle de retrait, puis on pilote rendement + allocation. Vous voyez tout, et vous pouvez retirer selon la règle convenue.</p>
 
           <div class="kicker" aria-label="Highlights">
             <span>Coffre à votre nom (Safe)</span>
+            <span>Retrait par signature</span>
             <span>IBAN + carte (selon éligibilité)</span>
-            <span>Yield + allocation + reporting</span>
           </div>
 
           <div class="ctaRow">
@@ -53,21 +53,21 @@
         </div>
 
         <aside class="card cardPad">
-          <div class="cardTitle">Le “tout-en-un” (simple pour débuter)</div>
-          <p class="cardSub">Un point d’entrée clair, des règles, et un suivi. Vous voyez tout, et vous pouvez retirer quand vous voulez.</p>
+          <div class="cardTitle">Qui fait quoi ?</div>
+          <p class="cardSub">Simple : vous gardez la clé. Nous opérons et on vous rend des comptes.</p>
 
-          <div class="miniGrid">
-            <div class="mini">
-              <strong>Un coffre par mandat</strong>
-              <span>À votre nom. Pas de mélange entre clients.</span>
+          <div class="whoGrid">
+            <div class="whoItem">
+              <strong>Vous</strong>
+              <span>Propriétaire du coffre · visibilité · retrait selon la règle.</span>
             </div>
-            <div class="mini">
-              <strong>Rails fiat simples</strong>
-              <span>IBAN/carte + dépôts/retraits accompagnés.</span>
+            <div class="whoItem">
+              <strong>BlockPilot</strong>
+              <span>Allocation · exécution · gestion du risque · reporting trimestriel.</span>
             </div>
-            <div class="mini">
-              <strong>Pilotage & reporting</strong>
-              <span>Stratégie sur-mesure + revue régulière.</span>
+            <div class="whoItem">
+              <strong>Contrôle</strong>
+              <span>Historique on-chain + relevés. Pas d’opacité.</span>
             </div>
           </div>
         </aside>
@@ -78,18 +78,18 @@
   <section id="performance" class="section section--tight">
     <div class="container">
       <h2 class="h2">Performance & Yield</h2>
-      <p class="p">Données “long run” (1–3–5 ans) : contexte marché + rendement estimatif par classe d’actifs. Chiffres indicatifs.</p>
+      <p class="p">Données “long run” (1–3–5 ans) : contexte marché + rendement estimatif (DeFi) par classe d’actifs. Chiffres indicatifs.</p>
 
       <div class="grid2" style="margin-top:18px;">
         <div class="card cardPad">
           <div class="cardTitle">Contexte marché</div>
-          <p class="small">Prix du token (EUR) — pour situer l’environnement. Total global disponible via données internes.</p>
+          <p class="small">Prix tokens (EUR). TOTAL = indice égal-pondéré BTC/ETH/BNB (base 100).</p>
 
           <div class="marketTabs" style="margin-top:12px;">
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
             <button class="tabBtn" type="button" data-market="eth">ETH</button>
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
-            <button class="tabBtn disabled" type="button" data-market="total">TOTAL</button>
+            <button class="tabBtn" type="button" data-market="total">TOTAL</button>
           </div>
 
           <div class="kpiRow">
@@ -102,12 +102,13 @@
             <div class="chartEmpty" id="marketEmpty">Chargement…</div>
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
           </div>
-          <div class="small" id="marketMeta" style="margin-top:10px;"></div>
+          <div class="small" id="totalHint" style="margin-top:10px;"></div>
+          <div class="small" id="marketMeta" style="margin-top:8px;"></div>
         </div>
 
         <div class="card cardPad">
           <div class="cardTitle">Yield (estimatif)</div>
-          <p class="cardSub">Deux moteurs : (1) plus de tokens via le yield, (2) variation du prix du token en €.</p>
+          <p class="cardSub">Le yield augmente le nombre de tokens (intérêts composés). Si le prix du token monte, la valeur en € monte en plus.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -118,6 +119,7 @@
 
           <div class="simBox">
             <div class="simTitle">Simulation rapide</div>
+
             <div class="formRow">
               <div>
                 <div class="small" style="margin-bottom:6px;">Montant (€)</div>
@@ -174,15 +176,15 @@
       <div class="grid3" style="margin-top:18px;">
         <div class="card cardPad">
           <div class="cardTitle">1) Coffre + règle</div>
-          <p class="cardSub">Création du Safe à votre nom + règle de retrait.</p>
+          <p class="cardSub">Création du coffre (Safe) à votre nom + règle de retrait (signature/co-signature).</p>
         </div>
         <div class="card cardPad">
           <div class="cardTitle">2) Rails</div>
           <p class="cardSub">IBAN/carte (selon éligibilité) + dépôt accompagné.</p>
         </div>
         <div class="card cardPad">
-          <div class="cardTitle">3) Stratégie</div>
-          <p class="cardSub">Allocation + exécution + relevé périodique.</p>
+          <div class="cardTitle">3) Pilotage</div>
+          <p class="cardSub">Allocation + exécution + relevé périodique (performance + frais).</p>
         </div>
       </div>
     </div>
@@ -201,7 +203,7 @@
           </div>
           <div>
             <div class="cardTitle">Retrait</div>
-            <p class="cardSub">Retrait possible selon la règle convenue (signature/cosignature).</p>
+            <p class="cardSub">Retrait possible selon la règle convenue (signature/co-signature).</p>
           </div>
           <div>
             <div class="cardTitle">Transparence</div>
@@ -214,14 +216,15 @@
 
   <footer class="footer">
     <div class="container">
-      <span>Contact:</span>
-      <a id="footerEmail" href="#">toni@blockpilot.capital</a>
-      <span> · </span>
-      <a id="footerTerms" href="#" target="_blank" rel="noopener">Conditions (PDF)</a>
-      <span> · </span>
-      <a id="footerDocs" class="muted" href="#" target="_blank" rel="noopener">Docs</a>
-      <span> · </span>
-      <a id="footerSignature" href="../sign.html" target="_blank" rel="noopener">Signature</a>
+      <div class="footerRow">
+        <a id="footerEmail" href="#" aria-label="Contact">Contact</a>
+        <span> · </span>
+        <a id="footerTerms" href="#">Conditions (PDF)</a>
+        <span> · </span>
+        <a id="footerDocs" class="muted" href="#">Docs</a>
+        <span> · </span>
+        <a id="footerSignature" href="../sign.html">Signature</a>
+      </div>
     </div>
   </footer>
 

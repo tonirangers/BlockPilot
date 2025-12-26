@@ -537,6 +537,8 @@
     let active = (cfg?.defaults?.marketDefault || "total");
     setActiveTab("[data-market]", active);
 
+    const MIN_CACHE_POINTS = 120; // ~4 months of dailies; anything shorter tries live data
+
     async function refresh(sym) {
       const empty=$("#marketEmpty");
       if (empty) empty.style.display="flex", empty.textContent=T.loading;
@@ -565,6 +567,7 @@
 
       if (sym === "total") {
         const ct = cacheSeries("total");
+        if (ct.length >= MIN_CACHE_POINTS) {
         if (ct.length) {
           series = ct;
           const s = getSrc(cache?.meta);
@@ -574,6 +577,9 @@
           const cb = cacheSeries("btc");
           const ce = cacheSeries("eth");
           const cn = cacheSeries("bnb");
+          const computed = computeTotalEqualWeighted(cb, ce, cn);
+          if (computed.length >= MIN_CACHE_POINTS) {
+            series = computed;
           series = computeTotalEqualWeighted(cb, ce, cn);
           if (series.length) {
             const s = getSrc(cache?.meta);
@@ -582,6 +588,67 @@
           }
         }
       } else {
+        const cs = cacheSeries(sym);
+        if (cs.length >= MIN_CACHE_POINTS) {
+          series = cs;
+          const s = getSrc(cache?.meta);
+          source = s ? "cache:"+s : "cache";
+        }
+      }
+
+      const needLive = series.length < MIN_CACHE_POINTS;
+      if (needLive) {
+        if (sym === "total") {
+          const [b,e,n] = await Promise.all([
+            loadMarketSeriesLive("btc"),
+            loadMarketSeriesLive("eth"),
+            loadMarketSeriesLive("bnb")
+          ]);
+          const liveTotal = computeTotalEqualWeighted(b,e,n);
+          if (liveTotal.length) {
+            series = liveTotal;
+            source = "Binance (live)";
+            isIndex = true;
+          }
+        } else {
+          const live = await loadMarketSeriesLive(sym);
+          if (live.length) {
+            series = live;
+            source = "Binance (live)";
+          }
+        }
+      }
+
+      if (!series.length) {
+        if (sym === "total") {
+          const ct = cacheSeries("total");
+          if (ct.length) {
+            series = ct;
+            const s = getSrc(cache?.meta);
+            source = s ? "cache:"+s : "cache";
+            isIndex = true;
+          } else {
+            const cb = cacheSeries("btc");
+            const ce = cacheSeries("eth");
+            const cn = cacheSeries("bnb");
+            const computed = computeTotalEqualWeighted(cb, ce, cn);
+            if (computed.length) {
+              series = computed;
+              const s = getSrc(cache?.meta);
+              source = s ? "cache:"+s : "cache";
+              isIndex=true;
+            }
+          }
+        } else {
+          const cs = cacheSeries(sym);
+          if (cs.length) {
+            series = cs;
+            const s = getSrc(cache?.meta);
+            source = s ? "cache:"+s : "cache";
+          }
+        }
+      }
+
         series = cacheSeries(sym);
         if (series.length) {
           const s = getSrc(cache?.meta);

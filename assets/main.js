@@ -518,174 +518,132 @@
     });
   }
 
-  async function init() {
-    enableSmoothScroll();
-    initMobileMenu();
+    async function init() {
+      enableSmoothScroll();
+      initMobileMenu();
 
-    const cfg = await firstJSON(
-      [fromRoot("data/blockpilot.json"), "../data/blockpilot.json","./data/blockpilot.json"],
-      {}
-    );
-
-    applyLinks(cfg);
-
-    const yields = fillApr(cfg);
-    const pricesUSD = await loadPricesUSD(cfg);
-    initCalc(cfg, pricesUSD, yields);
-
-    const marketBtns = $$('[data-market]');
-    let active = (cfg?.defaults?.marketDefault || "total");
-    setActiveTab("[data-market]", active);
-
-    const MIN_CACHE_POINTS = 120; // ~4 months of dailies; anything shorter tries live data
-
-    async function refresh(sym) {
-      const empty=$("#marketEmpty");
-      if (empty) empty.style.display="flex", empty.textContent=T.loading;
-
-      let series=[], source="", isIndex=false;
-
-      const getSrc=(meta)=>{
-        const src=meta?.source;
-        if (typeof src === "string") return src;
-        if (src && typeof src === "object") {
-          if (sym === "total" && src.total) return src.total;
-          if (src.prices) return src.prices;
-          if (src[sym]) return src[sym];
-        }
-        return "";
-      };
-
-      const cache = await firstJSON(
-        [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
-        null
+      const cfg = await firstJSON(
+        [fromRoot("data/blockpilot.json"), "../data/blockpilot.json","./data/blockpilot.json"],
+        {}
       );
 
-      const cacheSeries = (k) => normalizeSeriesDaily(
-        (cache?.[k] || []).map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]))
-      );
+      applyLinks(cfg);
 
-      if (sym === "total") {
-        const ct = cacheSeries("total");
-        if (ct.length >= MIN_CACHE_POINTS) {
-        if (ct.length) {
-          series = ct;
-          const s = getSrc(cache?.meta);
-          source = s ? "cache:"+s : "cache";
-          isIndex = true;
-        } else {
-          const cb = cacheSeries("btc");
-          const ce = cacheSeries("eth");
-          const cn = cacheSeries("bnb");
-          const computed = computeTotalEqualWeighted(cb, ce, cn);
-          if (computed.length >= MIN_CACHE_POINTS) {
-            series = computed;
-          series = computeTotalEqualWeighted(cb, ce, cn);
-          if (series.length) {
-            const s = getSrc(cache?.meta);
-            source = s ? "cache:"+s : "cache";
-            isIndex=true;
-          }
-        }
-      } else {
-        const cs = cacheSeries(sym);
-        if (cs.length >= MIN_CACHE_POINTS) {
-          series = cs;
-          const s = getSrc(cache?.meta);
-          source = s ? "cache:"+s : "cache";
-        }
-      }
+      const yields = fillApr(cfg);
+      const pricesUSD = await loadPricesUSD(cfg);
+      initCalc(cfg, pricesUSD, yields);
 
-      const needLive = series.length < MIN_CACHE_POINTS;
-      if (needLive) {
-        if (sym === "total") {
-          const [b,e,n] = await Promise.all([
-            loadMarketSeriesLive("btc"),
-            loadMarketSeriesLive("eth"),
-            loadMarketSeriesLive("bnb")
-          ]);
-          const liveTotal = computeTotalEqualWeighted(b,e,n);
-          if (liveTotal.length) {
-            series = liveTotal;
-            source = "Binance (live)";
-            isIndex = true;
-          }
-        } else {
-          const live = await loadMarketSeriesLive(sym);
-          if (live.length) {
-            series = live;
-            source = "Binance (live)";
-          }
-        }
-      }
+      const marketBtns = $$('[data-market]');
+      let active = (cfg?.defaults?.marketDefault || "total");
+      setActiveTab("[data-market]", active);
 
-      if (!series.length) {
-        if (sym === "total") {
-          const ct = cacheSeries("total");
-          if (ct.length) {
-            series = ct;
-            const s = getSrc(cache?.meta);
-            source = s ? "cache:"+s : "cache";
-            isIndex = true;
-          } else {
+      const MIN_CACHE_POINTS = 120; // ~4 months of dailies; anything shorter tries live data
+
+      async function refresh(sym) {
+        const empty=$("#marketEmpty");
+        if (empty) {
+          empty.style.display="flex";
+          empty.textContent=T.loading;
+        }
+
+        let series=[], source="", isIndex=false;
+
+        const getSrc=(meta)=>{
+          const src=meta?.source;
+          if (typeof src === "string") return src;
+          if (src && typeof src === "object") {
+            if (sym === "total" && src.total) return src.total;
+            if (src.prices) return src.prices;
+            if (src[sym]) return src[sym];
+          }
+          return "";
+        };
+
+        const cache = await firstJSON(
+          [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
+          null
+        );
+
+        const cacheSeries = (k) => normalizeSeriesDaily(
+          (cache?.[k] || []).map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]))
+        );
+
+        function useCacheOrIndex() {
+          if (sym === "total") {
+            const ct = cacheSeries("total");
+            if (ct.length >= MIN_CACHE_POINTS) {
+              return { series: ct, isIndex: true };
+            }
             const cb = cacheSeries("btc");
             const ce = cacheSeries("eth");
             const cn = cacheSeries("bnb");
             const computed = computeTotalEqualWeighted(cb, ce, cn);
-            if (computed.length) {
-              series = computed;
-              const s = getSrc(cache?.meta);
-              source = s ? "cache:"+s : "cache";
-              isIndex=true;
+            if (computed.length >= MIN_CACHE_POINTS) {
+              return { series: computed, isIndex: true };
             }
+            return { series: [] };
           }
-        } else {
-          const cs = cacheSeries(sym);
-          if (cs.length) {
-            series = cs;
-            const s = getSrc(cache?.meta);
-            source = s ? "cache:"+s : "cache";
-          }
-        }
-      }
 
-        series = cacheSeries(sym);
+          const cs = cacheSeries(sym);
+          if (cs.length >= MIN_CACHE_POINTS) return { series: cs, isIndex: false };
+          return { series: [] };
+        }
+
+        const cachePick = useCacheOrIndex();
+        series = cachePick.series;
+        isIndex = !!cachePick.isIndex;
         if (series.length) {
           const s = getSrc(cache?.meta);
           source = s ? "cache:"+s : "cache";
         }
-      }
 
-      if (!series.length) {
-        if (sym === "total") {
-          const [b,e,n] = await Promise.all([
-            loadMarketSeriesLive("btc"),
-            loadMarketSeriesLive("eth"),
-            loadMarketSeriesLive("bnb")
-          ]);
-          series = computeTotalEqualWeighted(b,e,n);
-          source = series.length ? "Binance (live)" : "";
-          isIndex = true;
-        } else {
-          series = await loadMarketSeriesLive(sym);
-          source = series.length ? "Binance (live)" : "";
+        const needLive = series.length < MIN_CACHE_POINTS;
+        if (needLive) {
+          if (sym === "total") {
+            const [b,e,n] = await Promise.all([
+              loadMarketSeriesLive("btc"),
+              loadMarketSeriesLive("eth"),
+              loadMarketSeriesLive("bnb")
+            ]);
+            const liveTotal = computeTotalEqualWeighted(b,e,n);
+            if (liveTotal.length) {
+              series = liveTotal;
+              source = "Binance (live)";
+              isIndex = true;
+            }
+          } else {
+            const live = await loadMarketSeriesLive(sym);
+            if (live.length) {
+              series = live;
+              source = "Binance (live)";
+            }
+          }
         }
+
+        if (!series.length) {
+          const fallback = useCacheOrIndex();
+          series = fallback.series;
+          isIndex = !!fallback.isIndex;
+          if (series.length) {
+            const s = getSrc(cache?.meta);
+            source = s ? "cache:"+s : "cache";
+          }
+        }
+
+        setMarketUI({ series, source, isIndex });
       }
 
-      setMarketUI({ series, source, isIndex });
+      marketBtns.forEach(b => b.addEventListener("click", async () => {
+        const sym=b.dataset.market;
+        if (!sym || sym===active) return;
+        active=sym;
+        setActiveTab("[data-market]", active);
+        await refresh(active);
+      }));
+
+      await refresh(active);
     }
 
-    marketBtns.forEach(b => b.addEventListener("click", async () => {
-      const sym=b.dataset.market;
-      if (!sym || sym===active) return;
-      active=sym;
-      setActiveTab("[data-market]", active);
-      await refresh(active);
-    }));
-
-    await refresh(active);
-  }
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
-})();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+  })();

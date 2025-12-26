@@ -3,37 +3,46 @@
   const $ = (s, el=document) => el.querySelector(s);
   const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
 
+  let CUR="USD", VS="usd";
+
   const fmtPct = (v) => {
     if (!isFinite(v)) return "—";
     const sign = v > 0 ? "+" : "";
     return sign + (v * 100).toFixed(0) + "%";
   };
+
   const fmtNum = (v, max=2) => {
     if (!isFinite(v)) return "—";
     return new Intl.NumberFormat(undefined, { maximumFractionDigits: max }).format(v);
   };
-  const fmtEur = (v) => {
+
+  const fmtMoney = (v, max=0) => {
     if (!isFinite(v)) return "—";
-    return new Intl.NumberFormat(undefined, { style:"currency", currency:"EUR", maximumFractionDigits:0 }).format(v);
+    return new Intl.NumberFormat(undefined, {
+      style:"currency",
+      currency:CUR,
+      currencyDisplay:"narrowSymbol",
+      maximumFractionDigits:max
+    }).format(v);
   };
 
   const LANG = document.body?.dataset?.lang || "fr";
   const I18N = {
     fr: {
       loading: "Chargement…",
-      marketUnavailable: "Données marché en cours d’activation.",
-      lastValue: (v, dt, src) => `Dernière valeur: ${v} € · maj ${dt}${src ? " · " + src : ""}`,
+      marketUnavailable: "Données marché indisponibles pour le moment.",
+      lastValue: (v, dt, src) => `Dernière valeur: ${v} · maj ${dt}${src ? " · " + src : ""}`,
       lastIndexValue: (v, dt, src) => `Indice: ${v} (base 100) · maj ${dt}${src ? " · " + src : ""}`,
-      stableHint: "Hypothèse: 1€ ≈ 1 stable.",
-      priceHint: (px, unit, scn) => `Prix utilisé: ~${px} €/${unit}. Scénario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "prix constant"}.`
+      stableHint: (one) => `Hypothèse: ${one} ≈ 1 stable.`,
+      priceHint: (pxNow, unit, scnPct, px5) => `Prix aujourd’hui: ${pxNow}/${unit}. Scénario: +${scnPct}%/an → ${px5}/${unit} à 5 ans.`
     },
     en: {
       loading: "Loading…",
-      marketUnavailable: "Market data is being enabled.",
-      lastValue: (v, dt, src) => `Last value: €${v} · updated ${dt}${src ? " · " + src : ""}`,
+      marketUnavailable: "Market data is temporarily unavailable.",
+      lastValue: (v, dt, src) => `Last value: ${v} · updated ${dt}${src ? " · " + src : ""}`,
       lastIndexValue: (v, dt, src) => `Index: ${v} (base 100) · updated ${dt}${src ? " · " + src : ""}`,
-      stableHint: "Assumption: €1 ≈ 1 stable.",
-      priceHint: (px, unit, scn) => `Price used: ~€${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "flat price"}.`
+      stableHint: (one) => `Assumption: ${one} ≈ 1 stable.`,
+      priceHint: (pxNow, unit, scnPct, px5) => `Price today: ${pxNow}/${unit}. Scenario: +${scnPct}%/yr → ${px5}/${unit} in 5y.`
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -126,8 +135,8 @@
     return out;
   }
 
-  async function loadPricesEUR(cfg) {
-    const cacheKey="bp_prices_eur_v2";
+  async function loadPrices(cfg) {
+    const cacheKey=`bp_prices_v3_${VS}`;
     const cachedRaw=localStorage.getItem(cacheKey);
     const now=Date.now();
     if (cachedRaw) {
@@ -137,22 +146,22 @@
       } catch {}
     }
 
-    const fall = cfg?.fallbackPricesEUR || { btc:90000, eth:3000, bnb:550 };
+    const fall = cfg?.fallbackPrices || { btc:100000, eth:4000, bnb:700 };
     const ids="bitcoin,ethereum,binancecoin";
-    const url=`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`;
+    const url=`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${VS}`;
     const res=await safeJSON(url,null);
 
     const prices={
-      btc: res?.bitcoin?.eur ?? fall.btc ?? 0,
-      eth: res?.ethereum?.eur ?? fall.eth ?? 0,
-      bnb: res?.binancecoin?.eur ?? fall.bnb ?? 0
+      btc: res?.bitcoin?.[VS] ?? fall.btc ?? 0,
+      eth: res?.ethereum?.[VS] ?? fall.eth ?? 0,
+      bnb: res?.binancecoin?.[VS] ?? fall.bnb ?? 0
     };
     localStorage.setItem(cacheKey, JSON.stringify({ ts:now, prices }));
     return prices;
   }
 
   async function loadMarketSeriesRaw(sym) {
-    const cacheKey="bp_mkt_"+sym+"_v3";
+    const cacheKey=`bp_mkt_${sym}_v4_${VS}`;
     const cachedRaw=localStorage.getItem(cacheKey);
     const now=Date.now();
     if (cachedRaw) {
@@ -166,7 +175,7 @@
     const id=idMap[sym];
     if (!id) return [];
 
-    const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=eur&days=1825&interval=daily`;
+    const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${VS}&days=1825&interval=daily`;
     const res=await safeJSON(url,null);
     const series=(res?.prices||[])
       .map(p=>[Number(p[0]),Number(p[1])])
@@ -241,7 +250,7 @@
     const dt=d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
 
     if (meta) {
-      const valTxt=isIndex ? fmtNum(last[1],0) : fmtNum(last[1],0);
+      const valTxt=isIndex ? fmtNum(last[1],0) : fmtMoney(last[1],0);
       meta.textContent = isIndex
         ? T.lastIndexValue(valTxt, dt, source)
         : T.lastValue(valTxt, dt, source);
@@ -267,37 +276,40 @@
     return yields;
   }
 
-  function initCalc(cfg, pricesEUR, yields) {
-    const amount=$("#amountEUR");
+  function initCalc(cfg, prices, yields) {
+    const amount=$("#amountFiat");
     const assetSel=$("#assetSel");
     const chips=$$(".scenarios .chip");
+    const scenariosWrap=$(".scenarios");
 
     const depTok=$("#depTok");
     const y1Tok=$("#y1Tok");
     const y3Tok=$("#y3Tok");
     const y5Tok=$("#y5Tok");
-    const v1Eur=$("#v1Eur");
-    const v3Eur=$("#v3Eur");
-    const v5Eur=$("#v5Eur");
+    const v1Fiat=$("#v1Fiat");
+    const v3Fiat=$("#v3Fiat");
+    const v5Fiat=$("#v5Fiat");
     const priceMeta=$("#priceMeta");
 
-    let scenario=Number(cfg?.defaults?.scenario ?? 0);
-
+    let scenario=Number(cfg?.defaults?.scenario ?? 0.2);
     const symLabel=(a)=>a==="stables" ? "STABLE" : a.toUpperCase();
 
     function recalc() {
-      const eur=Number(String(amount?.value ?? "").replace(",", "."));
+      const fiat=Number(String(amount?.value ?? "").replace(",", "."));
       const asset=assetSel?.value || "stables";
       const apr=Number(yields?.[asset] ?? 0);
-      const px=asset==="stables" ? 1 : Number(pricesEUR?.[asset] ?? 0);
+      const px=asset==="stables" ? 1 : Number(prices?.[asset] ?? 0);
+      const scn = asset==="stables" ? 0 : scenario; // CAGR annuel
 
-      if (!eur || eur<=0 || !isFinite(eur) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
-        [depTok,y1Tok,y3Tok,y5Tok,v1Eur,v3Eur,v5Eur].forEach(el => { if (el) el.textContent="—"; });
+      if (scenariosWrap) scenariosWrap.style.display = asset==="stables" ? "none" : "flex";
+
+      if (!fiat || fiat<=0 || !isFinite(fiat) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
+        [depTok,y1Tok,y3Tok,y5Tok,v1Fiat,v3Fiat,v5Fiat].forEach(el => { if (el) el.textContent="—"; });
         if (priceMeta) priceMeta.textContent="";
         return;
       }
 
-      const principalTok=eur/px;
+      const principalTok=fiat/px;
       const tok1=computeTokens(principalTok, apr, 1);
       const tok3=computeTokens(principalTok, apr, 3);
       const tok5=computeTokens(principalTok, apr, 5);
@@ -314,19 +326,22 @@
       if (y3Tok) y3Tok.textContent=`+${fmtNum(i3, maxDec)} ${unit}`;
       if (y5Tok) y5Tok.textContent=`+${fmtNum(i5, maxDec)} ${unit}`;
 
-      const pxScn=px*(1+scenario);
-      if (v1Eur) v1Eur.textContent=fmtEur(tok1*pxScn);
-      if (v3Eur) v3Eur.textContent=fmtEur(tok3*pxScn);
-      if (v5Eur) v5Eur.textContent=fmtEur(tok5*pxScn);
+      const px1=px*Math.pow(1+scn,1);
+      const px3=px*Math.pow(1+scn,3);
+      const px5=px*Math.pow(1+scn,5);
+
+      if (v1Fiat) v1Fiat.textContent=fmtMoney(tok1*px1,0);
+      if (v3Fiat) v3Fiat.textContent=fmtMoney(tok3*px3,0);
+      if (v5Fiat) v5Fiat.textContent=fmtMoney(tok5*px5,0);
 
       const pxTxt = asset==="stables"
-        ? T.stableHint
-        : T.priceHint(fmtNum(px,0), unit, scenario);
+        ? T.stableHint(fmtMoney(1,0))
+        : T.priceHint(fmtMoney(px,0), unit, (scn*100).toFixed(0), fmtMoney(px5,0));
 
       if (priceMeta) priceMeta.textContent=pxTxt;
     }
 
-    if (amount) amount.value=String(cfg?.defaults?.amountEUR ?? 10000);
+    if (amount) amount.value=String(cfg?.defaults?.amount ?? cfg?.defaults?.amountEUR ?? 10000);
     if (assetSel) assetSel.value=cfg?.defaults?.asset ?? "stables";
 
     chips.forEach(ch => ch.addEventListener("click", () => {
@@ -350,7 +365,13 @@
     const ctaEmail=$("#ctaEmail");
     const footerEmail=$("#footerEmail");
     if (ctaEmail) ctaEmail.href=mailto;
-    if (footerEmail) footerEmail.href=mailto, footerEmail.textContent=email;
+    if (footerEmail) {
+      const label = cfg?.links?.footerEmailLabel || (LANG==="fr" ? "Contact" : "Contact");
+      footerEmail.href=mailto;
+      footerEmail.textContent=label;
+      footerEmail.title=email;
+      footerEmail.setAttribute("aria-label", email);
+    }
 
     const callUrl=cfg?.links?.bookCall || "";
     const ctaCall=$("#ctaCall");
@@ -376,7 +397,6 @@
     if (docs) {
       setDisabledLink(navDocs, false);
       if (navDocs) navDocs.href=docs, navDocs.target="_blank", navDocs.rel="noopener";
-
       setDisabledLink(footerDocs, false);
       if (footerDocs) footerDocs.href=docs, footerDocs.target="_blank", footerDocs.rel="noopener";
     } else {
@@ -402,16 +422,29 @@
     });
   }
 
+  let MARKET_FILE=null;
+  async function loadMarketFile() {
+    if (MARKET_FILE) return MARKET_FILE;
+    MARKET_FILE = await safeJSON("../data/market.json", null);
+    return MARKET_FILE;
+  }
+  function seriesFromFile(file, sym) {
+    const arr = file?.[sym] || [];
+    return arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
+  }
+
   async function init() {
     enableSmoothScroll();
 
     const cfg = await safeJSON("../data/blockpilot.json", null) || {};
+    CUR = String(cfg?.currency || "USD").toUpperCase();
+    VS = CUR.toLowerCase();
+
     applyLinks(cfg);
 
     const yields = fillApr(cfg);
-
-    const pricesEUR = await loadPricesEUR(cfg);
-    initCalc(cfg, pricesEUR, yields);
+    const prices = await loadPrices(cfg);
+    initCalc(cfg, prices, yields);
 
     const marketBtns = $$("[data-market]");
     let active = "btc";
@@ -423,35 +456,33 @@
 
       let series=[], source="", isIndex=false;
 
+      const file = await loadMarketFile();
+      if (file) {
+        if (sym === "total") {
+          const b=seriesFromFile(file,"btc"), e=seriesFromFile(file,"eth"), n=seriesFromFile(file,"bnb");
+          const s = computeTotalEqualWeighted(b,e,n);
+          if (s.length) { series=s; source=file?.meta?.source ? `cache:${file.meta.source}` : "cache"; isIndex=true; }
+        } else {
+          const s = seriesFromFile(file, sym);
+          if (s.length) { series=s; source=file?.meta?.source ? `cache:${file.meta.source}` : "cache"; }
+        }
+        if (series.length) setMarketUI({ series, source, isIndex });
+      }
+
       if (sym === "total") {
         const [b,e,n] = await Promise.all([
           loadMarketSeriesRaw("btc"),
           loadMarketSeriesRaw("eth"),
           loadMarketSeriesRaw("bnb")
         ]);
-        series = computeTotalEqualWeighted(b,e,n);
-        source = series.length ? "composite" : "";
-        isIndex = true;
-
-        if (!series.length) {
-          const cache = await safeJSON("../data/market.json", null);
-          const arr = cache?.total || [];
-          series = arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
-          if (series.length) source="cache", isIndex=true;
-        }
+        const live = computeTotalEqualWeighted(b,e,n);
+        if (live.length) setMarketUI({ series:live, source:"CoinGecko", isIndex:true });
+        else if (!series.length) setMarketUI({ series:[], source:"", isIndex:true });
       } else {
-        series = await loadMarketSeriesRaw(sym);
-        source = series.length ? "CoinGecko" : "";
-
-        if (!series.length) {
-          const cache = await safeJSON("../data/market.json", null);
-          const arr = cache?.[sym] || [];
-          series = arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
-          if (series.length) source="cache";
-        }
+        const live = await loadMarketSeriesRaw(sym);
+        if (live.length) setMarketUI({ series:live, source:"CoinGecko", isIndex:false });
+        else if (!series.length) setMarketUI({ series:[], source:"", isIndex:false });
       }
-
-      setMarketUI({ series, source, isIndex });
     }
 
     marketBtns.forEach(b => b.addEventListener("click", async () => {

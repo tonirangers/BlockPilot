@@ -8,31 +8,31 @@
     const sign = v > 0 ? "+" : "";
     return sign + (v * 100).toFixed(0) + "%";
   };
-
   const fmtNum = (v, max=2) => {
     if (!isFinite(v)) return "—";
     return new Intl.NumberFormat(undefined, { maximumFractionDigits: max }).format(v);
   };
-
   const fmtEur = (v) => {
     if (!isFinite(v)) return "—";
-    return new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
+    return new Intl.NumberFormat(undefined, { style:"currency", currency:"EUR", maximumFractionDigits:0 }).format(v);
   };
 
-  const LANG = (document.body && document.body.dataset && document.body.dataset.lang) ? document.body.dataset.lang : "fr";
+  const LANG = document.body?.dataset?.lang || "fr";
   const I18N = {
     fr: {
       loading: "Chargement…",
-      marketUnavailable: "Flux marché indisponible pour le moment.",
+      marketUnavailable: "Données marché en cours d’activation.",
       lastValue: (v, dt, src) => `Dernière valeur: ${v} € · maj ${dt}${src ? " · " + src : ""}`,
-      stableHint: "Hypothèse: 1€ ~ 1 stable.",
+      lastIndexValue: (v, dt, src) => `Indice: ${v} (base 100) · maj ${dt}${src ? " · " + src : ""}`,
+      stableHint: "Hypothèse: 1€ ≈ 1 stable.",
       priceHint: (px, unit, scn) => `Prix utilisé: ~${px} €/${unit}. Scénario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "prix constant"}.`
     },
     en: {
       loading: "Loading…",
-      marketUnavailable: "Market feed unavailable for now.",
+      marketUnavailable: "Market data is being enabled.",
       lastValue: (v, dt, src) => `Last value: €${v} · updated ${dt}${src ? " · " + src : ""}`,
-      stableHint: "Assumption: €1 ~ 1 stable.",
+      lastIndexValue: (v, dt, src) => `Index: ${v} (base 100) · updated ${dt}${src ? " · " + src : ""}`,
+      stableHint: "Assumption: €1 ≈ 1 stable.",
       priceHint: (px, unit, scn) => `Price used: ~€${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "flat price"}.`
     }
   };
@@ -42,14 +42,13 @@
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+      const res = await fetch(url, { signal: ctrl.signal, cache:"no-store" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       return await res.json();
     } finally {
       clearTimeout(t);
     }
   }
-
   async function safeJSON(url, fallback=null) {
     try { return await fetchJSON(url); } catch { return fallback; }
   }
@@ -58,8 +57,8 @@
     if (!a) return;
     if (disabled) {
       a.classList.add("disabled");
-      a.setAttribute("aria-disabled", "true");
-      a.setAttribute("tabindex", "-1");
+      a.setAttribute("aria-disabled","true");
+      a.setAttribute("tabindex","-1");
       a.href = "#";
     } else {
       a.classList.remove("disabled");
@@ -71,7 +70,6 @@
   function setActiveChip(groupSel, key) {
     $$(groupSel).forEach(b => b.classList.toggle("active", String(b.dataset.scn) === String(key)));
   }
-
   function setActiveTab(groupSel, key) {
     $$(groupSel).forEach(b => b.classList.toggle("active", b.dataset.market === key));
   }
@@ -81,31 +79,29 @@
     svgEl.innerHTML = "";
     if (!points || points.length < 2) return;
 
-    const w = 1000, h = 300, pad = 20;
-    const xs = points.map(p => p[0]);
-    const ys = points.map(p => p[1]);
-    const xMin = Math.min(...xs), xMax = Math.max(...xs);
-    const yMin = Math.min(...ys), yMax = Math.max(...ys);
-    const xSpan = (xMax - xMin) || 1;
-    const ySpan = (yMax - yMin) || 1;
+    const w=1000,h=300,pad=20;
+    const xs=points.map(p=>p[0]), ys=points.map(p=>p[1]);
+    const xMin=Math.min(...xs), xMax=Math.max(...xs);
+    const yMin=Math.min(...ys), yMax=Math.max(...ys);
+    const xSpan=(xMax-xMin)||1, ySpan=(yMax-yMin)||1;
 
-    const mapX = x => pad + (w - pad*2) * (x - xMin) / xSpan;
-    const mapY = y => (h - pad) - (h - pad*2) * (y - yMin) / ySpan;
+    const mapX=x=>pad+(w-pad*2)*(x-xMin)/xSpan;
+    const mapY=y=>(h-pad)-(h-pad*2)*(y-yMin)/ySpan;
 
-    const d = points.map((p,i) => (i ? "L" : "M") + mapX(p[0]).toFixed(2) + " " + mapY(p[1]).toFixed(2)).join(" ");
+    const d=points.map((p,i)=>(i?"L":"M")+mapX(p[0]).toFixed(2)+" "+mapY(p[1]).toFixed(2)).join(" ");
 
-    const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const dArea = d + ` L ${mapX(xMax).toFixed(2)} ${(h-pad).toFixed(2)} L ${mapX(xMin).toFixed(2)} ${(h-pad).toFixed(2)} Z`;
-    area.setAttribute("d", dArea);
-    area.setAttribute("fill", "rgba(11,111,102,.10)");
+    const area=document.createElementNS("http://www.w3.org/2000/svg","path");
+    const dArea=d+` L ${mapX(xMax).toFixed(2)} ${(h-pad).toFixed(2)} L ${mapX(xMin).toFixed(2)} ${(h-pad).toFixed(2)} Z`;
+    area.setAttribute("d",dArea);
+    area.setAttribute("fill","rgba(11,111,102,.10)");
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke", "rgba(11,111,102,.95)");
-    path.setAttribute("stroke-width", "3");
-    path.setAttribute("stroke-linecap", "round");
-    path.setAttribute("stroke-linejoin", "round");
+    const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d",d);
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke","rgba(11,111,102,.95)");
+    path.setAttribute("stroke-width","3");
+    path.setAttribute("stroke-linecap","round");
+    path.setAttribute("stroke-linejoin","round");
 
     svgEl.appendChild(area);
     svgEl.appendChild(path);
@@ -113,180 +109,228 @@
 
   function nearestByTime(series, targetTs) {
     if (!series || !series.length) return null;
-    let best = series[0], bestD = Math.abs(series[0][0] - targetTs);
+    let best=series[0], bestD=Math.abs(series[0][0]-targetTs);
     for (let i=1;i<series.length;i++){
-      const d = Math.abs(series[i][0] - targetTs);
-      if (d < bestD) { bestD = d; best = series[i]; }
+      const d=Math.abs(series[i][0]-targetTs);
+      if (d<bestD){bestD=d; best=series[i];}
     }
     return best;
   }
 
   function sampleSeries(series, maxPoints=220) {
-    if (!series || series.length <= maxPoints) return series;
-    const step = Math.ceil(series.length / maxPoints);
-    const out = [];
+    if (!series || series.length<=maxPoints) return series;
+    const step=Math.ceil(series.length/maxPoints);
+    const out=[];
     for (let i=0;i<series.length;i+=step) out.push(series[i]);
-    if (out[out.length-1] !== series[series.length-1]) out.push(series[series.length-1]);
+    if (out[out.length-1]!==series[series.length-1]) out.push(series[series.length-1]);
     return out;
   }
 
   async function loadPricesEUR(cfg) {
-    const cacheKey = "bp_prices_eur_v1";
-    const cachedRaw = localStorage.getItem(cacheKey);
-    const now = Date.now();
+    const cacheKey="bp_prices_eur_v2";
+    const cachedRaw=localStorage.getItem(cacheKey);
+    const now=Date.now();
     if (cachedRaw) {
       try {
-        const c = JSON.parse(cachedRaw);
-        if (c.ts && (now - c.ts) < 10*60*1000 && c.prices) return c.prices;
+        const c=JSON.parse(cachedRaw);
+        if (c.ts && (now-c.ts)<10*60*1000 && c.prices) return c.prices;
       } catch {}
     }
-    const ids = "bitcoin,ethereum,binancecoin";
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`;
-    const res = await safeJSON(url, null);
-    const prices = {
-      btc: res?.bitcoin?.eur ?? cfg?.fallbackPricesEUR?.btc ?? 0,
-      eth: res?.ethereum?.eur ?? cfg?.fallbackPricesEUR?.eth ?? 0,
-      bnb: res?.binancecoin?.eur ?? cfg?.fallbackPricesEUR?.bnb ?? 0
+
+    const fall = cfg?.fallbackPricesEUR || { btc:90000, eth:3000, bnb:550 };
+    const ids="bitcoin,ethereum,binancecoin";
+    const url=`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`;
+    const res=await safeJSON(url,null);
+
+    const prices={
+      btc: res?.bitcoin?.eur ?? fall.btc ?? 0,
+      eth: res?.ethereum?.eur ?? fall.eth ?? 0,
+      bnb: res?.binancecoin?.eur ?? fall.bnb ?? 0
     };
-    localStorage.setItem(cacheKey, JSON.stringify({ ts: now, prices }));
+    localStorage.setItem(cacheKey, JSON.stringify({ ts:now, prices }));
     return prices;
   }
 
-  async function loadMarketSeries(sym) {
-    const cacheKey = "bp_mkt_" + sym + "_v2";
-    const cachedRaw = localStorage.getItem(cacheKey);
-    const now = Date.now();
+  async function loadMarketSeriesRaw(sym) {
+    const cacheKey="bp_mkt_"+sym+"_v3";
+    const cachedRaw=localStorage.getItem(cacheKey);
+    const now=Date.now();
     if (cachedRaw) {
       try {
-        const c = JSON.parse(cachedRaw);
-        if (c.ts && (now - c.ts) < 12*60*60*1000 && Array.isArray(c.series) && c.series.length) return c.series;
+        const c=JSON.parse(cachedRaw);
+        if (c.ts && (now-c.ts)<12*60*60*1000 && Array.isArray(c.series) && c.series.length) return c.series;
       } catch {}
     }
 
-    const idMap = { btc:"bitcoin", eth:"ethereum", bnb:"binancecoin" };
-    const id = idMap[sym];
+    const idMap={ btc:"bitcoin", eth:"ethereum", bnb:"binancecoin" };
+    const id=idMap[sym];
     if (!id) return [];
 
-    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=eur&days=1825&interval=daily`;
-    const res = await safeJSON(url, null);
-    const series = (res?.prices || []).map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
-    if (series.length) localStorage.setItem(cacheKey, JSON.stringify({ ts: now, series }));
+    const url=`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=eur&days=1825&interval=daily`;
+    const res=await safeJSON(url,null);
+    const series=(res?.prices||[])
+      .map(p=>[Number(p[0]),Number(p[1])])
+      .filter(p=>isFinite(p[0]) && isFinite(p[1]));
+
+    if (series.length) localStorage.setItem(cacheKey, JSON.stringify({ ts:now, series }));
     return series;
   }
 
-  function setMarketUI({ series, source }) {
-    const empty = $("#marketEmpty");
-    const svg = $("#marketSvg");
-    const meta = $("#marketMeta");
-    const k1 = $("#kpi1y");
-    const k3 = $("#kpi3y");
-    const k5 = $("#kpi5y");
+  function computeTotalEqualWeighted(btc, eth, bnb) {
+    if (!btc?.length || !eth?.length || !bnb?.length) return [];
 
-    if (!series || series.length < 2) {
-      if (empty) empty.textContent = T.marketUnavailable;
-      if (meta) meta.textContent = "";
-      if (svg) svg.innerHTML = "";
-      if (k1) k1.textContent = "—";
-      if (k3) k3.textContent = "—";
-      if (k5) k5.textContent = "—";
+    const m1=new Map(btc.map(p=>[p[0],p[1]]));
+    const m2=new Map(eth.map(p=>[p[0],p[1]]));
+    const m3=new Map(bnb.map(p=>[p[0],p[1]]));
+
+    const ts=[...m1.keys()].filter(t=>m2.has(t) && m3.has(t)).sort((a,b)=>a-b);
+    if (ts.length<50) return [];
+
+    const t0=ts[0];
+    const b0=m1.get(t0), e0=m2.get(t0), n0=m3.get(t0);
+    if (!b0 || !e0 || !n0) return [];
+
+    const out=[];
+    for (const t of ts) {
+      const b=m1.get(t), e=m2.get(t), n=m3.get(t);
+      if (!b || !e || !n) continue;
+      const level=100*((b/b0)+(e/e0)+(n/n0))/3;
+      out.push([t, level]);
+    }
+    return out;
+  }
+
+  function setMarketUI({ series, source, isIndex }) {
+    const empty=$("#marketEmpty");
+    const svg=$("#marketSvg");
+    const meta=$("#marketMeta");
+    const k1=$("#kpi1y");
+    const k3=$("#kpi3y");
+    const k5=$("#kpi5y");
+
+    if (!series || series.length<2) {
+      if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
+      if (meta) meta.textContent="";
+      if (svg) svg.innerHTML="";
+      if (k1) k1.textContent="—";
+      if (k3) k3.textContent="—";
+      if (k5) k5.textContent="—";
       return;
     }
 
-    if (empty) empty.style.display = "none";
+    if (empty) empty.style.display="none";
 
-    const last = series[series.length-1];
-    const now = last[0];
+    const last=series[series.length-1];
+    const now=last[0];
 
-    const p1 = nearestByTime(series, now - 365*24*60*60*1000);
-    const p3 = nearestByTime(series, now - 3*365*24*60*60*1000);
-    const p5 = nearestByTime(series, now - 5*365*24*60*60*1000);
+    const p1=nearestByTime(series, now-365*24*60*60*1000);
+    const p3=nearestByTime(series, now-3*365*24*60*60*1000);
+    const p5=nearestByTime(series, now-5*365*24*60*60*1000);
 
-    const r1 = p1 ? (last[1] / p1[1] - 1) : NaN;
-    const r3 = p3 ? (last[1] / p3[1] - 1) : NaN;
-    const r5 = p5 ? (last[1] / p5[1] - 1) : NaN;
+    const r1=p1 ? (last[1]/p1[1]-1) : NaN;
+    const r3=p3 ? (last[1]/p3[1]-1) : NaN;
+    const r5=p5 ? (last[1]/p5[1]-1) : NaN;
 
-    if (k1) k1.textContent = fmtPct(r1);
-    if (k3) k3.textContent = fmtPct(r3);
-    if (k5) k5.textContent = fmtPct(r5);
+    if (k1) k1.textContent=fmtPct(r1);
+    if (k3) k3.textContent=fmtPct(r3);
+    if (k5) k5.textContent=fmtPct(r5);
 
-    const sampled = sampleSeries(series);
-    drawSvgLine(svg, sampled);
+    drawSvgLine(svg, sampleSeries(series));
 
-    const d = new Date(last[0]);
-    const dt = d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
-    if (meta) meta.textContent = T.lastValue(fmtNum(last[1],0), dt, source);
+    const d=new Date(last[0]);
+    const dt=d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+
+    if (meta) {
+      const valTxt=isIndex ? fmtNum(last[1],0) : fmtNum(last[1],0);
+      meta.textContent = isIndex
+        ? T.lastIndexValue(valTxt, dt, source)
+        : T.lastValue(valTxt, dt, source);
+    }
   }
 
   function computeTokens(principalTokens, apr, years) {
-    const n = 12;
-    const r = apr / n;
-    return principalTokens * Math.pow(1 + r, n * years);
+    const n=12;
+    const r=apr/n;
+    return principalTokens*Math.pow(1+r, n*years);
   }
 
-  function initCalc(cfg, pricesEUR) {
-    const amount = $("#amountEUR");
-    const assetSel = $("#assetSel");
-    const chips = $$(".scenarios .chip");
+  function fillApr(cfg) {
+    const yields = {
+      stables:0.10, btc:0.02, eth:0.04, bnb:0.13,
+      ...(cfg?.yields||{})
+    };
+    const set=(id, v)=>{ const el=$(id); if (el) el.textContent=(Number(v||0)*100).toFixed(0)+"%"; };
+    set("#aprStables", yields.stables);
+    set("#aprBtc", yields.btc);
+    set("#aprEth", yields.eth);
+    set("#aprBnb", yields.bnb);
+    return yields;
+  }
 
-    const depTok = $("#depTok");
-    const y1Tok = $("#y1Tok");
-    const y3Tok = $("#y3Tok");
-    const y5Tok = $("#y5Tok");
-    const v1Eur = $("#v1Eur");
-    const v3Eur = $("#v3Eur");
-    const v5Eur = $("#v5Eur");
-    const priceMeta = $("#priceMeta");
+  function initCalc(cfg, pricesEUR, yields) {
+    const amount=$("#amountEUR");
+    const assetSel=$("#assetSel");
+    const chips=$$(".scenarios .chip");
 
-    let scenario = Number(cfg?.defaults?.scenario ?? 0);
+    const depTok=$("#depTok");
+    const y1Tok=$("#y1Tok");
+    const y3Tok=$("#y3Tok");
+    const y5Tok=$("#y5Tok");
+    const v1Eur=$("#v1Eur");
+    const v3Eur=$("#v3Eur");
+    const v5Eur=$("#v5Eur");
+    const priceMeta=$("#priceMeta");
 
-    const symLabel = (a) => a === "stables" ? "STABLE" : a.toUpperCase();
+    let scenario=Number(cfg?.defaults?.scenario ?? 0);
+
+    const symLabel=(a)=>a==="stables" ? "STABLE" : a.toUpperCase();
 
     function recalc() {
-      const eur = Number(String(amount?.value ?? "").replace(",", "."));
-      const asset = assetSel?.value || "stables";
-      const apr = Number(cfg?.yields?.[asset] ?? 0);
-      const px = asset === "stables" ? 1 : Number(pricesEUR?.[asset] ?? 0);
+      const eur=Number(String(amount?.value ?? "").replace(",", "."));
+      const asset=assetSel?.value || "stables";
+      const apr=Number(yields?.[asset] ?? 0);
+      const px=asset==="stables" ? 1 : Number(pricesEUR?.[asset] ?? 0);
 
-      if (!eur || eur <= 0 || !isFinite(eur) || !isFinite(apr) || (asset !== "stables" && (!px || px <= 0))) {
-        [depTok,y1Tok,y3Tok,y5Tok,v1Eur,v3Eur,v5Eur].forEach(el => { if(el) el.textContent="—"; });
-        if (priceMeta) priceMeta.textContent = "";
+      if (!eur || eur<=0 || !isFinite(eur) || !isFinite(apr) || (asset!=="stables" && (!px || px<=0))) {
+        [depTok,y1Tok,y3Tok,y5Tok,v1Eur,v3Eur,v5Eur].forEach(el => { if (el) el.textContent="—"; });
+        if (priceMeta) priceMeta.textContent="";
         return;
       }
 
-      const principalTok = eur / px;
-      const tok1 = computeTokens(principalTok, apr, 1);
-      const tok3 = computeTokens(principalTok, apr, 3);
-      const tok5 = computeTokens(principalTok, apr, 5);
+      const principalTok=eur/px;
+      const tok1=computeTokens(principalTok, apr, 1);
+      const tok3=computeTokens(principalTok, apr, 3);
+      const tok5=computeTokens(principalTok, apr, 5);
 
-      const y1 = tok1 - principalTok;
-      const y3 = tok3 - principalTok;
-      const y5 = tok5 - principalTok;
+      const i1=tok1-principalTok;
+      const i3=tok3-principalTok;
+      const i5=tok5-principalTok;
 
-      const maxDec = asset === "stables" ? 2 : 6;
-      const unit = symLabel(asset);
+      const maxDec=asset==="stables" ? 2 : 6;
+      const unit=symLabel(asset);
 
-      if (depTok) depTok.textContent = `${fmtNum(principalTok, maxDec)} ${unit}`;
-      if (y1Tok) y1Tok.textContent = `+${fmtNum(y1, maxDec)} ${unit}`;
-      if (y3Tok) y3Tok.textContent = `+${fmtNum(y3, maxDec)} ${unit}`;
-      if (y5Tok) y5Tok.textContent = `+${fmtNum(y5, maxDec)} ${unit}`;
+      if (depTok) depTok.textContent=`${fmtNum(principalTok, maxDec)} ${unit}`;
+      if (y1Tok) y1Tok.textContent=`+${fmtNum(i1, maxDec)} ${unit}`;
+      if (y3Tok) y3Tok.textContent=`+${fmtNum(i3, maxDec)} ${unit}`;
+      if (y5Tok) y5Tok.textContent=`+${fmtNum(i5, maxDec)} ${unit}`;
 
-      const pxScn = px * (1 + scenario);
-      if (v1Eur) v1Eur.textContent = fmtEur(tok1 * pxScn);
-      if (v3Eur) v3Eur.textContent = fmtEur(tok3 * pxScn);
-      if (v5Eur) v5Eur.textContent = fmtEur(tok5 * pxScn);
+      const pxScn=px*(1+scenario);
+      if (v1Eur) v1Eur.textContent=fmtEur(tok1*pxScn);
+      if (v3Eur) v3Eur.textContent=fmtEur(tok3*pxScn);
+      if (v5Eur) v5Eur.textContent=fmtEur(tok5*pxScn);
 
-      const pxTxt = asset === "stables"
+      const pxTxt = asset==="stables"
         ? T.stableHint
         : T.priceHint(fmtNum(px,0), unit, scenario);
 
-      if (priceMeta) priceMeta.textContent = pxTxt;
+      if (priceMeta) priceMeta.textContent=pxTxt;
     }
 
-    if (amount) amount.value = String(cfg?.defaults?.amountEUR ?? 10000);
-    if (assetSel) assetSel.value = cfg?.defaults?.asset ?? "stables";
+    if (amount) amount.value=String(cfg?.defaults?.amountEUR ?? 10000);
+    if (assetSel) assetSel.value=cfg?.defaults?.asset ?? "stables";
 
     chips.forEach(ch => ch.addEventListener("click", () => {
-      scenario = Number(ch.dataset.scn ?? 0);
+      scenario=Number(ch.dataset.scn ?? 0);
       setActiveChip(".scenarios .chip", String(scenario));
       recalc();
     }));
@@ -299,61 +343,61 @@
   }
 
   function applyLinks(cfg) {
-    const email = cfg?.links?.email || "toni@blockpilot.capital";
-    const subject = encodeURIComponent(cfg?.links?.emailSubject || "BlockPilot");
-    const mailto = `mailto:${email}?subject=${subject}`;
+    const email=cfg?.links?.email || "toni@blockpilot.capital";
+    const subject=encodeURIComponent(cfg?.links?.emailSubject || "BlockPilot");
+    const mailto=`mailto:${email}?subject=${subject}`;
 
-    const ctaEmail = $("#ctaEmail");
-    const footerEmail = $("#footerEmail");
-    if (ctaEmail) ctaEmail.href = mailto;
-    if (footerEmail) footerEmail.href = mailto, footerEmail.textContent = email;
+    const ctaEmail=$("#ctaEmail");
+    const footerEmail=$("#footerEmail");
+    if (ctaEmail) ctaEmail.href=mailto;
+    if (footerEmail) footerEmail.href=mailto, footerEmail.textContent=email;
 
-    const callUrl = cfg?.links?.bookCall || "";
-    const ctaCall = $("#ctaCall");
+    const callUrl=cfg?.links?.bookCall || "";
+    const ctaCall=$("#ctaCall");
     if (ctaCall) {
-      if (callUrl) ctaCall.href = callUrl, ctaCall.target = "_blank", ctaCall.rel = "noopener";
-      else ctaCall.href = mailto;
+      if (callUrl) ctaCall.href=callUrl, ctaCall.target="_blank", ctaCall.rel="noopener";
+      else ctaCall.href=mailto;
     }
 
-    const terms = cfg?.links?.termsPdf || "../BPC_Terms.pdf";
-    const footerTerms = $("#footerTerms");
-    if (footerTerms) footerTerms.href = terms;
+    const terms=cfg?.links?.termsPdf || "../BPC_Terms.pdf";
+    const footerTerms=$("#footerTerms");
+    if (footerTerms) footerTerms.href=terms;
 
-    const docs = cfg?.links?.docs || "";
-    const navDocs = $("#navDocs");
-    const footerDocs = $("#footerDocs");
+    const signature=cfg?.links?.signature || "../sign.html";
+    const navSignature=$("#navSignature");
+    const footerSignature=$("#footerSignature");
+    if (navSignature) navSignature.href=signature, navSignature.target="_blank", navSignature.rel="noopener";
+    if (footerSignature) footerSignature.href=signature, footerSignature.target="_blank", footerSignature.rel="noopener";
+
+    const docs=cfg?.links?.docs || "";
+    const navDocs=$("#navDocs");
+    const footerDocs=$("#footerDocs");
 
     if (docs) {
       setDisabledLink(navDocs, false);
-      navDocs.href = docs; navDocs.target = "_blank"; navDocs.rel = "noopener";
-      if (footerDocs) footerDocs.href = docs, footerDocs.classList.remove("muted");
+      if (navDocs) navDocs.href=docs, navDocs.target="_blank", navDocs.rel="noopener";
+
+      setDisabledLink(footerDocs, false);
+      if (footerDocs) footerDocs.href=docs, footerDocs.target="_blank", footerDocs.rel="noopener";
     } else {
       setDisabledLink(navDocs, true);
-      if (footerDocs) footerDocs.href = "#", footerDocs.classList.add("muted");
+      setDisabledLink(footerDocs, true);
     }
   }
 
-  function fillApr(cfg) {
-    const set = (id, v) => { const el = $(id); if (el) el.textContent = (v*100).toFixed(0) + "%"; };
-    set("#aprStables", Number(cfg?.yields?.stables ?? 0));
-    set("#aprBtc", Number(cfg?.yields?.btc ?? 0));
-    set("#aprEth", Number(cfg?.yields?.eth ?? 0));
-    set("#aprBnb", Number(cfg?.yields?.bnb ?? 0));
-  }
-
   function enableSmoothScroll() {
-    const header = $(".header");
-    const offset = () => (header?.offsetHeight || 0) + 12;
+    const header=$(".header");
+    const offset=()=> (header?.offsetHeight || 0) + 12;
 
     $$('a[href^="#"]').forEach(a => {
       a.addEventListener("click", (e) => {
-        const href = a.getAttribute("href");
-        if (!href || href === "#") return;
-        const el = document.getElementById(href.slice(1));
+        const href=a.getAttribute("href");
+        if (!href || href==="#") return;
+        const el=document.getElementById(href.slice(1));
         if (!el) return;
         e.preventDefault();
-        const top = el.getBoundingClientRect().top + window.scrollY - offset();
-        window.scrollTo({ top, behavior: "smooth" });
+        const top=el.getBoundingClientRect().top + window.scrollY - offset();
+        window.scrollTo({ top, behavior:"smooth" });
       });
     });
   }
@@ -363,36 +407,57 @@
 
     const cfg = await safeJSON("../data/blockpilot.json", null) || {};
     applyLinks(cfg);
-    fillApr(cfg);
+
+    const yields = fillApr(cfg);
 
     const pricesEUR = await loadPricesEUR(cfg);
-    initCalc(cfg, pricesEUR);
+    initCalc(cfg, pricesEUR, yields);
 
     const marketBtns = $$("[data-market]");
     let active = "btc";
     setActiveTab("[data-market]", active);
 
     async function refresh(sym) {
-      const empty = $("#marketEmpty");
-      if (empty) empty.style.display = "flex", empty.textContent = T.loading;
+      const empty=$("#marketEmpty");
+      if (empty) empty.style.display="flex", empty.textContent=T.loading;
 
-      let series = await loadMarketSeries(sym);
-      let source = "CoinGecko";
+      let series=[], source="", isIndex=false;
 
-      if (!series.length) {
-        const cache = await safeJSON("../data/market.json", null);
-        const arr = cache?.[sym] || [];
-        series = arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
-        source = series.length ? "cache" : "";
+      if (sym === "total") {
+        const [b,e,n] = await Promise.all([
+          loadMarketSeriesRaw("btc"),
+          loadMarketSeriesRaw("eth"),
+          loadMarketSeriesRaw("bnb")
+        ]);
+        series = computeTotalEqualWeighted(b,e,n);
+        source = series.length ? "composite" : "";
+        isIndex = true;
+
+        if (!series.length) {
+          const cache = await safeJSON("../data/market.json", null);
+          const arr = cache?.total || [];
+          series = arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
+          if (series.length) source="cache", isIndex=true;
+        }
+      } else {
+        series = await loadMarketSeriesRaw(sym);
+        source = series.length ? "CoinGecko" : "";
+
+        if (!series.length) {
+          const cache = await safeJSON("../data/market.json", null);
+          const arr = cache?.[sym] || [];
+          series = arr.map(p => [Number(p[0]), Number(p[1])]).filter(p => isFinite(p[0]) && isFinite(p[1]));
+          if (series.length) source="cache";
+        }
       }
 
-      setMarketUI({ series, source });
+      setMarketUI({ series, source, isIndex });
     }
 
     marketBtns.forEach(b => b.addEventListener("click", async () => {
-      const sym = b.dataset.market;
-      if (!sym || sym === active || b.classList.contains("disabled")) return;
-      active = sym;
+      const sym=b.dataset.market;
+      if (!sym || sym===active) return;
+      active=sym;
       setActiveTab("[data-market]", active);
       await refresh(active);
     }));

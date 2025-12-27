@@ -756,8 +756,9 @@
       [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
       { series:[], meta:{} }
     );
-    const marketCapIndex = (cacheMarket?.meta?.totalKind === "index") || String(cacheCap?.meta?.source||"").includes("synthetic");
-    if (marketCapIndex) {
+    const marketCapIndex = cacheMarket?.meta?.totalKind === "index";
+    const totalSeriesCount = Array.isArray(cacheCap?.series) ? cacheCap.series.length : 0;
+    if (!totalSeriesCount && marketCapIndex) {
       const totalBtn = document.querySelector('[data-market="total"]');
       if (totalBtn) totalBtn.remove();
       marketBtns = $$('[data-market]');
@@ -776,10 +777,11 @@
     const adoptionCount = adoptionSeries.length;
     const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
     const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
+    const adoptionReliable = adoptionCount >= 30 && adoptionMax > 0 && !adoptionHasNaN;
+    const adoptionRenderable = adoptionSeries.length >= 2 && isFinite(adoptionMax);
 
     const chart = document.querySelector("#adoptionChart");
-    if (!adoptionReliable) {
+    if (!adoptionRenderable) {
       if (chart) chart.style.display = "none";
       if (adoptionSection) adoptionSection.style.display="none";
       if (adoptionNotice) {
@@ -791,7 +793,12 @@
     } else {
       if (chart) chart.style.display = "";
       if (adoptionSection) adoptionSection.style.display="";
-      if (adoptionNotice) adoptionNotice.style.display="none";
+      if (adoptionNotice) adoptionNotice.style.display = adoptionReliable ? "none" : "block";
+      if (adoptionNotice && !adoptionReliable) {
+        adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
+          ? T.adoptionUnavailable
+          : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
+      }
     }
 
     async function refresh(sym) {
@@ -863,7 +870,7 @@
     }));
 
     await refresh(active);
-    if (adoptionReliable) await refreshAdoption();
+    if (adoptionRenderable) await refreshAdoption();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

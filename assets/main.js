@@ -53,6 +53,7 @@
     }
   };
   const T = I18N[LANG] || I18N.fr;
+  try { localStorage.setItem("bp_lang", LANG); } catch {}
 
   const SCRIPT_URL = (() => {
     try {
@@ -182,6 +183,57 @@
       m.set(t, v);
     }
     return [...m.entries()].sort((a,b)=>a[0]-b[0]);
+  }
+
+  function sanitizeSeriesUSD(series) {
+    const clean = (series||[])
+      .map(p=>[Number(p?.[0]), Number(p?.[1])])
+      .filter(p=>isFinite(p[0]) && isFinite(p[1]))
+      .sort((a,b)=>a[0]-b[0]);
+    if (clean.length < 2) return clean;
+    const last = clean[clean.length-1][1];
+    const tail = clean.slice(-6,-1).map(p=>p[1]).filter(v=>isFinite(v));
+    const baselineArr = tail.length ? tail.slice().sort((a,b)=>a-b) : [clean[clean.length-2][1]];
+    const mid = baselineArr[Math.floor((baselineArr.length-1)/2)] || baselineArr[0];
+    if (isFinite(last) && isFinite(mid) && last > mid*4) return clean.slice(0,-1);
+    return clean;
+  }
+
+  function scaleSeriesToUSD(series){
+    const vals=(series||[]).map(p=>Number(p?.[1])).filter(isFinite);
+    const max = vals.length ? Math.max(...vals) : 0;
+    const factor = max && max < 1e7 ? 1e9 : 1;
+    return (series||[]).map(p=>[Number(p?.[0]), Number(p?.[1])*factor]);
+  }
+
+  function buildEqualWeightedIndex(seriesMap) {
+    const keys=["btc","eth","bnb"];
+    const maps = keys.map(k=>{
+      const m=new Map();
+      (seriesMap?.[k]||[]).forEach(p=>{
+        const t=dayTs(p?.[0]);
+        const v=Number(p?.[1]);
+        if (isFinite(t) && isFinite(v) && v>0) m.set(t, v);
+      });
+      return m;
+    });
+    if (!maps.every(m=>m.size)) return [];
+    const common=[...maps[0].keys()].filter(ts=>maps[1].has(ts)&&maps[2].has(ts)).sort((a,b)=>a-b);
+    if (!common.length) return [];
+
+    const baseTs=common[0];
+    const base=maps.map(m=>Number(m.get(baseTs))).map(v=>isFinite(v)&&v>0?v:null);
+    if (base.some(v=>v===null)) return [];
+
+    const out=[];
+    for (const ts of common) {
+      const vals=maps.map(m=>Number(m.get(ts)));
+      if (vals.some(v=>!isFinite(v)||v<=0)) continue;
+      const norms=vals.map((v,i)=>v/base[i]*100);
+      const idx=norms.reduce((a,v)=>a+v,0)/norms.length;
+      out.push([ts, Number(idx.toFixed(2))]);
+    }
+    return out;
   }
 
   async function loadPricesUSD(cfg) {
@@ -325,13 +377,16 @@
     const last=series[series.length-1][0];
     const span=last-first || 1;
     const show=(p)=>{
-      const label=isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0);
+      const val = fmtVal ? fmtVal(p[1]) : (isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0));
+      const label=isIndex ? `${LANG==="fr"?"Indice":"Index"} ${val}` : val;
       hover.textContent = `${label} · ${fmtDate(p[0])}`;
       hover.style.display="block";
     };
     box.onmousemove = (e)=>{
       const rect=box.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
+      const padFrac = 20/1000;
+      const rawRatio = (e.clientX-rect.left)/rect.width;
+      const ratio = Math.min(1-padFrac, Math.max(padFrac, rawRatio));
       const t = first + span*ratio;
       const p = nearestByTime(series, t);
       if (p) show(p);
@@ -683,6 +738,35 @@
     installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtUsd(v,0), false);
   }
 
+  function setCapUI(series, meta, periodDays){
+    const empty=$("#capEmpty");
+    const svg=$("#capSvg");
+    const k1=$("#cap1y");
+    const k3=$("#cap3y");
+    const k5=$("#cap5y");
+    const hover=$("#capHover");
+    if (!series || series.length<2){
+      if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
+      if (svg) svg.innerHTML="";
+      [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
+      if (hover) hover.style.display="none";
+      return;
+    }
+    if (empty) empty.style.display="none";
+    const viewSeries = sliceWindow(series, periodDays||1825);
+    const vs = viewSeries.length?viewSeries:series;
+    const sampled = sampleSeries(vs);
+    drawSvgLine(svg, sampled);
+    const base = vs.length ? vs : series;
+    const r1=computeReturn(base,365);
+    const r3=computeReturn(base,1095);
+    const r5=computeReturn(base,1825);
+    if (k1) k1.textContent=fmtPct(r1);
+    if (k3) k3.textContent=fmtPct(r3);
+    if (k5) k5.textContent=fmtPct(r5);
+    installHover("#capChart", "#capHover", sampled, (v)=>fmtUsd(v,0), false);
+  }
+
     function initSignatureEmbeds(){
       const tabBtns=$$('[data-signature-view]');
       const frame=$("#signatureFrame");
@@ -731,18 +815,23 @@
     let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     let adoptionBtns = $$('[data-adoption-card]');
+    let capBtns = $$('[data-cap-card]');
     let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
     let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || availableMarkets[0] || "btc";
     if (!availableMarkets.includes(active)) active = availableMarkets[0] || "btc";
     const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
     const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
     const defaultAdopt = Number(cfg?.defaults?.adoptionPeriod || 1825);
+    const defaultCapPeriod = Number(cfg?.defaults?.capPeriod || 1825);
     const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || defaultAdopt;
+    const storedCap = Number(localStorage.getItem("bp_cap_period")) || defaultCapPeriod;
     let periodDays = storedPeriod;
     let adoptionPeriod = storedAdoption;
+    let capPeriod = storedCap;
     setActiveTab("[data-market]", active);
     setActiveChip("[data-period-card]", String(periodDays));
     setActiveChip("[data-adoption-card]", String(adoptionPeriod));
+    setActiveChip("[data-cap-card]", String(capPeriod));
 
     const cacheMarket = await firstJSON(
       [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
@@ -750,56 +839,50 @@
     );
     const cacheCap = await firstJSON(
       [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
-      { series:[] }
+      { series:[], meta:{} }
     );
     const adoptionCache = await firstJSON(
       [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
       { series:[], meta:{} }
     );
-    const marketCapIndex = cacheMarket?.meta?.totalKind === "index";
-    const totalSeriesCount = Array.isArray(cacheCap?.series) ? cacheCap.series.length : 0;
-    if (!totalSeriesCount && marketCapIndex) {
-      const totalBtn = document.querySelector('[data-market="total"]');
-      if (totalBtn) totalBtn.remove();
-      marketBtns = $$('[data-market]');
-      availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
-      if (active === "total") active = availableMarkets[0] || "btc";
-      setActiveTab("[data-market]", active);
-    }
+    const priceSeries={
+      btc: normalizeSeriesDaily((cacheMarket?.btc||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
+      eth: normalizeSeriesDaily((cacheMarket?.eth||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
+      bnb: normalizeSeriesDaily((cacheMarket?.bnb||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])))
+    };
+    const totalIndexSeries = buildEqualWeightedIndex(priceSeries);
 
     const adoptionSection=document.querySelector(".adoptionBox");
     const adoptionNotice=$("#adoptionNotice");
+    const capNotice=$("#capNotice");
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }
-    const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
+
+    const marketCapSeriesCache = sanitizeSeriesUSD(scaleSeriesToUSD(cacheCap?.series));
+    const marketCapMeta = cacheCap?.meta || {};
+
+    let marketCapSeries = marketCapSeriesCache;
+    const snap = await loadMarketCapSnapshot();
+    if (snap && isFinite(snap.value)) {
+      const lastTs = marketCapSeries[marketCapSeries.length-1]?.[0] || 0;
+      const livePoint=[Date.now(), snap.value];
+      if (livePoint[0] > lastTs) marketCapSeries = marketCapSeries.concat([livePoint]);
+      marketCapSeries = sanitizeSeriesUSD(marketCapSeries);
+    }
+
+    const adoptionSeries = sanitizeSeriesUSD(scaleSeriesToUSD(adoptionCache?.series));
     const adoptionMeta = adoptionCache?.meta || {};
     const adoptionCount = adoptionSeries.length;
     const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
     const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-    const adoptionReliable = adoptionCount >= 30 && adoptionMax > 0 && !adoptionHasNaN;
-    const adoptionRenderable = adoptionSeries.length >= 2 && isFinite(adoptionMax);
+    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e8 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
 
-    const chart = document.querySelector("#adoptionChart");
-    if (!adoptionRenderable) {
-      if (chart) chart.style.display = "none";
-      if (adoptionSection) adoptionSection.style.display="none";
-      if (adoptionNotice) {
-        adoptionNotice.style.display="block";
-        adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
-          ? T.adoptionUnavailable
-          : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
-      }
-    } else {
-      if (chart) chart.style.display = "";
-      if (adoptionSection) adoptionSection.style.display="";
-      if (adoptionNotice) adoptionNotice.style.display = adoptionReliable ? "none" : "block";
-      if (adoptionNotice && !adoptionReliable) {
-        adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
-          ? T.adoptionUnavailable
-          : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
-      }
+    if (adoptionNotice) {
+      adoptionNotice.style.display = adoptionReliable ? "none" : "block";
+      adoptionNotice.textContent = T.adoptionUnavailable;
     }
+    if (adoptionSection) adoptionSection.style.display = adoptionReliable ? "block" : "none";
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
@@ -807,20 +890,9 @@
       let series=[], source="", isIndex=sym==="total", updatedAt=Date.now();
 
       if (sym === "total") {
-        const fallbackSeries = normalizeSeriesDaily((cacheCap?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
-        series = fallbackSeries;
-        source = cacheCap?.meta?.source || "cache";
-        updatedAt = Date.parse(cacheCap?.meta?.last_updated) || updatedAt;
-
-        const snap = await loadMarketCapSnapshot();
-        if (snap && isFinite(snap.value)) {
-          const lastTs = series[series.length-1]?.[0] || 0;
-          const point=[Date.now(), Number((snap.value/1e9).toFixed(2))];
-          if (point[0] > lastTs) series = series.concat([point]);
-          source = snap.source || "live";
-          updatedAt = snap.updatedAt || point[0];
-        }
-        isIndex=false;
+        series = totalIndexSeries;
+        source = "Equal-weighted index";
+        updatedAt = series?.[series.length-1]?.[0] || updatedAt;
       } else {
         const cache = cacheSeries(sym);
         series = cache;
@@ -857,7 +929,26 @@
     }));
 
     async function refreshAdoption(){
+      if (!adoptionReliable) {
+        if (adoptionNotice) adoptionNotice.style.display="block";
+        if (adoptionSection) adoptionSection.style.display="none";
+        return;
+      }
+      if (adoptionSection) adoptionSection.style.display="block";
       setAdoptionUI(adoptionSeries, adoptionMeta, adoptionPeriod);
+    }
+
+    async function refreshCap(){
+      if (!marketCapSeries || marketCapSeries.length<2) {
+        if (capNotice) { capNotice.style.display="block"; capNotice.textContent=T.adoptionUnavailable; }
+        const capBox=document.querySelector("#capChart");
+        if (capBox) capBox.style.display="none";
+        return;
+      }
+      const capBox=document.querySelector("#capChart");
+      if (capBox) capBox.style.display="block";
+      if (capNotice) capNotice.style.display="none";
+      setCapUI(marketCapSeries, marketCapMeta, capPeriod);
     }
 
     adoptionBtns.forEach(b => b.addEventListener("click", () => {
@@ -869,8 +960,18 @@
       refreshAdoption();
     }));
 
+    capBtns.forEach(b => b.addEventListener("click", () => {
+      const d=Number(b.dataset.capCard||0);
+      if (!d || d===capPeriod) return;
+      capPeriod=d;
+      localStorage.setItem("bp_cap_period", String(capPeriod));
+      setActiveChip("[data-cap-card]", String(capPeriod));
+      refreshCap();
+    }));
+
     await refresh(active);
-    if (adoptionRenderable) await refreshAdoption();
+    await refreshCap();
+    await refreshAdoption();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

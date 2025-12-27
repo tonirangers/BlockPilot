@@ -32,9 +32,16 @@
     .output-box{background:rgba(238,247,245,.35);padding:16px;border-radius:12px;margin-top:14px;text-align:left;overflow-wrap:anywhere;border:1px solid var(--line)}
     .copy-btn{background:var(--brand);color:#fff;padding:10px 14px;border:0;border-radius:10px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
     .copy-btn:hover{background:var(--brand2)}
+    .copy-btn.ghost{background:rgba(11,111,102,.08);color:var(--brand);border:1px solid rgba(13,35,31,.14);}
     .small{font-size:13px;color:var(--muted);margin-top:8px}
     .muted{color:var(--muted)}
     .actions{margin-top:8px}
+    .doc-row{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px;gap:12px;font-weight:800;}
+    .doc-label{font-size:15px;}
+    .doc-details{display:none;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(238,247,245,.45);font-size:14px;gap:6px;flex-direction:column;}
+    .doc-details.show{display:flex;}
+    .token-box{background:rgba(11,111,102,.08);border:1px solid var(--line);padding:12px;border-radius:12px;margin-top:8px;font-size:14px;word-break:break-word;}
+    .token-box code{background:rgba(255,255,255,.8);padding:6px;border-radius:8px;display:block;margin:6px 0;}
   </style>
 
 </head>
@@ -73,11 +80,18 @@
         <button id="signBtn" class="sign-btn primary" disabled>⏳ Preparing…</button>
       </div>
 
-      <div class="hash-line">PDF (<span id="pdfName">BPC_Terms.pdf</span>) • Keccak-256: <span id="pdfHash">…</span></div>
+      <div class="doc-row">
+        <div class="doc-label" id="docLabel">Document : Conditions BPC (PDF)</div>
+        <button class="copy-btn ghost" type="button" id="toggleTech">Détails techniques</button>
+      </div>
+      <div class="doc-details" id="techDetails" aria-hidden="true">
+        <div><strong>PDF:</strong> <span id="pdfName">BPC_Terms.pdf</span></div>
+        <div><strong>Hash:</strong> <span id="pdfHash">…</span></div>
+      </div>
+
+      <div class="token-box" id="tokenBox" style="display:none;"></div>
 
       <div id="signatureOutput"></div>
-
-      <p class="small">✅ You can verify signatures anytime on <a href="verify.html">verify.html</a>.</p>
     </div>
   </div>
 <script>
@@ -89,21 +103,108 @@
   };
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzOmjt11dQ3vmYtVrydXl6gejh0lVwqiSxCbXMhUVpQPNBFoMTUP2JJlAj0atjTOcfDtg/exec';
 
+  const STR = {
+    en: {
+      tabStandard:'Standard', tabSeed:'Seed',
+      titleStandard:'Sign Terms & Conditions', titleSeed:'Sign Terms & Conditions (Seed)',
+      subtitleStandard:'By signing, you confirm you’ve read and agree to the official BPC Terms.',
+      subtitleSeed:'By signing, you confirm you’ve read and agree to the official BPC Seed Terms.',
+      viewPdf:'📄 View PDF Terms',
+      docLabel:'Document: BPC Terms (PDF)',
+      techDetails:'Technical details',
+      preparing:'⏳ Preparing…', signWallet:'✍️ Sign with Wallet', waiting:'🔐 Waiting wallet…', signAgain:'✍️ Sign again', hashError:'⚠️ PDF hash error',
+      tokenTitle:'Verification token', tokenHint:'Use this token on Verify to confirm your signature.', copyToken:'Copy token',
+      signedAs:'Signed as', timestamp:'Timestamp', docId:'Doc ID', origin:'Origin', pdf:'PDF', pdfHash:'PDF Hash', signature:'Signature',
+      copyBlock:'Copy block', copyTokenAction:'Copy token', downloadJson:'Download JSON', openVerify:'Open verify',
+      shareLink:'Share link', shareToken:'Share token', shareJson:'Share JSON', copyMsg:'Copied!',
+      alertMissingWallet:'Wallet not detected (Rabby/MetaMask/Zeal)', signFailed:'Signing cancelled or failed.'
+    },
+    fr: {
+      tabStandard:'Standard', tabSeed:'Seed',
+      titleStandard:'Signer les Conditions', titleSeed:'Signer les Conditions (Seed)',
+      subtitleStandard:'En signant, vous confirmez avoir lu et accepté les Conditions BPC.',
+      subtitleSeed:'En signant, vous confirmez avoir lu et accepté les Conditions BPC Seed.',
+      viewPdf:'📄 Voir le PDF',
+      docLabel:'Document : Conditions BPC (PDF)',
+      techDetails:'Détails techniques',
+      preparing:'⏳ Préparation…', signWallet:'✍️ Signer avec le wallet', waiting:'🔐 En attente du wallet…', signAgain:'✍️ Signer à nouveau', hashError:'⚠️ Erreur de hash PDF',
+      tokenTitle:'Token de vérification', tokenHint:'Collez ce token dans Vérifier pour valider votre signature.', copyToken:'Copier le token',
+      signedAs:'Signé en tant que', timestamp:'Horodatage', docId:'Doc ID', origin:'Origine', pdf:'PDF', pdfHash:'Hash PDF', signature:'Signature',
+      copyBlock:'Copier le bloc', copyTokenAction:'Copier le token', downloadJson:'Télécharger le JSON', openVerify:'Ouvrir Vérifier',
+      shareLink:'Partager le lien', shareToken:'Partager le token', shareJson:'Partager le JSON', copyMsg:'Copié !',
+      alertMissingWallet:'Wallet non détecté (Rabby/MetaMask/Zeal)', signFailed:'Signature annulée ou échouée.'
+    }
+  };
+  const getLang = () => ((localStorage.getItem('bp_lang')||document.documentElement.lang||'en').startsWith('fr') ? 'fr' : 'en');
+  let lang = getLang();
+  const t = (k) => STR[lang]?.[k] || STR.en[k] || k;
+
   // ---- State
   let mode = 'standard';
   let pdfPath = PDFs[mode];
   let pdfHash = '';
   let signing = false;
 
+  function setButtonLabel(state){
+    const btn=document.getElementById('signBtn');
+    if (!btn) return;
+    const labelMap={
+      preparing:t('preparing'), ready:t('signWallet'), waiting:t('waiting'), again:t('signAgain'), error:t('hashError')
+    };
+    btn.textContent = labelMap[state] || t('signWallet');
+  }
+
+  function renderCopy(){
+    document.documentElement.lang = lang;
+    const tabStd=document.getElementById('tab-standard');
+    const tabSeed=document.getElementById('tab-seed');
+    if (tabStd) tabStd.textContent=t('tabStandard');
+    if (tabSeed) tabSeed.textContent=t('tabSeed');
+    document.getElementById('viewPdfBtn').textContent = t('viewPdf');
+    const docLabel=document.getElementById('docLabel');
+    if (docLabel) docLabel.textContent = t('docLabel');
+    const techBtn=document.getElementById('toggleTech');
+    if (techBtn) techBtn.textContent = t('techDetails');
+    const tokenBox=document.getElementById('tokenBox');
+    if (tokenBox && tokenBox.dataset.token){
+      tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${tokenBox.dataset.token}</code><button class="copy-btn" type="button" onclick="copyText('${tokenBox.dataset.token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;
+    }
+    const btn=document.getElementById('signBtn');
+    if (btn && btn.disabled) setButtonLabel(signing ? 'waiting' : 'preparing');
+  }
+
+  function updateHeadings(){
+    document.getElementById('title').textContent = mode==='standard' ? t('titleStandard') : t('titleSeed');
+    document.getElementById('subtitle').textContent = mode==='standard' ? t('subtitleStandard') : t('subtitleSeed');
+  }
+
   // ---- Init
   document.addEventListener('DOMContentLoaded', () => {
+    lang = getLang();
+    renderCopy();
     const params = getHashParams();
     if (params.mode === 'seed') mode = 'seed';
+    updateHeadings();
     applyMode();
+    const techBtn=document.getElementById('toggleTech');
+    const techDetails=document.getElementById('techDetails');
+    if (techBtn && techDetails) techBtn.addEventListener('click', ()=>{
+      const show=!techDetails.classList.contains('show');
+      techDetails.classList.toggle('show', show);
+      techDetails.setAttribute('aria-hidden', show ? 'false' : 'true');
+    });
   });
 
-  document.getElementById('tab-standard').addEventListener('click', () => { mode='standard'; applyMode(true); });
-  document.getElementById('tab-seed').addEventListener('click', () => { mode='seed'; applyMode(true); });
+  window.addEventListener('storage', (e)=>{
+    if (e.key === 'bp_lang') {
+      lang = getLang();
+      renderCopy();
+      updateHeadings();
+    }
+  });
+
+  document.getElementById('tab-standard').addEventListener('click', () => { mode='standard'; updateHeadings(); applyMode(true); });
+  document.getElementById('tab-seed').addEventListener('click', () => { mode='seed'; updateHeadings(); applyMode(true); });
   document.getElementById('signBtn').addEventListener('click', signTerms);
 
   function getHashParams() {
@@ -122,13 +223,12 @@
     document.getElementById('tab-standard').classList.toggle('active', mode==='standard');
     document.getElementById('tab-seed').classList.toggle('active', mode==='seed');
     // titles
-    document.getElementById('title').textContent = mode==='standard' ? 'Sign Terms & Conditions' : 'Sign Terms & Conditions (Seed)';
-    document.getElementById('subtitle').textContent = mode==='standard'
-      ? 'By signing, you confirm you’ve read and agree to the official BPC Terms.'
-      : 'By signing, you confirm you’ve read and agree to the official BPC Seed Terms.';
+    updateHeadings();
     // links
     document.getElementById('viewPdfBtn').href = pdfPath;
     document.getElementById('pdfName').textContent = pdfPath;
+    const tokenBox=document.getElementById('tokenBox');
+    if (tokenBox){ tokenBox.style.display='none'; tokenBox.dataset.token=''; tokenBox.innerHTML=''; }
 
     // clear previous receipt
     document.getElementById('signatureOutput').innerHTML = '';
@@ -136,7 +236,7 @@
     // disable button while hashing
     const btn = document.getElementById('signBtn');
     signing = false;
-    btn.disabled = true; btn.textContent = '⏳ Preparing…';
+    btn.disabled = true; setButtonLabel('preparing');
 
     // compute hash
     pdfHash = '';
@@ -147,21 +247,22 @@
       const buf = new Uint8Array(await r.arrayBuffer());
       pdfHash = '0x' + keccak256(buf);
       document.getElementById('pdfHash').textContent = pdfHash;
-      btn.disabled = false; btn.textContent = '✍️ Sign with Wallet';
+      btn.disabled = false; setButtonLabel('ready');
     } catch(e){
       console.error('PDF hash error:', e);
-      btn.disabled = true; btn.textContent = '⚠️ PDF hash error';
+      btn.disabled = true; setButtonLabel('error');
     }
 
     if (pushHash) location.hash = `mode=${mode}`;
+    renderCopy();
   }
 
   async function signTerms() {
     if (signing) return;
     const btn = document.getElementById('signBtn');
     try {
-      if (!window.ethereum) { alert('Wallet not detected (Rabby/MetaMask/Zeal)'); return; }
-      signing = true; btn.disabled = true; btn.textContent = '🔐 Waiting wallet…';
+      if (!window.ethereum) { alert(t('alertMissingWallet')); return; }
+      signing = true; btn.disabled = true; setButtonLabel('waiting');
 
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
@@ -217,42 +318,49 @@ ${signature}`;
       }
 
       // Render receipt
+      const tokenBox=document.getElementById('tokenBox');
+      if (tokenBox){
+        tokenBox.dataset.token = token;
+        tokenBox.style.display='block';
+        tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${token}</code><button class="copy-btn" type="button" onclick="copyText('${token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;
+      }
+
       document.getElementById('signatureOutput').innerHTML = `
         <div class="output-box">
-          ✅ <b>Signed as:</b> ${address} <span class="muted">[${mode}]</span><br>
-          🕒 <b>Timestamp:</b> ${timestamp}<br>
-          📄 <b>Doc ID:</b> ${docId}<br>
-          🌐 <b>Origin:</b> ${origin}<br>
-          📘 <b>PDF:</b> ${pdfPath}<br>
-          🧮 <b>PDF Hash:</b> ${pdfHash}<br>
-          ✍️ <b>Signature:</b><br>${signature}<br><br>
+          ✅ <b>${t('signedAs')}:</b> ${address} <span class="muted">[${mode}]</span><br>
+          🕒 <b>${t('timestamp')}:</b> ${timestamp}<br>
+          📄 <b>${t('docId')}:</b> ${docId}<br>
+          🌐 <b>${t('origin')}:</b> ${origin}<br>
+          📘 <b>${t('pdf')}:</b> ${pdfPath}<br>
+          🧮 <b>${t('pdfHash')}:</b> ${pdfHash}<br>
+          ✍️ <b>${t('signature')}:</b><br>${signature}<br><br>
 
           <div class="actions">
-            <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)' title="Copier le bloc lisible">📋 Copy block</button>
-            <button class="copy-btn" onclick='copyText(\`${token}\`)' title="Coller dans verify.html">🔑 Copy token</button>
-            <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="Reçu JSON">⬇️ Download JSON</a>
-            <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="Lien direct de vérification">🔗 Open verify</a>
+            <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)' title="${t('copyBlock')}">📋 ${t('copyBlock')}</button>
+            <button class="copy-btn" onclick='copyText(\`${token}\`)' title="${t('copyTokenAction')}">🔑 ${t('copyTokenAction')}</button>
+            <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="${t('downloadJson')}">⬇️ ${t('downloadJson')}</a>
+            <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="${t('openVerify')}">🔗 ${t('openVerify')}</a>
           </div>
 
           <div class="actions">
-            <button class="copy-btn" onclick='shareLink("${verifyLink}")'>📤 Share link</button>
-            <button class="copy-btn" onclick='shareToken("${token}")'>🔑 Share token</button>
-            <button class="copy-btn" onclick='shareJsonFile("bpc-signature-${address}.json", \`${json.replace(/`/g,"\\`")}\`)'>🧾 Share JSON</button>
+            <button class="copy-btn" onclick='shareLink("${verifyLink}")'>📤 ${t('shareLink')}</button>
+            <button class="copy-btn" onclick='shareToken("${token}")'>🔑 ${t('shareToken')}</button>
+            <button class="copy-btn" onclick='shareJsonFile("bpc-signature-${address}.json", \`${json.replace(/`/g,"\\`")}\`)'>🧾 ${t('shareJson')}</button>
           </div>
         </div>
       `;
 
       // reset button
-      signing = false; btn.disabled = false; btn.textContent = '✍️ Sign again';
+      signing = false; btn.disabled = false; setButtonLabel('again');
     } catch (err) {
       console.error(err);
       signing = false;
-      btn.disabled = false; btn.textContent = '✍️ Sign with Wallet';
-      alert('Signing cancelled or failed.');
+      btn.disabled = false; setButtonLabel('ready');
+      alert(t('signFailed'));
     }
   }
 
-  function copyText(s){ navigator.clipboard.writeText(s||''); alert('Copied!'); }
+  function copyText(s){ navigator.clipboard.writeText(s||''); alert(t('copyMsg')); }
 
   // --- Share helpers (Web Share API + fallbacks)
   async function shareLink(url){

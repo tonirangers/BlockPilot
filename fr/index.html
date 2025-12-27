@@ -35,15 +35,16 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot pilote votre allocation crypto pour viser du rendement (stables, BTC, ETH).</h1>
+          <h1 class="h1">L’expertise d’une banque privée, la performance de la DeFi.</h1>
 
           <p class="lead">
-            Vous gardez la clé : aucun retrait sans votre signature. Reporting clair, entrées/sorties simples.
+            BlockPilot optimise vos allocations Stables, BTC et ETH pour viser du rendement — sans jamais toucher à vos clés. Toute sortie exige votre signature.
           </p>
 
           <ul class="heroPoints" aria-label="Clés">
-            <li>Pilotage 1:1 + reporting clair.</li>
-            <li>Entrées/sorties simples : virement, carte, crypto.</li>
+            <li>Non-custodial: retraits impossibles sans votre accord.</li>
+            <li>Gestion 1:1: stratégie sur-mesure + reporting clair.</li>
+            <li>Entrées/sorties simples: virement, carte ou crypto.</li>
           </ul>
 
           <div class="ctaRow">
@@ -56,16 +57,16 @@
           <div class="cardTitle">Comment ça marche</div>
           <div class="miniGrid">
             <div class="mini">
-              <strong>Votre coffre & règles</strong>
-              <span>On configure votre coffre et vos règles de retrait.</span>
+              <strong>Configuration</strong>
+              <span>Profil de risque + règles de retrait.</span>
             </div>
             <div class="mini">
-              <strong>Dépôt / retrait</strong>
-              <span>Vous alimentez (virement, carte, crypto).</span>
+              <strong>Dépôt</strong>
+              <span>Alimentez votre coffre en fiat ou crypto.</span>
             </div>
             <div class="mini">
-              <strong>Pilotage & relevés</strong>
-              <span>On pilote l’allocation, vous suivez, retrait sur demande (signature).</span>
+              <strong>Pilotage</strong>
+              <span>J’optimise l’allocation, vous suivez et signez les sorties.</span>
             </div>
           </div>
         </aside>
@@ -82,7 +83,7 @@
           <div class="cardTitle">Contexte marché</div>
 
           <div class="marketTabs" style="margin-top:12px;">
-            <button class="tabBtn" type="button" data-market="total">Market cap</button>
+            <button class="tabBtn" type="button" data-market="total">TOTAL</button>
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
             <button class="tabBtn" type="button" data-market="eth">ETH</button>
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
@@ -101,12 +102,26 @@
             <div class="chartHover" id="marketHover"></div>
           </div>
 
-          <div class="adoptionBox">
+          <div class="adoptionBox" style="margin-top:18px;">
             <div class="adoptionHeader">
-              <div>
-                <div class="cardTitle">Adoption</div>
-                <p class="small">DeFi TVL global (USD).</p>
-              </div>
+              <div class="cardTitle">Market cap</div>
+            </div>
+            <div class="kpiRow kpiRow--clickable" id="capPeriods">
+              <button class="kpi" type="button" data-cap-card="365"><div class="k">1 an</div><div class="v" id="cap1y">—</div></button>
+              <button class="kpi" type="button" data-cap-card="1095"><div class="k">3 ans</div><div class="v" id="cap3y">—</div></button>
+              <button class="kpi" type="button" data-cap-card="1825"><div class="k">5 ans</div><div class="v" id="cap5y">—</div></button>
+            </div>
+            <div class="chartBox" id="capChart">
+              <div class="chartEmpty" id="capEmpty">Chargement…</div>
+              <svg class="chartSvg" id="capSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="chartHover" id="capHover"></div>
+            </div>
+            <div class="small" id="capNotice" style="display:none; margin-top:10px;"></div>
+          </div>
+
+          <div class="adoptionBox" style="margin-top:18px;">
+            <div class="adoptionHeader">
+              <div class="cardTitle">Adoption</div>
             </div>
             <div class="kpiRow kpiRow--clickable" id="adoptionPeriods">
               <button class="kpi" type="button" data-adoption-card="365"><div class="k">1 an</div><div class="v" id="adopt1y">—</div></button>

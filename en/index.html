@@ -35,15 +35,16 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot pilots your crypto allocation to target yield (stables, BTC, ETH).</h1>
+          <h1 class="h1">Private banking expertise, with DeFi performance.</h1>
 
           <p class="lead">
-            You keep the key: no withdrawal without your signature. Clear reporting, simple in/out.
+            BlockPilot optimizes your Stable, BTC and ETH allocations to target yield — without ever touching your keys. Every withdrawal requires your signature.
           </p>
 
           <ul class="heroPoints" aria-label="Highlights">
-            <li>1:1 execution + clear reporting.</li>
-            <li>Easy in/out: bank transfer, card, crypto.</li>
+            <li>Non-custodial: no withdrawals without your approval.</li>
+            <li>1:1 management: tailored strategy + clear reporting.</li>
+            <li>Smooth in/out: wire, card or crypto.</li>
           </ul>
 
           <div class="ctaRow">
@@ -56,16 +57,16 @@
           <div class="cardTitle">How it works</div>
           <div class="miniGrid">
             <div class="mini">
-              <strong>Your vault & rules</strong>
-              <span>We configure your vault and withdrawal rules.</span>
+              <strong>Configuration</strong>
+              <span>Risk profile + withdrawal rules.</span>
             </div>
             <div class="mini">
-              <strong>Deposit / withdraw</strong>
-              <span>You fund (transfer, card, crypto).</span>
+              <strong>Deposit</strong>
+              <span>Fund your vault in fiat or crypto.</span>
             </div>
             <div class="mini">
-              <strong>Execution & statements</strong>
-              <span>We run allocation; you monitor, withdraw on request (signature).</span>
+              <strong>Piloting</strong>
+              <span>I optimize allocation; you monitor and sign withdrawals.</span>
             </div>
           </div>
         </aside>
@@ -82,7 +83,7 @@
           <div class="cardTitle">Market context</div>
 
           <div class="marketTabs" style="margin-top:12px;">
-            <button class="tabBtn" type="button" data-market="total">Market cap</button>
+            <button class="tabBtn" type="button" data-market="total">TOTAL</button>
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
             <button class="tabBtn" type="button" data-market="eth">ETH</button>
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
@@ -101,12 +102,26 @@
             <div class="chartHover" id="marketHover"></div>
           </div>
 
-          <div class="adoptionBox">
+          <div class="adoptionBox" style="margin-top:18px;">
             <div class="adoptionHeader">
-              <div>
-                <div class="cardTitle">Adoption</div>
-                <p class="small">Global DeFi TVL (USD).</p>
-              </div>
+              <div class="cardTitle">Market cap</div>
+            </div>
+            <div class="kpiRow kpiRow--clickable" id="capPeriods">
+              <button class="kpi" type="button" data-cap-card="365"><div class="k">1y</div><div class="v" id="cap1y">—</div></button>
+              <button class="kpi" type="button" data-cap-card="1095"><div class="k">3y</div><div class="v" id="cap3y">—</div></button>
+              <button class="kpi" type="button" data-cap-card="1825"><div class="k">5y</div><div class="v" id="cap5y">—</div></button>
+            </div>
+            <div class="chartBox" id="capChart">
+              <div class="chartEmpty" id="capEmpty">Loading…</div>
+              <svg class="chartSvg" id="capSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="chartHover" id="capHover"></div>
+            </div>
+            <div class="small" id="capNotice" style="display:none; margin-top:10px;"></div>
+          </div>
+
+          <div class="adoptionBox" style="margin-top:18px;">
+            <div class="adoptionHeader">
+              <div class="cardTitle">Adoption</div>
             </div>
             <div class="kpiRow kpiRow--clickable" id="adoptionPeriods">
               <button class="kpi" type="button" data-adoption-card="365"><div class="k">1y</div><div class="v" id="adopt1y">—</div></button>

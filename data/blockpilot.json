@@ -1,6 +1,6 @@
 {
   "links": {
-    "bookCall": "",
+    "bookCall": "https://calendar.app.google/bQWcTHd22XDzuCt6A",
     "email": "toni@blockpilot.capital",
     "emailSubject": "BlockPilot — demande d’informations",
     "termsPdf": "../BPC_Terms.pdf",
@@ -13,15 +13,17 @@
     "eth": 0.04,
     "bnb": 0.13
   },
-  "defaults": {
-    "amountUSD": 10000,
-    "asset": "stables",
-    "scenario": 0.2,
-    "marketDefault": "total"
-  },
-  "fallbackPricesUSD": {
-    "btc": 100000,
-    "eth": 3500,
-    "bnb": 650
+    "defaults": {
+      "amountUSD": 10000,
+      "asset": "stables",
+      "scenario": 0.2,
+      "marketDefault": "total",
+      "marketPeriod": 365
+    },
+    "fallbackPricesUSD": {
+      "btc": 100000,
+      "eth": 3500,
+      "bnb": 650
+    },
+    "price_scenarios": [0, 0.2, 0.5]
   }
-}

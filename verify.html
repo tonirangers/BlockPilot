@@ -102,7 +102,11 @@ Signature:
       pasteGuidance:'Collez un token BPC1, un bloc nouveau format ou un bloc legacy.', invalidSig:'❌ Erreur lors de la vérification'
     }
   };
-  const getLang = () => ((localStorage.getItem('bp_lang')||document.documentElement.lang||'en').startsWith('fr') ? 'fr' : 'en');
+  const getLang = () => {
+    const qs = new URLSearchParams(location.search).get('lang');
+    const base = (qs || localStorage.getItem('bp_lang') || 'fr').toLowerCase();
+    return base.startsWith('en') ? 'en' : 'fr';
+  };
   let lang = getLang();
   const t = (k) => STR[lang]?.[k] || STR.en[k] || k;
 

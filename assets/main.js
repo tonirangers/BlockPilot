@@ -35,7 +35,7 @@
       menu: "Menu",
       close: "Fermer",
       lastUpdated: "Dernière mise à jour",
-      adoptionUnavailable: "Données en cours de calibration."
+      calibrating: "Données en cours de calibration."
     },
     en: {
       loading: "Loading…",
@@ -49,7 +49,7 @@
       menu: "Menu",
       close: "Close",
       lastUpdated: "Last updated",
-      adoptionUnavailable: "Data being calibrated."
+      calibrating: "Data being calibrated."
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -104,7 +104,7 @@
 
   function setActiveChip(groupSel, key) {
     $$(groupSel).forEach(b => {
-      const data = b.dataset.scn ?? b.dataset.periodCard ?? b.dataset.capCard ?? b.dataset.adoptionCard ?? b.dataset.duration;
+      const data = b.dataset.scn ?? b.dataset.periodCard ?? b.dataset.capCard ?? b.dataset.duration;
       b.classList.toggle("active", String(data) === String(key));
     });
   }
@@ -193,13 +193,19 @@
       .map(p=>[Number(p?.[0]), Number(p?.[1])])
       .filter(p=>isFinite(p[0]) && isFinite(p[1]))
       .sort((a,b)=>a[0]-b[0]);
-    if (clean.length < 2) return clean;
+    if (clean.length < 2) return [];
     const last = clean[clean.length-1][1];
     const tail = clean.slice(-6,-1).map(p=>p[1]).filter(v=>isFinite(v));
     const baselineArr = tail.length ? tail.slice().sort((a,b)=>a-b) : [clean[clean.length-2][1]];
     const mid = baselineArr[Math.floor((baselineArr.length-1)/2)] || baselineArr[0];
     if (isFinite(last) && isFinite(mid) && last > mid*4) return clean.slice(0,-1);
     return clean;
+  }
+
+  function isSeriesReliable(series, meta) {
+    if (!Array.isArray(series) || series.length < 10) return false;
+    if ((meta?.source||"").toLowerCase().includes("synthetic")) return false;
+    return series.every(p=>Array.isArray(p) && p.length>=2 && isFinite(p[0]) && isFinite(p[1]));
   }
 
   function scaleSeriesToUSD(series){
@@ -379,11 +385,17 @@
     const first=series[0][0];
     const last=series[series.length-1][0];
     const span=last-first || 1;
-    const show=(p)=>{
+    const show=(p, clientX)=>{
       const val = fmtVal ? fmtVal(p[1]) : (isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0));
       const label=isIndex ? `${LANG==="fr"?"Indice":"Index"} ${val}` : val;
       hover.textContent = `${label} · ${fmtDate(p[0])}`;
       hover.style.display="block";
+      if (clientX !== undefined) {
+        const rect=box.getBoundingClientRect();
+        const left=Math.min(rect.width - hover.offsetWidth - 8, Math.max(8, clientX-rect.left - hover.offsetWidth/2));
+        hover.style.right = "auto";
+        hover.style.left = `${left}px`;
+      }
     };
     box.onmousemove = (e)=>{
       const rect=box.getBoundingClientRect();
@@ -392,7 +404,7 @@
       const ratio = Math.min(1-padFrac, Math.max(padFrac, rawRatio));
       const t = first + span*ratio;
       const p = nearestByTime(series, t);
-      if (p) show(p);
+      if (p) show(p, e.clientX);
     };
     box.onmouseleave = ()=>{ hover.style.display="none"; };
     show(series[series.length-1]);
@@ -406,8 +418,10 @@
     const k5=$("#kpi5y");
     const axis=$("#marketAxis");
 
-    if (!series || series.length<2) {
-      if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
+    const safeSeries = sanitizeSeriesUSD(series);
+
+    if (!safeSeries || safeSeries.length<2 || !isSeriesReliable(safeSeries)) {
+      if (empty) { empty.style.display="flex"; empty.textContent=T.calibrating; }
       if (svg) svg.innerHTML="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       return;
@@ -415,10 +429,10 @@
 
     if (empty) empty.style.display="none";
 
-    const windowed = sliceWindow(series, periodDays || 365);
-    let viewSeries = windowed.length >= 2 ? windowed : series;
+    const windowed = sliceWindow(safeSeries, periodDays || 365);
+    let viewSeries = windowed.length >= 2 ? windowed : safeSeries;
 
-    const base=series && series.length ? series : [];
+    const base=safeSeries && safeSeries.length ? safeSeries : [];
     const r1=computeReturn(base,365);
     const r3=computeReturn(base,1095);
     const r5=computeReturn(base,1825);
@@ -715,8 +729,8 @@
     const k3=$("#cap3y");
     const k5=$("#cap5y");
     const hover=$("#capHover");
-    if (!series || series.length<2){
-      if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
+    if (!series || series.length<2 || !isSeriesReliable(series, meta)){
+      if (empty){ empty.style.display="flex"; empty.textContent=T.calibrating; }
       if (svg) svg.innerHTML="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       if (hover) hover.style.display="none";
@@ -745,21 +759,42 @@
     function initSignatureEmbeds(){
       const tabBtns=$$('[data-signature-view]');
       const frame=$("#signatureFrame");
-      if (!tabBtns.length || !frame) return;
+      const frameSign=$("#signatureSign");
+      const frameVerify=$("#signatureVerify");
+      if (!tabBtns.length && !frame && !frameSign && !frameVerify) return;
+
+      const getEmbedLang=()=>{
+        const qsLang=new URLSearchParams(location.search).get("lang");
+        const stored=localStorage.getItem("bp_lang") || LANG;
+        const base=(qsLang||stored||"fr").toLowerCase();
+        return base.startsWith("en")?"en":"fr";
+      };
+      let embedLang=getEmbedLang();
 
       const srcFor=(view)=>{
         const page=view==="verify" ? "verify" : "sign";
-        return fromRoot(`${page}.html?embed=1`);
+        return fromRoot(`${page}.html?embed=1&lang=${embedLang}`);
       };
 
-      let current="";
+      let current=location.hash==="#verify" ? "verify" : "sign";
+      const applyTabs=()=>{
+        tabBtns.forEach(b=>b.classList.toggle("active", (b.dataset.signatureView||"sign")===current));
+      };
+      const refreshFrames=()=>{
+        applyTabs();
+        if (frame) {
+          frame.src=srcFor(current);
+          frame.title = current==="verify" ? (embedLang==="fr"?"Vérifier":"Verify") : (embedLang==="fr"?"Signer":"Sign");
+        }
+        if (frameSign) frameSign.src=srcFor("sign");
+        if (frameVerify) frameVerify.src=srcFor("verify");
+      };
+
       const setActive=(view)=>{
         const v=view==="verify" ? "verify" : "sign";
         if (current===v) return;
         current=v;
-        tabBtns.forEach(b=>b.classList.toggle("active", (b.dataset.signatureView||"sign")===v));
-        frame.src=srcFor(v);
-        frame.title = v==="verify" ? (LANG==="fr"?"Vérifier":"Verify") : (LANG==="fr"?"Signer":"Sign");
+        refreshFrames();
       };
 
       tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
@@ -767,8 +802,14 @@
         setActive(b.dataset.signatureView||"sign");
       }));
 
-      const defaultView = location.hash==="#verify" ? "verify" : "sign";
-      setActive(defaultView);
+      window.addEventListener("storage", (e)=>{
+        if (e.key === "bp_lang") {
+          const next=getEmbedLang();
+          if (next !== embedLang) { embedLang = next; refreshFrames(); }
+        }
+      });
+
+      refreshFrames();
     }
 
   async function init() {
@@ -792,9 +833,9 @@
     const capBtns = $$('[data-cap-card]');
     const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
     const defaultActive = "total";
-    let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || defaultActive;
+    let active = localStorage.getItem("bp_market_sel") || defaultActive;
     if (!availableMarkets.includes(active)) active = availableMarkets.includes(defaultActive) ? defaultActive : (availableMarkets[0] || "btc");
-    const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
+    const defaultPeriod = 1825;
     const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
     const defaultCapPeriod = 1825;
     const storedCap = Number(localStorage.getItem("bp_cap_period")) || defaultCapPeriod;
@@ -804,7 +845,7 @@
     setActiveChip("[data-period-card]", String(periodDays));
     setActiveChip("[data-cap-card]", String(capPeriod));
 
-    const cacheBust=`?t=${dayTs(Date.now())}`;
+    const cacheBust=`?t=${Date.now()}`;
     const cacheMarket = await firstJSON(
       [fromRoot(`data/market.json${cacheBust}`), `../data/market.json${cacheBust}`,`./data/market.json${cacheBust}`],
       null
@@ -836,19 +877,6 @@
       if (livePoint[0] > lastTs) marketCapSeries = marketCapSeries.concat([livePoint]);
       marketCapSeries = sanitizeSeriesUSD(marketCapSeries);
     }
-
-    const adoptionSeries = sanitizeSeriesUSD(scaleSeriesToUSD(adoptionCache?.series));
-    const adoptionMeta = adoptionCache?.meta || {};
-    const adoptionCount = adoptionSeries.length;
-    const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
-    const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e8 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
-
-    if (adoptionNotice) {
-      adoptionNotice.style.display = adoptionReliable ? "none" : "block";
-      adoptionNotice.textContent = T.adoptionUnavailable;
-    }
-    if (adoptionSection) adoptionSection.style.display = adoptionReliable ? "block" : "none";
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
@@ -895,8 +923,8 @@
     }));
 
     async function refreshCap(){
-      if (!marketCapSeries || marketCapSeries.length<2) {
-        if (capNotice) { capNotice.style.display="block"; capNotice.textContent=T.adoptionUnavailable; }
+      if (!marketCapSeries || marketCapSeries.length<2 || !isSeriesReliable(marketCapSeries, marketCapMeta)) {
+        if (capNotice) { capNotice.style.display="block"; capNotice.textContent=T.calibrating; }
         const capBox=document.querySelector("#capChart");
         if (capBox) capBox.style.display="none";
         return;
@@ -906,15 +934,6 @@
       if (capNotice) capNotice.style.display="none";
       setCapUI(marketCapSeries, marketCapMeta, capPeriod);
     }
-
-    capBtns.forEach(b => b.addEventListener("click", () => {
-      const d=Number(b.dataset.capCard||0);
-      if (!d || d===capPeriod) return;
-      capPeriod=d;
-      localStorage.setItem("bp_cap_period", String(capPeriod));
-      setActiveChip("[data-cap-card]", String(capPeriod));
-      refreshCap();
-    }));
 
     capBtns.forEach(b => b.addEventListener("click", () => {
       const d=Number(b.dataset.capCard||0);

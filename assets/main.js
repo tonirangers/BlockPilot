@@ -118,9 +118,16 @@
     const xMin=Math.min(...xs), xMax=Math.max(...xs);
     const yMin=Math.min(...ys), yMax=Math.max(...ys);
     const xSpan=(xMax-xMin)||1, ySpan=(yMax-yMin)||1;
+    const yPad=Math.max(0.05*ySpan, 1);
+    const yMinPad=yMin - yPad;
+    const yMaxPad=yMax + yPad;
 
     const mapX=x=>pad+(w-pad*2)*(x-xMin)/xSpan;
-    const mapY=y=>(h-pad)-(h-pad*2)*(y-yMin)/ySpan;
+    const mapY=y=>{
+      const clamped=Math.min(yMaxPad, Math.max(yMinPad, y));
+      const span=(yMaxPad-yMinPad)||1;
+      return (h-pad)-(h-pad*2)*(clamped-yMinPad)/span;
+    };
 
     const d=points.map((p,i)=>(i?"L":"M")+mapX(p[0]).toFixed(2)+" "+mapY(p[1]).toFixed(2)).join(" ");
 
@@ -330,31 +337,25 @@
   function setMarketUI({ series, source, isIndex, updatedAt, periodDays }) {
     const empty=$("#marketEmpty");
     const svg=$("#marketSvg");
-    const meta=$("#marketMeta");
     const k1=$("#kpi1y");
     const k3=$("#kpi3y");
     const k5=$("#kpi5y");
     const axis=$("#marketAxis");
-    const upd=$("#marketUpdated");
-    const range=$("#marketRange");
 
     if (!series || series.length<2) {
       if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
-      if (meta) meta.textContent="";
       if (svg) svg.innerHTML="";
       if (axis) axis.innerHTML="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
-      if (upd) upd.textContent="";
-      if (range) range.textContent="";
       return;
     }
 
     if (empty) empty.style.display="none";
 
     const windowed = sliceWindow(series, periodDays || 365);
-    const viewSeries = windowed.length >= 2 ? windowed : series;
+    let viewSeries = windowed.length >= 2 ? windowed : series;
 
-    const base=viewSeries.length ? viewSeries : series;
+    const base=series && series.length ? series : [];
     const r1=computeReturn(base,365);
     const r3=computeReturn(base,1095);
     const r5=computeReturn(base,1825);
@@ -362,29 +363,18 @@
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
 
-    drawSvgLine(svg, sampleSeries(viewSeries));
-    setAxisLabels(axis, viewSeries);
+    if (axis) { axis.innerHTML=""; axis.style.display="none"; }
 
-    const last=viewSeries[viewSeries.length-1];
-    const d=new Date(last[0]);
-    const dt=d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+    if (viewSeries.length > 5) {
+      const last=viewSeries[viewSeries.length-1][1];
+      const prev=viewSeries[viewSeries.length-2][1] || last;
+      if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
+    }
 
-    if (meta) {
-      const valTxt=fmtNum(last[1],0);
-      meta.textContent = isIndex
-        ? T.lastIndexValue(valTxt, dt, source)
-        : T.lastValue(valTxt, dt, source);
-    }
-    if (upd) {
-      const ts = updatedAt || last[0];
-      upd.textContent = `${T.lastUpdated || "Dernière mise à jour"}: ${fmtDate(ts)}`;
-    }
-    if (range) {
-      const first=viewSeries[0][0];
-      const lbl = LANG === "fr" ? "Période" : "Range";
-      range.textContent=`${lbl}: ${fmtDate(first)} – ${fmtDate(last[0])}`;
-    }
-    installHover("#marketChart", "#marketHover", viewSeries, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+    const sampled = sampleSeries(viewSeries);
+    drawSvgLine(svg, sampled);
+
+    installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
   }
 
   function computeTokens(principalTokens, apr, years) {
@@ -573,7 +563,7 @@
     const footerTerms=$("#footerTerms");
     if (footerTerms) footerTerms.href=resolveHref(terms);
 
-    const signature=cfg?.links?.signature || "../sign.html";
+    const signature=cfg?.links?.signature || "../signature.html";
     const navSignature=$("#navSignature");
     const footerSignature=$("#footerSignature");
     if (navSignature && !navSignature.getAttribute("href")?.startsWith("#")) navSignature.href=resolveHref(signature);
@@ -703,13 +693,18 @@
     const verifyFrame=$("#signatureVerify");
     if (!tabBtns.length || !signFrame || !verifyFrame) return;
 
+    const inLocale=/\/(en|fr)\/signature\.html$/i.test(location.pathname);
+    const basePath=inLocale ? "../" : "./";
+    const signSrc=resolveHref(basePath+"sign.html");
+    const verifySrc=resolveHref(basePath+"verify.html");
+
     let signLoaded=false, verifyLoaded=false;
     const setActive=(view)=>{
       tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
       signFrame.classList.toggle("active", view==="sign");
       verifyFrame.classList.toggle("active", view==="verify");
-      if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html"); signLoaded=true; }
-      if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html"); verifyLoaded=true; }
+      if (view==="sign" && !signLoaded){ signFrame.src=signSrc; signLoaded=true; }
+      if (view==="verify" && !verifyLoaded){ verifyFrame.src=verifySrc; verifyLoaded=true; }
     };
 
     tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
@@ -731,6 +726,7 @@
     );
 
     applyLinks(cfg);
+    initSignatureEmbeds();
 
     const yields = fillApr(cfg);
     const pricesUSD = await loadPricesUSD(cfg);
@@ -738,8 +734,8 @@
 
     const marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
-    const adoptionBtns = $$('[data-adoption-period]');
-    const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
+    let adoptionBtns = $$('[data-adoption-card]');
+    let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
     let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || availableMarkets[0] || "btc";
     if (!availableMarkets.includes(active)) active = availableMarkets[0] || "btc";
     const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
@@ -750,7 +746,7 @@
     let adoptionPeriod = storedAdoption;
     setActiveTab("[data-market]", active);
     setActiveChip("[data-period-card]", String(periodDays));
-    setActiveChip("[data-adoption-period]", String(adoptionPeriod));
+    setActiveChip("[data-adoption-card]", String(adoptionPeriod));
 
     const cacheMarket = await firstJSON(
       [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
@@ -764,11 +760,34 @@
       [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
       { series:[], meta:{} }
     );
+    const marketCapIndex = (cacheMarket?.meta?.totalKind === "index") || String(cacheCap?.meta?.source||"").includes("synthetic");
+    if (marketCapIndex) {
+      const totalBtn = document.querySelector('[data-market="total"]');
+      if (totalBtn) totalBtn.remove();
+      marketBtns = $$('[data-market]');
+      availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
+      if (active === "total") active = availableMarkets[0] || "btc";
+      setActiveTab("[data-market]", active);
+    }
+
+    const adoptionSection=document.querySelector(".adoptionBox");
+    const adoptionNotice=$("#adoptionNotice");
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }
     const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     const adoptionMeta = adoptionCache?.meta || {};
+    const adoptionCount = adoptionSeries.length;
+    const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
+    const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
+    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
+    if (!adoptionReliable) {
+      if (adoptionSection) adoptionSection.style.display="none";
+      if (adoptionNotice) {
+        adoptionNotice.style.display="block";
+        adoptionNotice.textContent = LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.";
+      }
+    }
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
@@ -830,16 +849,16 @@
     }
 
     adoptionBtns.forEach(b => b.addEventListener("click", () => {
-      const d=Number(b.dataset.adoptionPeriod||0);
+      const d=Number(b.dataset.adoptionCard||0);
       if (!d || d===adoptionPeriod) return;
       adoptionPeriod=d;
       localStorage.setItem("bp_adoption_period", String(adoptionPeriod));
-      setActiveChip("[data-adoption-period]", String(adoptionPeriod));
+      setActiveChip("[data-adoption-card]", String(adoptionPeriod));
       refreshAdoption();
     }));
 
     await refresh(active);
-    await refreshAdoption();
+    if (adoptionReliable) await refreshAdoption();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

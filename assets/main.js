@@ -710,52 +710,6 @@
     });
   }
 
-  async function loadMarketCapSnapshot(){
-    if (location.protocol === "file:") return null;
-    try {
-      const snap = await fetchJSON("https://api.coingecko.com/api/v3/global", 9000);
-      const total = Number(snap?.data?.total_market_cap?.usd);
-      const change = Number(snap?.data?.market_cap_change_percentage_24h_usd);
-      if (!isFinite(total) || total<=0) return null;
-      const updatedAt = Number(snap?.data?.updated_at)*1000 || Date.now();
-      return { value: total, change24h: change, updatedAt, source:"CoinGecko" };
-    } catch { return null; }
-  }
-
-  function setCapUI(series, meta, periodDays){
-    const empty=$("#capEmpty");
-    const svg=$("#capSvg");
-    const k1=$("#cap1y");
-    const k3=$("#cap3y");
-    const k5=$("#cap5y");
-    const hover=$("#capHover");
-    if (!series || series.length<2 || !isSeriesReliable(series, meta)){
-      if (empty){ empty.style.display="flex"; empty.textContent=T.calibrating; }
-      if (svg) svg.innerHTML="";
-      [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
-      if (hover) hover.style.display="none";
-      return;
-    }
-    if (empty) empty.style.display="none";
-    let viewSeries = sliceWindow(series, periodDays||1825);
-    let vs = viewSeries.length?viewSeries:series;
-    if (vs.length > 5) {
-      const last=vs[vs.length-1][1];
-      const prev=vs[vs.length-2][1] || last;
-      if (isFinite(last) && isFinite(prev) && last > prev*4) vs = vs.slice(0,-1);
-    }
-    const sampled = sampleSeries(vs);
-    drawSvgLine(svg, sampled);
-    const base = vs.length ? vs : series;
-    const r1=computeReturn(base,365);
-    const r3=computeReturn(base,1095);
-    const r5=computeReturn(base,1825);
-    if (k1) k1.textContent=fmtPct(r1);
-    if (k3) k3.textContent=fmtPct(r3);
-    if (k5) k5.textContent=fmtPct(r5);
-    installHover("#capChart", "#capHover", sampled, (v)=>fmtUsd(v,0), false);
-  }
-
     function initSignatureEmbeds(){
       const tabBtns=$$('[data-signature-view]');
       const frame=$("#signatureFrame");
@@ -830,29 +784,20 @@
 
     let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
-    const capBtns = $$('[data-cap-card]');
     const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
     const defaultActive = "total";
     let active = localStorage.getItem("bp_market_sel") || defaultActive;
     if (!availableMarkets.includes(active)) active = availableMarkets.includes(defaultActive) ? defaultActive : (availableMarkets[0] || "btc");
     const defaultPeriod = 1825;
     const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
-    const defaultCapPeriod = 1825;
-    const storedCap = Number(localStorage.getItem("bp_cap_period")) || defaultCapPeriod;
     let periodDays = storedPeriod;
-    let capPeriod = storedCap;
     setActiveTab("[data-market]", active);
     setActiveChip("[data-period-card]", String(periodDays));
-    setActiveChip("[data-cap-card]", String(capPeriod));
 
     const cacheBust=`?t=${Date.now()}`;
     const cacheMarket = await firstJSON(
       [fromRoot(`data/market.json${cacheBust}`), `../data/market.json${cacheBust}`,`./data/market.json${cacheBust}`],
       null
-    );
-    const cacheCap = await firstJSON(
-      [fromRoot(`data/market_total_ex_stables.json${cacheBust}`), `../data/market_total_ex_stables.json${cacheBust}`,`./data/market_total_ex_stables.json${cacheBust}`],
-      { series:[], meta:{} }
     );
     const priceSeries={
       btc: normalizeSeriesDaily((cacheMarket?.btc||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
@@ -861,21 +806,8 @@
     };
     const totalIndexSeries = buildEqualWeightedIndex(priceSeries);
 
-    const capNotice=$("#capNotice");
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
-    }
-
-    const marketCapSeriesCache = sanitizeSeriesUSD(scaleSeriesToUSD(cacheCap?.series));
-    const marketCapMeta = cacheCap?.meta || {};
-
-    let marketCapSeries = marketCapSeriesCache;
-    const snap = await loadMarketCapSnapshot();
-    if (snap && isFinite(snap.value)) {
-      const lastTs = marketCapSeries[marketCapSeries.length-1]?.[0] || 0;
-      const livePoint=[Date.now(), snap.value];
-      if (livePoint[0] > lastTs) marketCapSeries = marketCapSeries.concat([livePoint]);
-      marketCapSeries = sanitizeSeriesUSD(marketCapSeries);
     }
 
     async function refresh(sym) {
@@ -922,30 +854,7 @@
       await refresh(active);
     }));
 
-    async function refreshCap(){
-      if (!marketCapSeries || marketCapSeries.length<2 || !isSeriesReliable(marketCapSeries, marketCapMeta)) {
-        if (capNotice) { capNotice.style.display="block"; capNotice.textContent=T.calibrating; }
-        const capBox=document.querySelector("#capChart");
-        if (capBox) capBox.style.display="none";
-        return;
-      }
-      const capBox=document.querySelector("#capChart");
-      if (capBox) capBox.style.display="block";
-      if (capNotice) capNotice.style.display="none";
-      setCapUI(marketCapSeries, marketCapMeta, capPeriod);
-    }
-
-    capBtns.forEach(b => b.addEventListener("click", () => {
-      const d=Number(b.dataset.capCard||0);
-      if (!d || d===capPeriod) return;
-      capPeriod=d;
-      localStorage.setItem("bp_cap_period", String(capPeriod));
-      setActiveChip("[data-cap-card]", String(capPeriod));
-      refreshCap();
-    }));
-
     await refresh(active);
-    await refreshCap();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

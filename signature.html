@@ -30,6 +30,57 @@
     </div>
   </header>
 
+  <script>
+    (function(){
+      const params = new URLSearchParams(location.search);
+      const stored = (()=>{ try { return localStorage.getItem('bp_lang'); } catch { return null; }})();
+      const base = (params.get('lang') || stored || document.documentElement.lang || 'fr').toLowerCase();
+      const lang = base.startsWith('en') ? 'en' : 'fr';
+      document.documentElement.lang = lang;
+      if (document.body) document.body.setAttribute('data-lang', lang);
+
+      const updateNavLinks = (lng) => {
+        document.querySelectorAll('.nav__links a').forEach(a => {
+          const href = a.getAttribute('href');
+          if (!href) return;
+          try {
+            const url = new URL(href, location.href);
+            url.searchParams.set('lang', lng);
+            a.href = url.toString();
+          } catch {}
+        });
+      };
+
+      const setLang = (lng) => {
+        const next = lng === 'en' ? 'en' : 'fr';
+        document.documentElement.lang = next;
+        if (document.body) document.body.setAttribute('data-lang', next);
+        try { localStorage.setItem('bp_lang', next); } catch {}
+        const url = new URL(location.href);
+        url.searchParams.set('lang', next);
+        history.replaceState({}, '', url.toString());
+        updateNavLinks(next);
+        try { window.dispatchEvent(new StorageEvent('storage', { key:'bp_lang', newValue: next })); } catch {}
+      };
+
+      updateNavLinks(lang);
+      window.addEventListener('load', () => updateNavLinks(document.body?.dataset?.lang || lang));
+
+      document.querySelectorAll('.lang .pill').forEach(pill => {
+        const target = (pill.textContent || '').trim().toLowerCase().startsWith('en') ? 'en' : 'fr';
+        try {
+          const url = new URL(location.href);
+          url.searchParams.set('lang', target);
+          pill.href = url.toString();
+        } catch {}
+        pill.addEventListener('click', (e) => {
+          e.preventDefault();
+          setLang(target);
+        });
+      });
+    })();
+  </script>
+
   <main class="section section--tight" id="signature">
     <div class="container">
       <div class="signatureIntro">

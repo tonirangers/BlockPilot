@@ -85,8 +85,12 @@
         <button class="copy-btn ghost" type="button" id="toggleTech">Détails techniques</button>
       </div>
       <div class="doc-details" id="techDetails" aria-hidden="true">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between;">
+          <div id="hashLabel">Empreinte du document (hash)</div>
+          <button class="copy-btn ghost" type="button" id="copyHash">Copier</button>
+        </div>
+        <div style="word-break:break-word;"><span id="pdfHash">…</span></div>
         <div><strong>PDF:</strong> <span id="pdfName">BPC_Terms.pdf</span></div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><strong>Hash:</strong> <span id="pdfHash">…</span><button class="copy-btn ghost" type="button" id="copyHash">Copier</button></div>
       </div>
 
       <div class="token-box" id="tokenBox" style="display:none;"></div>
@@ -101,7 +105,7 @@
     standard: { docId: 'BPC_Terms v1.0 (2025-11-07)' },
     seed:     { docId: 'BPC_Terms_Seed v1.0 (2025-11-07)' }
   };
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzOmjt11dQ3vmYtVrydXl6gejh0lVwqiSxCbXMhUVpQPNBFoMTUP2JJlAj0atjTOcfDtg/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxEr5Wky-9oz2H7QMaWvc0Xi7-u1hEm1Et-ZtKoPyek4Gp2tXH2FN3sx_ys1JqPtRPTLw/exec';
 
   const STR = {
     en: {
@@ -112,10 +116,11 @@
       viewPdf:'📄 View PDF Terms',
       docLabel:'Document: BPC Terms (PDF)',
       techDetails:'Technical details',
+      fingerprint:'Document fingerprint (hash)',
       preparing:'⏳ Preparing…', signWallet:'✍️ Sign with Wallet', waiting:'🔐 Waiting wallet…', signAgain:'✍️ Sign again', hashError:'⚠️ PDF hash error',
       tokenTitle:'Verification token', tokenHint:'Use this token on Verify to confirm your signature.', copyToken:'Copy token',
       signedAs:'Signed as', timestamp:'Timestamp', docId:'Doc ID', origin:'Origin', pdf:'PDF', pdfHash:'PDF Hash', signature:'Signature',
-      copyBlock:'Copy block', copyTokenAction:'Copy token', downloadJson:'Download JSON', openVerify:'Open verify',
+      copyBlock:'Copy block', copyTokenAction:'Copy token', downloadJson:'Download JSON', openVerify:'Open verify', copyHash:'Copy hash',
       shareLink:'Share link', shareToken:'Share token', shareJson:'Share JSON', copyMsg:'Copied!',
       alertMissingWallet:'Wallet not detected (Rabby/MetaMask/Zeal)', signFailed:'Signing cancelled or failed.'
     },
@@ -127,15 +132,20 @@
       viewPdf:'📄 Voir le PDF',
       docLabel:'Document : Conditions BPC (PDF)',
       techDetails:'Détails techniques',
+      fingerprint:'Empreinte du document (hash)',
       preparing:'⏳ Préparation…', signWallet:'✍️ Signer avec le wallet', waiting:'🔐 En attente du wallet…', signAgain:'✍️ Signer à nouveau', hashError:'⚠️ Erreur de hash PDF',
       tokenTitle:'Token de vérification', tokenHint:'Collez ce token dans Vérifier pour valider votre signature.', copyToken:'Copier le token',
       signedAs:'Signé en tant que', timestamp:'Horodatage', docId:'Doc ID', origin:'Origine', pdf:'PDF', pdfHash:'Hash PDF', signature:'Signature',
-      copyBlock:'Copier le bloc', copyTokenAction:'Copier le token', downloadJson:'Télécharger le JSON', openVerify:'Ouvrir Vérifier',
+      copyBlock:'Copier le bloc', copyTokenAction:'Copier le token', downloadJson:'Télécharger le JSON', openVerify:'Ouvrir Vérifier', copyHash:'Copier le hash',
       shareLink:'Partager le lien', shareToken:'Partager le token', shareJson:'Partager le JSON', copyMsg:'Copié !',
       alertMissingWallet:'Wallet non détecté (Rabby/MetaMask/Zeal)', signFailed:'Signature annulée ou échouée.'
     }
   };
-  const getLang = () => ((localStorage.getItem('bp_lang')||document.documentElement.lang||'en').startsWith('fr') ? 'fr' : 'en');
+  const getLang = () => {
+    const qs = new URLSearchParams(location.search).get('lang');
+    const base = (qs || localStorage.getItem('bp_lang') || 'fr').toLowerCase();
+    return base.startsWith('en') ? 'en' : 'fr';
+  };
   let lang = getLang();
   const t = (k) => STR[lang]?.[k] || STR.en[k] || k;
 
@@ -165,8 +175,10 @@
     if (docLabel) docLabel.textContent = t('docLabel');
     const techBtn=document.getElementById('toggleTech');
     if (techBtn) techBtn.textContent = t('techDetails');
+    const hashLabel=document.getElementById('hashLabel');
+    if (hashLabel) hashLabel.textContent = t('fingerprint');
     const copyHashBtn=document.getElementById('copyHash');
-    if (copyHashBtn) copyHashBtn.textContent = t('copyTokenAction');
+    if (copyHashBtn) copyHashBtn.textContent = t('copyHash');
     const tokenBox=document.getElementById('tokenBox');
     if (tokenBox && tokenBox.dataset.token){
       tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${tokenBox.dataset.token}</code><button class="copy-btn" type="button" onclick="copyText('${tokenBox.dataset.token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;
@@ -307,8 +319,9 @@ ${signature}`;
 
       const payload = { mode, address, pdf: pdfPath, pdfHash, timestamp, signature, origin, docId, userAgent: navigator.userAgent };
       const token   = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      const verifyUrl = new URL('verify.html', location.href).toString();
-      const verifyLink = `${verifyUrl}#mode=${mode}&token=${encodeURIComponent(token)}`;
+      const verifyUrl = new URL('verify.html', location.href);
+      verifyUrl.searchParams.set('lang', lang);
+      const verifyLink = `${verifyUrl.toString()}#mode=${mode}&token=${encodeURIComponent(token)}`;
 
       const json = JSON.stringify(payload, null, 2);
       const blob = new Blob([json], { type:'application/json' });

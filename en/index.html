@@ -179,8 +179,8 @@
 
             <div class="formRow">
               <div>
-                <div class="small" style="margin-bottom:6px;">Amount ($)</div>
-                <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
+                <div class="small" style="margin-bottom:6px;">Amount (€)</div>
+                <input class="input" id="amountEUR" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Asset</div>
@@ -296,6 +296,42 @@
       </div>
     </div>
   </section>
+
+  <section id="signature" class="section section--tight">
+    <div class="container">
+      <h2 class="h2">Signature</h2>
+      <p class="p">Sign or verify BlockPilot terms without leaving the page.</p>
+      <div class="card cardPad signatureIntro">
+        <div>
+          <div class="cardTitle">Sign</div>
+          <p class="cardSub">Generates the same BPC1 signature (message + hash unchanged).</p>
+          <button class="btn btn--primary" type="button" data-signature-view="sign">Open sign</button>
+        </div>
+        <div>
+          <div class="cardTitle">Verify</div>
+          <p class="cardSub">Check a BPC1 token or an existing PDF hash.</p>
+          <button class="btn btn--ghost" type="button" data-signature-view="verify">Open verify</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="signatureModal" id="signatureModal" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
+    <div class="signatureModal__inner">
+      <div class="signatureModal__header">
+        <div>
+          <div class="cardTitle" id="signatureTitle">BlockPilot Signature</div>
+          <p class="small">Sign or verify in the same tab.</p>
+        </div>
+        <div class="signatureTabs">
+          <button class="chip" type="button" data-signature-view="sign">Sign</button>
+          <button class="chip" type="button" data-signature-view="verify">Verify</button>
+        </div>
+        <button class="signatureClose" type="button" aria-label="Close">×</button>
+      </div>
+      <iframe id="signatureFrame" title="Signature" src="" loading="lazy"></iframe>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="container">

@@ -118,9 +118,16 @@
     const xMin=Math.min(...xs), xMax=Math.max(...xs);
     const yMin=Math.min(...ys), yMax=Math.max(...ys);
     const xSpan=(xMax-xMin)||1, ySpan=(yMax-yMin)||1;
+    const yPad=Math.max(0.05*ySpan, 1);
+    const yMinPad=yMin - yPad;
+    const yMaxPad=yMax + yPad;
 
     const mapX=x=>pad+(w-pad*2)*(x-xMin)/xSpan;
-    const mapY=y=>(h-pad)-(h-pad*2)*(y-yMin)/ySpan;
+    const mapY=y=>{
+      const clamped=Math.min(yMaxPad, Math.max(yMinPad, y));
+      const span=(yMaxPad-yMinPad)||1;
+      return (h-pad)-(h-pad*2)*(clamped-yMinPad)/span;
+    };
 
     const d=points.map((p,i)=>(i?"L":"M")+mapX(p[0]).toFixed(2)+" "+mapY(p[1]).toFixed(2)).join(" ");
 
@@ -348,9 +355,9 @@
     if (empty) empty.style.display="none";
 
     const windowed = sliceWindow(series, periodDays || 365);
-    const viewSeries = windowed.length >= 2 ? windowed : series;
+    let viewSeries = windowed.length >= 2 ? windowed : series;
 
-    const base=viewSeries.length ? viewSeries : series;
+    const base=series && series.length ? series : [];
     const r1=computeReturn(base,365);
     const r3=computeReturn(base,1095);
     const r5=computeReturn(base,1825);
@@ -358,10 +365,19 @@
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
 
-    const sampled = sampleSeries(viewSeries);
-    drawSvgLine(svg, sampled);
+if (axis) { axis.innerHTML=""; axis.style.display="none"; }
 
-    installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+if (viewSeries.length > 5) {
+  const last=viewSeries[viewSeries.length-1][1];
+  const prev=viewSeries[viewSeries.length-2][1] || last;
+  if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
+}
+
+const sampled = sampleSeries(viewSeries);
+drawSvgLine(svg, sampled);
+
+installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+
   }
 
   function computeTokens(principalTokens, apr, years) {
@@ -678,13 +694,19 @@
     const verifyFrame=$("#signatureVerify");
     if (!tabBtns.length || !signFrame || !verifyFrame) return;
 
+    const inLocale=/\/(en|fr)\/signature\.html$/i.test(location.pathname);
+    const basePath=inLocale ? "../" : "./";
+    const signSrc=resolveHref(basePath+"sign.html");
+    const verifySrc=resolveHref(basePath+"verify.html");
+
     let signLoaded=false, verifyLoaded=false;
     const setActive=(view)=>{
       tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
       signFrame.classList.toggle("active", view==="sign");
       verifyFrame.classList.toggle("active", view==="verify");
-      if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html?embed=1"); signLoaded=true; }
-      if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?embed=1"); verifyLoaded=true; }
+if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html?embed=1"); signLoaded=true; }
+if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?embed=1"); verifyLoaded=true; }
+
     };
 
     tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
@@ -757,11 +779,25 @@
     }
     const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     const adoptionMeta = adoptionCache?.meta || {};
-    const adoptionVals = adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v));
-    const adoptionReliable = adoptionVals.length > 20 && Math.max(...adoptionVals) > 10 && !String(adoptionMeta?.source||"").includes("synthetic");
-    if (!adoptionReliable) {
-      if (adoptionSection) adoptionSection.style.display="none";
-      if (adoptionNotice) { adoptionNotice.style.display="block"; adoptionNotice.textContent=T.adoptionUnavailable; }
+const adoptionCount = adoptionSeries.length;
+const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
+const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
+const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
+
+const chart = document.querySelector("#adoptionChart");
+if (!adoptionReliable) {
+  if (chart) chart.style.display = "none";
+  if (adoptionNotice) {
+    adoptionNotice.style.display="block";
+    adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
+      ? T.adoptionUnavailable
+      : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
+  }
+} else {
+  if (chart) chart.style.display = "";
+  if (adoptionNotice) adoptionNotice.style.display="none";
+}
+
     }
 
     async function refresh(sym) {

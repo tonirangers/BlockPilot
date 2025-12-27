@@ -106,17 +106,17 @@
 
           <div id="yield" class="card cardPad">
             <div class="cardTitle">Rendement + prix + intérêts composés</div>
-            <p class="cardSub">Projection en $ : vous gagnez des tokens via le rendement. Si le prix bouge, la valeur en $ bouge aussi. Les intérêts sont réinvestis (effet composé).</p>
+            <p class="cardSub">Votre performance totale combine le rendement intrinsèque (tokens générés) et l’évolution de la valeur des actifs. Les intérêts sont réinvestis (effet composé).</p>
 
             <div class="yieldCards" style="margin-top:12px;">
-              <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
-              <div class="ycard"><div class="t">BTC</div><div class="n" id="aprBtc">—</div><div class="u">APR</div></div>
-              <div class="ycard"><div class="t">ETH</div><div class="n" id="aprEth">—</div><div class="u">APR</div></div>
-              <div class="ycard"><div class="t">BNB</div><div class="n" id="aprBnb">—</div><div class="u">APR</div></div>
+              <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APY (indicatif)</div></div>
+              <div class="ycard"><div class="t">BTC</div><div class="n" id="aprBtc">—</div><div class="u">APY (indicatif)</div></div>
+              <div class="ycard"><div class="t">ETH</div><div class="n" id="aprEth">—</div><div class="u">APY (indicatif)</div></div>
+              <div class="ycard"><div class="t">BNB</div><div class="n" id="aprBnb">—</div><div class="u">APY (indicatif)</div></div>
             </div>
 
           <div class="simBox">
-            <div class="simTitle">Simulation rapide</div>
+            <div class="simTitle">Simulez la croissance de votre patrimoine</div>
 
             <div class="formRow">
               <div>
@@ -143,7 +143,7 @@
               </div>
             </div>
 
-            <div class="scenarios" aria-label="Scénario prix">
+            <div class="scenarios" aria-label="Scénario prix" id="priceScenarioRow">
               <span class="small">Scénario prix</span>
               <div class="scenarioChips" id="priceScenarios"></div>
               <span id="stableScenarioNote">Stables : pas de scénario de prix.</span>
@@ -159,13 +159,13 @@
               <div>
                 <div class="small">Résultat (durée sélectionnée)</div>
                 <div class="simRow"><div class="l">Tokens avec intérêts</div><div class="r" id="cap12Tok">—</div></div>
-                <div class="simRow"><div class="l">Valeur (scénario prix)</div><div class="r" id="val12Scn">—</div></div>
-                <div class="simRow"><div class="l">Valeur prix plat</div><div class="r" id="val12Flat">—</div></div>
+                <div class="simRow simRow--value"><div class="l">Valeur (scénario prix)</div><div class="r simValueCell" id="val12Scn">—</div></div>
+                <div class="simRow simRow--value"><div class="l">Valeur prix plat</div><div class="r simValueCell" id="val12Flat">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
             </div>
 
-            <button class="btn btn--ghost" type="button" id="toggleDetails" aria-expanded="false" style="width:100%;margin-top:10px;">Voir le détail 1/3/5 ans</button>
+            <button class="btn btn--ghost" type="button" id="toggleDetails" aria-expanded="false" style="width:100%;margin-top:14px;">Voir le détail 1/3/5 ans</button>
 
             <div class="simGrid simGrid--wide compDetails" id="compDetails" aria-hidden="true">
               <div>
@@ -174,11 +174,11 @@
                 <div class="simRow"><div class="l">3 ans</div><div class="r" id="comp3Tok">—</div></div>
                 <div class="simRow"><div class="l">5 ans</div><div class="r" id="comp5Tok">—</div></div>
               </div>
-              <div>
+              <div class="simValueCol">
                 <div class="small">Valeur estimée (scénario prix)</div>
-                <div class="simRow"><div class="l">12 mois</div><div class="r" id="comp12Usd">—</div></div>
-                <div class="simRow"><div class="l">3 ans</div><div class="r" id="comp3Usd">—</div></div>
-                <div class="simRow"><div class="l">5 ans</div><div class="r" id="comp5Usd">—</div></div>
+                <div class="simRow simRow--value"><div class="l">12 mois</div><div class="r simValueCell" id="comp12Usd">—</div></div>
+                <div class="simRow simRow--value"><div class="l">3 ans</div><div class="r simValueCell" id="comp3Usd">—</div></div>
+                <div class="simRow simRow--value"><div class="l">5 ans</div><div class="r simValueCell" id="comp5Usd">—</div></div>
               </div>
             </div>
           </div>

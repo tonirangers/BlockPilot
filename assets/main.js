@@ -479,6 +479,7 @@
     const assetSel=$("#assetSel");
     const stableNote=$("#stableScenarioNote");
     const scenarioWrap=$("#priceScenarios");
+    const scenarioRow=scenarioWrap?.closest('.scenarios');
     const durationWrap=$("#durationChips");
 
     const depTok=$("#depTok");
@@ -526,7 +527,8 @@
         else ch.removeAttribute("aria-disabled");
       });
       if (stableNote) stableNote.style.display = isStable ? "block" : "none";
-      if (scenarioWrap) scenarioWrap.classList.toggle("is-stable", !!isStable);
+      if (scenarioWrap) scenarioWrap.style.display = isStable ? "none" : "flex";
+      if (scenarioRow) scenarioRow.classList.toggle("is-stable", !!isStable);
     }
 
     function priceGrowth(years){
@@ -642,10 +644,19 @@
     if (footerTerms) footerTerms.href=resolveHref(terms);
 
     const signature=cfg?.links?.signature || "../signature.html";
+    const withLang=(href)=>{
+      try {
+        const url=new URL(resolveHref(href));
+        url.searchParams.set("lang", LANG);
+        return url.toString();
+      } catch {
+        return resolveHref(href);
+      }
+    };
     const navSignature=$("#navSignature");
     const footerSignature=$("#footerSignature");
-    if (navSignature && !navSignature.getAttribute("href")?.startsWith("#")) navSignature.href=resolveHref(signature);
-    if (footerSignature && !footerSignature.getAttribute("href")?.startsWith("#")) footerSignature.href=resolveHref(signature);
+    if (navSignature && !navSignature.getAttribute("href")?.startsWith("#")) navSignature.href=withLang(signature);
+    if (footerSignature && !footerSignature.getAttribute("href")?.startsWith("#")) footerSignature.href=withLang(signature);
 
     const docs=cfg?.links?.docs || "";
     const navDocs=$("#navDocs");

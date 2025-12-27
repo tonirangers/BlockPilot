@@ -39,6 +39,12 @@
       document.documentElement.lang = lang;
       if (document.body) document.body.setAttribute('data-lang', lang);
 
+      if (!params.get('lang')) {
+        const url = new URL(location.href);
+        url.searchParams.set('lang', lang);
+        history.replaceState({}, '', url.toString());
+      }
+
       const updateNavLinks = (lng) => {
         document.querySelectorAll('.nav__links a').forEach(a => {
           const href = a.getAttribute('href');

@@ -164,7 +164,7 @@ img{max-width:100%; display:block}
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
-.cardPad{padding:18px}
+.cardPad{padding:20px}
 .cardTitle{font-size:18px; font-weight:950; margin:0 0 10px}
 .cardSub{margin:0; color:rgba(13,35,31,.68); font-weight:650}
 
@@ -287,14 +287,14 @@ img{max-width:100%; display:block}
   border:1px solid var(--line);
   border-radius:var(--radius2);
   background:rgba(238,247,245,.20);
-  padding:14px;
-  margin-top:12px;
+  padding:18px;
+  margin-top:14px;
 }
 .simTitle{font-weight:950; margin:0 0 8px; font-size:16px}
-.simGrid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+.simGrid{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
 .simGrid--wide{grid-template-columns: 1.1fr 0.9fr;}
 .simGrid--stack{grid-template-columns: 1fr;}
-.simRow{ 
+.simRow{
   display:flex; align-items:baseline; justify-content:space-between;
   border-bottom:1px dashed rgba(13,35,31,.14);
   padding:8px 0;
@@ -303,7 +303,7 @@ img{max-width:100%; display:block}
 .simRow:last-child{border-bottom:0}
 .simRow .l{color:rgba(13,35,31,.62); font-weight:900}
 .simRow .r{font-size:18px; font-weight:1000}
-.compDetails{display:none;}
+.compDetails{display:none; margin-top:14px;}
 .compDetails.is-open{display:grid;}
 
 .scenarios{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center}
@@ -322,10 +322,17 @@ img{max-width:100%; display:block}
 #stableScenarioNote{
   display:none;
   margin-left:auto;
-  color:rgba(13,35,31,.55);
-  font-weight:800;
+  color:rgba(13,35,31,.62);
+  font-weight:850;
   font-size:13px;
 }
+
+.simRow--value .l{color:rgba(13,35,31,.68);}
+.simValueCol{background:rgba(11,111,102,.05); border-radius:14px; padding:8px 10px;}
+.simValueCell{background:#fff; padding:6px 10px; border-radius:10px; box-shadow:0 4px 10px rgba(13,35,31,.06);}
+.simRow--value .simValueCell{font-weight:1000;}
+
+.simBox .btn--ghost{margin-top:14px;}
 
 .bullets{
   margin:10px 0 0;

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlockPilot — Signature</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body data-lang="fr">
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="../fr/#overview" aria-label="BlockPilot">
+          <img class="brand__logo" src="../logo.png" alt="BlockPilot" />
+        </a>
+
+        <button class="navToggle" id="navToggle" type="button" aria-expanded="false">Menu</button>
+
+        <div class="nav__links" aria-label="Navigation">
+          <a href="../fr/#performance">Performance</a>
+          <a href="../fr/#security">Sécurité</a>
+          <a id="navSignature" href="./signature.html">Signature</a>
+        </div>
+
+        <div class="lang" aria-label="Language">
+          <a class="pill is-active" href="../fr/">FR</a>
+          <a class="pill" href="../en/">EN</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section section--tight" id="signature">
+    <div class="container">
+      <h1 class="h1">Signature</h1>
+      <p class="p">Signer ou vérifier les conditions BlockPilot directement sur cette page.</p>
+
+      <div class="scenarios" style="margin-top:14px;">
+        <button class="chip" type="button" data-signature-view="sign">Signer</button>
+        <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
+      </div>
+
+      <div class="signatureFrames">
+        <iframe id="signatureSign" title="Signer" loading="lazy"></iframe>
+        <iframe id="signatureVerify" title="Vérifier" loading="lazy"></iframe>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span>© BlockPilot 2025</span>
+    </div>
+  </footer>
+
+  <script src="../assets/main.js" defer></script>
+</body>
+</html>

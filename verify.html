@@ -11,10 +11,11 @@
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#f4f4f4;margin:0;padding:40px 20px;display:flex;align-items:center;justify-content:center}
-    .embed body{background:transparent;padding:10px 0;}
+    .embed body{background:transparent;padding:0;display:block;}
     .container{max-width:680px;width:100%;background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 12px rgba(0,0,0,.05);text-align:center}
-    .embed .container{box-shadow:0 10px 24px rgba(13,35,31,.08);border:1px solid #d9ebe7;border-radius:18px;}
+    .embed .container{box-shadow:none;border:0;border-radius:0;padding:0;background:transparent;text-align:left;}
     .logo{height:150px;display:block;margin:0 auto 12px}
+    .embed .logo{display:none;}
     .tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
     .tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600;cursor:pointer;user-select:none}
     .tab.active{background:#0a6cff;color:#fff}
@@ -71,13 +72,52 @@ Signature:
   let mode = 'standard';
   let defaultPdf = PDFs[mode];
 
+  function renderCopy(){
+    document.documentElement.lang = lang;
+    const tabStd=document.getElementById('tab-standard');
+    const tabSeed=document.getElementById('tab-seed');
+    if (tabStd) tabStd.textContent=t('tabStandard');
+    if (tabSeed) tabSeed.textContent=t('tabSeed');
+    const titleEl=document.querySelector('h2');
+    if (titleEl) titleEl.textContent=t('title');
+    const intro=document.querySelector('p.muted');
+    if (intro) intro.textContent=t('intro');
+    const box=document.getElementById('inputData');
+    if (box) box.placeholder=t('placeholder');
+    const btn=document.getElementById('verifyBtn');
+    if (btn) btn.textContent=t('verifyBtn');
+  }
+
+  const STR = {
+    en: {
+      tabStandard:'Standard', tabSeed:'Seed', title:'Verify Signature', intro:'Paste your verify token (starts with BPC1.) or a full block (new or legacy).',
+      placeholder:`BPC1.eyJhZGRyZXNzIjoiMHh...  OR\n\nSigned as: 0x...\nDoc ID: BPC_Terms v1.0 (2025-11-07)\nOrigin: https://yourdomain.tld\nPDF: BPC_Terms.pdf\nPDF Hash: 0x...\nTimestamp: 2025-...\nSignature:\n0x...\n\n—OR—\n\nSigned as: 0x... as of 2025-...\nSignature:\n0x...                    ← legacy v0`,
+      verifyBtn:'🔍 Verify', signatureOnly:'The signature alone is not enough. Paste the BPC1 token generated after signing.',
+      pasteGuidance:'Paste a BPC1 token, a new-format block, or a legacy block.', invalidSig:'❌ Error verifying signature'
+    },
+    fr: {
+      tabStandard:'Standard', tabSeed:'Seed', title:'Vérifier la signature', intro:'Collez votre token de vérification (commence par BPC1.) ou un bloc complet (nouveau ou legacy).',
+      placeholder:`BPC1.eyJhZGRyZXNzIjoiMHh...  OU\n\nSigned as: 0x...\nDoc ID: BPC_Terms v1.0 (2025-11-07)\nOrigin: https://yourdomain.tld\nPDF: BPC_Terms.pdf\nPDF Hash: 0x...\nTimestamp: 2025-...\nSignature:\n0x...\n\n—OU—\n\nSigned as: 0x... as of 2025-...\nSignature:\n0x...                    ← legacy v0`,
+      verifyBtn:'🔍 Vérifier', signatureOnly:'La signature seule ne suffit pas. Collez le token BPC1 généré après signature.',
+      pasteGuidance:'Collez un token BPC1, un bloc nouveau format ou un bloc legacy.', invalidSig:'❌ Erreur lors de la vérification'
+    }
+  };
+  const getLang = () => ((localStorage.getItem('bp_lang')||document.documentElement.lang||'en').startsWith('fr') ? 'fr' : 'en');
+  let lang = getLang();
+  const t = (k) => STR[lang]?.[k] || STR.en[k] || k;
+
   document.addEventListener('DOMContentLoaded', () => {
+    lang = getLang();
+    renderCopy();
     const params = getHashParams();
     if (params.mode === 'seed') setMode('seed', false);
     if (params.token) {
       document.getElementById('inputData').value = params.token;
       verify();
     }
+  });
+  window.addEventListener('storage', (e)=>{
+    if (e.key === 'bp_lang') { lang = getLang(); renderCopy(); }
   });
   document.getElementById('tab-standard').addEventListener('click', () => setMode('standard', true));
   document.getElementById('tab-seed').addEventListener('click', () => setMode('seed', true));
@@ -111,6 +151,12 @@ Signature:
 
     // normalize CRLF → LF (Windows paste friendly)
     input = input.replace(/\r\n/g, '\n');
+
+    if (input.startsWith('0x') && !input.includes('\n')) {
+      out.classList.add('warn'); out.style.display='block';
+      out.textContent = t('signatureOnly');
+      return;
+    }
 
     try {
       let address, pdf = defaultPdf, pdfHash = null, timestamp, signature, isLegacy = false, docId = null, origin = null;
@@ -146,7 +192,7 @@ Signature:
             m = input.match(/Signed as: (0x[a-fA-F0-9]{40}) as of (.*?)\s*Signature:\s*(0x[a-fA-F0-9]{130,})/s);
             if (!m) {
               out.classList.add('err'); out.style.display='block';
-              out.textContent = '⚠️ Paste a BPC1 token, a new-format block, or a legacy block.'; return;
+              out.textContent = t('pasteGuidance'); return;
             }
             [, address, timestamp, signature] = m;
             isLegacy = true;
@@ -205,7 +251,7 @@ PDF: <code>${pdf}</code><br>` +
     } catch (e) {
       console.error(e);
       out.classList.add('err'); out.style.display='block';
-      out.textContent = '❌ Error verifying signature';
+      out.textContent = t('invalidSig');
     }
   }
 </script>

@@ -156,9 +156,9 @@ img{max-width:100%; display:block}
 
 .heroPoints{margin:6px 0 12px; padding-left:18px; color:rgba(13,35,31,.78); font-weight:750;}
 .heroPoints li{margin:6px 0;}
-.tip{text-decoration:underline dotted; text-decoration-thickness:2px;}
+.tip{text-decoration:underline; text-decoration-color:rgba(13,35,31,.35); text-underline-offset:3px;}
 
-.card{
+.card{ 
   background:var(--card);
   border:1px solid var(--line);
   border-radius:var(--radius);
@@ -167,6 +167,7 @@ img{max-width:100%; display:block}
 .cardPad{padding:20px}
 .cardTitle{font-size:18px; font-weight:950; margin:0 0 10px}
 .cardSub{margin:0; color:rgba(13,35,31,.68); font-weight:650}
+.cardHint{margin:4px 0 10px; color:rgba(13,35,31,.62); font-weight:750; font-size:13px;}
 
 .miniGrid{display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px}
 .mini{
@@ -221,12 +222,13 @@ img{max-width:100%; display:block}
   background:linear-gradient(180deg, rgba(238,247,245,.26), rgba(255,255,255,.88));
   overflow:hidden;
   position:relative;
-  padding:8px 10px 26px;
+  padding:10px 12px 38px;
 }
-.chartSvg{position:absolute; inset:8px 10px 26px; display:block; width:calc(100% - 20px); height:calc(100% - 34px);}
+.chartSvg{position:absolute; top:6px; left:6px; right:6px; bottom:34px; display:block; width:auto; height:auto;}
 
-.chartAxis{display:none;}
-.chartAxis .axisTick{position:relative; transform:translateX(-50%);}
+.chartAxis{display:none; position:absolute; left:12px; right:12px; bottom:10px; height:18px; font-size:12px; color:rgba(13,35,31,.55); pointer-events:none;}
+.chartAxis .axisTick{position:absolute; transform:translateX(-50%); white-space:nowrap;}
+.chartAxis .axisTick:last-child{transform:translateX(-50%);}
 .chartEmpty{
   display:flex;
   height:100%;
@@ -239,9 +241,7 @@ img{max-width:100%; display:block}
 }
 .chartHover{
   position:absolute;
-  right:10px;
-  top:10px;
-  background:rgba(255,255,255,.92);
+  background:rgba(255,255,255,.96);
   border:1px solid var(--line);
   border-radius:12px;
   padding:6px 10px;
@@ -294,9 +294,9 @@ img{max-width:100%; display:block}
 }
 .simTitle{font-weight:950; margin:0 0 8px; font-size:16px}
 .simGrid{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
-.simGrid--wide{grid-template-columns: 1.1fr 0.9fr;}
+.simGrid--wide{grid-template-columns: repeat(2,minmax(0,1fr));}
 .simGrid--stack{grid-template-columns: 1fr;}
-.simRow{
+.simRow{ 
   display:grid;
   grid-template-columns: 1fr auto;
   align-items:baseline;
@@ -308,8 +308,9 @@ img{max-width:100%; display:block}
 .simRow:last-child{border-bottom:0}
 .simRow .l{color:rgba(13,35,31,.62); font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:0;}
 .simRow .r{font-size:18px; font-weight:1000; text-align:right;}
-.compDetails{display:none; margin-top:14px;}
+.compDetails{display:none; margin-top:14px; align-items:start;}
 .compDetails.is-open{display:grid;}
+.compDetails .simRow .l{white-space:normal; overflow:visible;}
 
 .scenarios{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center}
 .scenarioChips{display:flex; gap:8px; flex-wrap:wrap;}

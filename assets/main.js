@@ -362,49 +362,81 @@
     return series.filter(p=>p[0]>=min);
   }
 
-  function setAxisLabels(el, series){
+  function setAxisLabels(el, series, periodDays){
     if (!el) return;
     el.innerHTML="";
     if (!series || !series.length) return;
     const first=series[0][0], last=series[series.length-1][0];
-    const mid=first + (last-first)/2;
-    [first,mid,last].forEach((ts,i)=>{
-      const span=document.createElement("span");
-      span.textContent=fmtDate(ts);
-      span.className="axisTick";
-      span.style.left = (i===0?0:i===1?50:100)+"%";
-      el.appendChild(span);
+    const span=last-first || 1;
+    const ticks=[];
+    const pushTick=(ts,label)=>{ if (ts>=first && ts<=last && !ticks.find(t=>t.ts===ts)) ticks.push({ ts, label }); };
+
+    if (periodDays>=1825){
+      const startYear=new Date(first).getFullYear();
+      const endYear=new Date(last).getFullYear();
+      for (let y=startYear; y<=endYear; y++) {
+        pushTick(Date.UTC(y,0,1), String(y));
+      }
+    } else if (periodDays>=1095){
+      const startYear=new Date(first).getFullYear();
+      const endYear=new Date(last).getFullYear();
+      for (let y=startYear; y<=endYear; y++) {
+        pushTick(Date.UTC(y,0,1), String(y));
+      }
+    } else {
+      const date=new Date(first);
+      for (let i=0;i<13;i+=3){
+        const ts=Date.UTC(date.getUTCFullYear(), date.getUTCMonth()+i, 1);
+        const d=new Date(ts);
+        pushTick(ts, d.toLocaleString(undefined,{month:'short'}));
+      }
+      pushTick(last, new Date(last).toLocaleString(undefined,{month:'short'}));
+    }
+
+    ticks.forEach(t=>{
+      const spanEl=document.createElement("span");
+      spanEl.textContent=t.label;
+      spanEl.className="axisTick";
+      spanEl.style.left = `${((t.ts-first)/span)*100}%`;
+      el.appendChild(spanEl);
     });
+    el.style.display = ticks.length ? "block" : "none";
   }
 
   function installHover(boxSel, hoverSel, series, fmtVal=fmtNum, isIndex=false){
     const box=$(boxSel);
     const hover=$(hoverSel);
+    const svg=box?.querySelector('svg');
     if (!box || !hover){ return; }
     if (!series || !series.length){ hover.style.display="none"; return; }
     const first=series[0][0];
     const last=series[series.length-1][0];
     const span=last-first || 1;
-    const show=(p, clientX)=>{
+    const clamp=(v,min,max)=>Math.min(max, Math.max(min, v));
+    const show=(p, clientX, clientY)=>{
       const val = fmtVal ? fmtVal(p[1]) : (isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0));
       const label=isIndex ? `${LANG==="fr"?"Indice":"Index"} ${val}` : val;
       hover.textContent = `${label} · ${fmtDate(p[0])}`;
+      const rect=box.getBoundingClientRect();
+      const leftBase = clientX !== undefined ? clientX-rect.left - hover.offsetWidth/2 : rect.width-hover.offsetWidth-10;
+      const topBase  = clientY !== undefined ? clientY-rect.top - hover.offsetHeight-8 : 10;
+      hover.style.left = `${clamp(leftBase, 6, rect.width - hover.offsetWidth - 6)}px`;
+      hover.style.top = `${clamp(topBase, 6, rect.height - hover.offsetHeight - 6)}px`;
       hover.style.display="block";
-      if (clientX !== undefined) {
-        const rect=box.getBoundingClientRect();
-        const left=Math.min(rect.width - hover.offsetWidth - 8, Math.max(8, clientX-rect.left - hover.offsetWidth/2));
-        hover.style.right = "auto";
-        hover.style.left = `${left}px`;
-      }
+      hover.style.right="auto";
     };
     box.onmousemove = (e)=>{
       const rect=box.getBoundingClientRect();
-      const padFrac = 20/1000;
-      const rawRatio = (e.clientX-rect.left)/rect.width;
-      const ratio = Math.min(1-padFrac, Math.max(padFrac, rawRatio));
-      const t = first + span*ratio;
+      const plotRect=svg?.getBoundingClientRect?.();
+      const insidePlot = plotRect && e.clientX>=plotRect.left && e.clientX<=plotRect.right && e.clientY>=plotRect.top && e.clientY<=plotRect.bottom;
+      if (plotRect && !insidePlot) { hover.style.display="none"; return; }
+      const baseLeft = plotRect ? plotRect.left : rect.left;
+      const baseWidth = plotRect ? plotRect.width : rect.width;
+      const ratioRaw = (e.clientX-baseLeft)/baseWidth;
+      if (ratioRaw<0 || ratioRaw>1) { hover.style.display="none"; return; }
+      const t = first + span*ratioRaw;
       const p = nearestByTime(series, t);
-      if (p) show(p, e.clientX);
+      if (p) show(p, e.clientX, e.clientY);
     };
     box.onmouseleave = ()=>{ hover.style.display="none"; };
     show(series[series.length-1]);
@@ -450,6 +482,7 @@
 
       const sampled = sampleSeries(viewSeries);
       drawSvgLine(svg, sampled);
+      if (axis) setAxisLabels(axis, sampled, periodDays || 365);
 
       installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
 

@@ -42,6 +42,7 @@
     .doc-details.show{display:flex;}
     .token-box{background:rgba(11,111,102,.08);border:1px solid var(--line);padding:12px;border-radius:12px;margin-top:8px;font-size:14px;word-break:break-word;}
     .token-box code{background:rgba(255,255,255,.8);padding:6px;border-radius:8px;display:block;margin:6px 0;}
+    .sign-note{font-size:14px;color:var(--muted);margin:6px 0 10px;font-weight:750;}
   </style>
 
 </head>
@@ -74,6 +75,7 @@
 
       <h1 id="title">Sign Terms &amp; Conditions</h1>
       <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
+      <p class="sign-note" id="signNote"></p>
 
       <div class="sign-row">
         <a id="viewPdfBtn" class="sign-btn ghost" href="./BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
@@ -113,6 +115,7 @@
       titleStandard:'Sign Terms & Conditions', titleSeed:'Sign Terms & Conditions (Seed)',
       subtitleStandard:'By signing, you confirm you’ve read and agree to the official BPC Terms.',
       subtitleSeed:'By signing, you confirm you’ve read and agree to the official BPC Seed Terms.',
+      offchainNote:'Off-chain signature (0 gas) — no transaction is sent. This signature proves acceptance of the Terms.',
       viewPdf:'📄 View PDF Terms',
       docLabel:'Document: BPC Terms (PDF)',
       techDetails:'Technical details',
@@ -129,6 +132,7 @@
       titleStandard:'Signer les Conditions', titleSeed:'Signer les Conditions (Seed)',
       subtitleStandard:'En signant, vous confirmez avoir lu et accepté les Conditions BPC.',
       subtitleSeed:'En signant, vous confirmez avoir lu et accepté les Conditions BPC Seed.',
+      offchainNote:'Signature off-chain (0 gas) — aucune transaction n’est envoyée. Cette signature sert de preuve d’acceptation des Conditions.',
       viewPdf:'📄 Voir le PDF',
       docLabel:'Document : Conditions BPC (PDF)',
       techDetails:'Détails techniques',
@@ -179,6 +183,8 @@
     if (hashLabel) hashLabel.textContent = t('fingerprint');
     const copyHashBtn=document.getElementById('copyHash');
     if (copyHashBtn) copyHashBtn.textContent = t('copyHash');
+    const signNote=document.getElementById('signNote');
+    if (signNote) signNote.textContent = t('offchainNote');
     const tokenBox=document.getElementById('tokenBox');
     if (tokenBox && tokenBox.dataset.token){
       tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${tokenBox.dataset.token}</code><button class="copy-btn" type="button" onclick="copyText('${tokenBox.dataset.token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;

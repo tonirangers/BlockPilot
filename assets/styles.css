@@ -147,8 +147,16 @@ img{max-width:100%; display:block}
   color:#fff;
 }
 .btn--primary:hover{background:var(--brand2)}
+.btn--text{background:transparent; border:0; box-shadow:none; padding:0; color:var(--brand2); font-weight:900;}
+.btn--text:hover{color:var(--brand)}
 .btn--ghost{background:rgba(255,255,255,.72)}
 .btn--ghost:hover{background:#fff}
+.btn--text{background:none; border:none; box-shadow:none; padding:10px 0; text-decoration:underline; text-underline-offset:4px; color:var(--muted);}
+.btn--text:hover{color:var(--ink)}
+
+.heroPoints{margin:6px 0 12px; padding-left:18px; color:rgba(13,35,31,.78); font-weight:750;}
+.heroPoints li{margin:6px 0;}
+.tip{text-decoration:underline dotted; text-decoration-thickness:2px;}
 
 .card{
   background:var(--card);
@@ -188,6 +196,9 @@ img{max-width:100%; display:block}
   color:rgba(13,35,31,.70);
 }
 .tabBtn.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38); color:var(--ink)}
+.periodTabs{display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 8px}
+.periodTabs .chip{border:1px solid rgba(13,35,31,.12); background:#fff; border-radius:999px; padding:8px 10px; font-weight:850; cursor:pointer; color:rgba(13,35,31,.70);}
+.periodTabs .chip.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38); color:var(--ink)}
 
 .kpiRow{display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin:6px 0 10px}
 .kpi{
@@ -198,6 +209,9 @@ img{max-width:100%; display:block}
 }
 .kpi .k{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:rgba(13,35,31,.55); font-weight:900}
 .kpi .v{font-size:22px; font-weight:950; margin-top:6px}
+.kpiRow--clickable{gap:12px}
+.kpiRow--clickable .kpi{cursor:pointer; text-align:left; transition:background .15s, border-color .15s; width:100%; display:block}
+.kpiRow--clickable .kpi.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38)}
 
 .chartBox{
   height:260px;
@@ -208,6 +222,8 @@ img{max-width:100%; display:block}
   position:relative;
 }
 .chartSvg{position:absolute; inset:0}
+.chartAxis{position:absolute; inset: auto 12px 8px 12px; display:flex; justify-content:space-between; font-size:12px; color:rgba(13,35,31,.55); pointer-events:none;}
+.chartAxis .axisTick{position:relative; transform:translateX(-50%);}
 .chartEmpty{
   display:flex;
   height:100%;
@@ -218,6 +234,31 @@ img{max-width:100%; display:block}
   padding:14px;
   text-align:center;
 }
+.chartHover{
+  position:absolute;
+  right:8px;
+  top:8px;
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:6px 10px;
+  font-weight:800;
+  font-size:13px;
+  color:var(--ink);
+  box-shadow:0 10px 24px rgba(13,35,31,.08);
+  display:none;
+  pointer-events:none;
+}
+.chartRange,.chartUpdate{position:absolute; font-size:12px; color:rgba(13,35,31,.55);}
+.chartRange{left:12px; bottom:10px;}
+.chartUpdate{right:12px; bottom:10px;}
+
+.adoptionBox{margin-top:18px; border-top:1px solid var(--line); padding-top:12px;}
+.adoptionHeader{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+.adoptionHeader .periodTabs{margin-left:auto;}
+.chartRange{position:absolute; left:12px; bottom:10px; font-size:12px; color:rgba(13,35,31,.55);}
+.chartUpdate{position:absolute; right:12px; bottom:10px; font-size:12px; color:rgba(13,35,31,.55);}
+.chartBox--mini{height:220px; margin-top:10px;}
 
 .yieldCards{display:grid; grid-template-columns: repeat(2,1fr); gap:10px}
 .ycard{
@@ -253,7 +294,9 @@ img{max-width:100%; display:block}
 }
 .simTitle{font-weight:950; margin:0 0 8px; font-size:16px}
 .simGrid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
-.simRow{
+.simGrid--wide{grid-template-columns: 1.1fr 0.9fr;}
+.simGrid--stack{grid-template-columns: 1fr;}
+.simRow{ 
   display:flex; align-items:baseline; justify-content:space-between;
   border-bottom:1px dashed rgba(13,35,31,.14);
   padding:8px 0;
@@ -262,9 +305,12 @@ img{max-width:100%; display:block}
 .simRow:last-child{border-bottom:0}
 .simRow .l{color:rgba(13,35,31,.62); font-weight:900}
 .simRow .r{font-size:18px; font-weight:1000}
+.compDetails{display:none;}
+.compDetails.is-open{display:grid;}
 
 .scenarios{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center}
-.scenarios .chip{
+.scenarioChips{display:flex; gap:8px; flex-wrap:wrap;}
+.scenarioChips .chip{
   border:1px solid rgba(13,35,31,.12);
   background:#fff;
   border-radius:999px;
@@ -273,8 +319,8 @@ img{max-width:100%; display:block}
   cursor:pointer;
   color:rgba(13,35,31,.70);
 }
-.scenarios .chip.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38); color:var(--ink)}
-.scenarios .chip.is-disabled{opacity:.45; cursor:not-allowed}
+.scenarioChips .chip.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38); color:var(--ink)}
+.scenarioChips .chip.is-disabled{opacity:.45; cursor:not-allowed}
 #stableScenarioNote{
   display:none;
   margin-left:auto;
@@ -305,6 +351,13 @@ img{max-width:100%; display:block}
 }
 .footer a:hover{color:var(--ink)}
 .footer a.disabled{color:rgba(13,35,31,.30); pointer-events:none; cursor:not-allowed; text-decoration:none}
+
+.signatureIntro{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:14px; align-items:start;}
+.signatureIntro .btn{margin-top:10px;}
+.signatureFrames{margin-top:16px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow);}
+.signatureFrames iframe{display:none; width:100%; border:0; min-height:640px; background:#fff;}
+.signatureFrames iframe.active{display:block;}
+.no-scroll{overflow:hidden;}
 
 @media (max-width: 980px){
   .hero__grid{grid-template-columns:1fr}

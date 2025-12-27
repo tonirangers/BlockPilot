@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BPC — Verify (Standard & Seed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script>const EMBED = new URLSearchParams(location.search).get('embed')==='1'; if (EMBED) document.documentElement.classList.add('embed');</script>
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#f4f4f4;margin:0;padding:40px 20px;display:flex;align-items:center;justify-content:center}
+    .embed body{background:transparent;padding:10px 0;}
     .container{max-width:680px;width:100%;background:#fff;padding:30px;border-radius:16px;box-shadow:0 0 12px rgba(0,0,0,.05);text-align:center}
+    .embed .container{box-shadow:0 10px 24px rgba(13,35,31,.08);border:1px solid #d9ebe7;border-radius:18px;}
     .logo{height:150px;display:block;margin:0 auto 12px}
     .tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
     .tab{padding:8px 12px;border-radius:999px;background:#eaf2ff;color:#0a6cff;text-decoration:none;font-weight:600;cursor:pointer;user-select:none}

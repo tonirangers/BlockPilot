@@ -312,9 +312,14 @@ img{max-width:100%; display:block}
 .simRow:last-child{border-bottom:0}
 .simRow .l{color:rgba(13,35,31,.62); font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:0;}
 .simRow .r{font-size:18px; font-weight:1000; text-align:right; white-space:nowrap;}
-.compDetails{display:none; margin-top:14px; align-items:start;}
-.compDetails.is-open{display:grid;}
-.compDetails .simRow .l{white-space:normal; overflow:visible;}
+.compDetails{display:none; margin-top:14px;}
+.compDetails.is-open{display:block;}
+.simDetailTable{display:grid; gap:10px;}
+.simDetailHeader,.simDetailRow{display:grid; grid-template-columns: minmax(92px,1fr) minmax(0,1.1fr) minmax(0,1.1fr); column-gap:12px; align-items:center;}
+.simDetailHeader{font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:rgba(13,35,31,.62); font-weight:950;}
+.simDetailRow{border:1px dashed rgba(13,35,31,.14); border-radius:14px; padding:10px 12px; background:rgba(238,247,245,.26);}
+.simDetailLabel{font-weight:900; color:rgba(13,35,31,.70); white-space:nowrap;}
+.simDetailValue{font-weight:1000; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 
 .scenarios{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center}
 .scenarioChips{display:flex; gap:8px; flex-wrap:wrap;}
@@ -353,6 +358,7 @@ img{max-width:100%; display:block}
 }
 .simRow--primaryValue .l{color:var(--ink); font-size:15px;}
 .simRow--primaryValue .r{font-size:22px;}
+.simRow.is-redundant{opacity:.68;}
 
 .simSummaryMeta{display:grid; gap:6px;}
 .simSummaryMeta .simRow{border-bottom:0; padding:6px 0;}
@@ -434,6 +440,7 @@ img{max-width:100%; display:block}
   .yieldCards{grid-template-columns:1fr}
   .formRow{grid-template-columns:1fr}
   .simGrid{grid-template-columns:1fr}
+  .simDetailHeader,.simDetailRow{grid-template-columns:minmax(82px,1fr) minmax(0,1fr) minmax(0,1fr); column-gap:8px;}
   #stableScenarioNote{margin-left:0}
 }
 @media (max-width: 390px){

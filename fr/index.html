@@ -42,9 +42,8 @@
           </p>
 
           <ul class="heroPoints" aria-label="Clés">
-            <li>Coffre à votre nom (vous restez propriétaire)</li>
-            <li>Allocation + rendement opérés (protocoles publics)</li>
-            <li>On/off-ramp (IBAN, carte, etc.)</li>
+            <li>J’opère l’allocation et le rendement (protocoles publics), vous gardez la propriété.</li>
+            <li>Entrées/sorties simples : IBAN, carte, crypto.</li>
           </ul>
 
           <div class="ctaRow">
@@ -58,15 +57,15 @@
           <div class="miniGrid">
             <div class="mini">
               <strong>1) Coffre + règle</strong>
-              <span>Coffre (Safe) à votre nom avec la règle de retrait.</span>
+              <span>Configuration du coffre (Safe) + règle de retrait adaptée.</span>
             </div>
             <div class="mini">
               <strong>2) Dépôt / retrait</strong>
-              <span>On/off-ramp guidé (IBAN, carte, etc.).</span>
+              <span>Dépôt / retrait guidé (IBAN, carte, on/off-ramp).</span>
             </div>
             <div class="mini">
               <strong>3) Stratégie + relevé</strong>
-              <span>Allocation, rendement, relevé périodique.</span>
+              <span>Allocation, rendement, revue périodique.</span>
             </div>
           </div>
         </aside>
@@ -77,14 +76,10 @@
   <section id="performance" class="section section--tight">
     <div class="container">
       <h2 class="h2">Performance & rendement</h2>
-      <p class="p">Données “long run” (1–3–5 ans) : contexte marché + rendement estimatif par classe d’actifs. Chiffres indicatifs.</p>
 
       <div class="grid2" style="margin-top:18px;">
         <div class="card cardPad">
           <div class="cardTitle">Contexte marché</div>
-          <p class="small">
-            Capitalisation totale crypto hors stables + coins majeurs (long run 1/3/5 ans).
-          </p>
 
           <div class="marketTabs" style="margin-top:12px;">
             <button class="tabBtn" type="button" data-market="total">Market cap</button>
@@ -93,16 +88,10 @@
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
           </div>
 
-          <div class="periodTabs" aria-label="Période">
-            <button class="chip" type="button" data-period="365">1 an</button>
-            <button class="chip" type="button" data-period="1095">3 ans</button>
-            <button class="chip" type="button" data-period="1825">5 ans</button>
-          </div>
-
-          <div class="kpiRow">
-            <div class="kpi"><div class="k">1 an</div><div class="v" id="kpi1y">—</div></div>
-            <div class="kpi"><div class="k">3 ans</div><div class="v" id="kpi3y">—</div></div>
-            <div class="kpi"><div class="k">5 ans</div><div class="v" id="kpi5y">—</div></div>
+          <div class="kpiRow kpiRow--clickable" id="marketPeriods">
+            <button class="kpi" type="button" data-period-card="365"><div class="k">1 an</div><div class="v" id="kpi1y">—</div></button>
+            <button class="kpi" type="button" data-period-card="1095"><div class="k">3 ans</div><div class="v" id="kpi3y">—</div></button>
+            <button class="kpi" type="button" data-period-card="1825"><div class="k">5 ans</div><div class="v" id="kpi5y">—</div></button>
           </div>
 
           <div class="chartBox" id="marketChart">
@@ -118,8 +107,8 @@
           <div class="adoptionBox">
             <div class="adoptionHeader">
               <div>
-                <div class="cardTitle">Cash on-chain</div>
-                <p class="small">Stablecoins en circulation (USD), index base 100.</p>
+                <div class="cardTitle">Adoption</div>
+                <p class="small">DeFi TVL global (USD).</p>
               </div>
               <div class="periodTabs" aria-label="Période adoption">
                 <button class="chip" type="button" data-adoption-period="365">1 an</button>
@@ -145,7 +134,7 @@
 
         <div id="yield" class="card cardPad">
           <div class="cardTitle">Rendement + prix + intérêts composés</div>
-          <p class="cardSub">Tout en $. Vous gagnez des tokens, leur prix peut bouger, les intérêts se réinvestissent.</p>
+          <p class="cardSub">Chiffres en $. Vous gagnez des tokens, leur prix peut bouger, les intérêts se réinvestissent.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -280,27 +269,17 @@
   <section id="signature" class="section section--tight">
     <div class="container">
       <h2 class="h2">Signature</h2>
-      <p class="p">Signer ou vérifier les conditions BlockPilot sans changer la logique. L’outil reste le même, intégré au site.</p>
+      <p class="p">Signer ou vérifier les conditions BlockPilot avec l’outil existant, intégré au site.</p>
       <div class="scenarios" style="margin-top:14px;">
         <button class="chip" type="button" data-signature-view="sign">Signer</button>
         <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
       </div>
+      <div class="signatureFrames">
+        <iframe id="signatureSign" title="Signer" loading="lazy"></iframe>
+        <iframe id="signatureVerify" title="Vérifier" loading="lazy"></iframe>
+      </div>
     </div>
   </section>
-
-  <div class="signatureModal" id="signatureModal" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
-    <div class="signatureModal__inner">
-      <div class="signatureModal__header">
-        <div class="cardTitle" id="signatureTitle">Signature</div>
-        <div class="scenarios">
-          <button class="chip" type="button" data-signature-view="sign">Signer</button>
-          <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
-        </div>
-        <button class="btn btn--ghost signatureClose" type="button" aria-label="Fermer">×</button>
-      </div>
-      <iframe id="signatureFrame" title="Signature"></iframe>
-    </div>
-  </div>
 
   <footer class="footer">
     <div class="container">

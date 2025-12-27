@@ -354,9 +354,10 @@
     const windowed = sliceWindow(series, periodDays || 365);
     const viewSeries = windowed.length >= 2 ? windowed : series;
 
-    const r1=computeReturn(series,365);
-    const r3=computeReturn(series,1095);
-    const r5=computeReturn(series,1825);
+    const base=viewSeries.length ? viewSeries : series;
+    const r1=computeReturn(base,365);
+    const r3=computeReturn(base,1095);
+    const r5=computeReturn(base,1825);
     if (k1) k1.textContent=fmtPct(r1);
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
@@ -605,7 +606,6 @@
 
     $$('a[href^="#"]').forEach(a => {
       a.addEventListener("click", (e) => {
-        if (a.id === "navSignature" || a.dataset.signatureLink === "true") return;
         const href=a.getAttribute("href");
         if (!href || href==="#") return;
         const el=document.getElementById(href.slice(1));
@@ -642,20 +642,15 @@
     });
   }
 
-  async function loadTotalExStableSnapshot(){
+  async function loadMarketCapSnapshot(){
     if (location.protocol === "file:") return null;
     try {
-      const global = await fetchJSON("https://api.coingecko.com/api/v3/global", 9000);
-      const stableIds=["tether","usd-coin","dai","first-digital-usd","frax","true-usd","usdd"];
-      const ids=stableIds.join(",");
-      const st = await fetchJSON(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=50&page=1&sparkline=false`, 9000);
-      const total = Number(global?.data?.total_market_cap?.usd);
-      const change = Number(global?.data?.market_cap_change_percentage_24h_usd);
-      const stableCap = Array.isArray(st) ? st.reduce((s,c)=>s+Number(c?.market_cap||0),0) : 0;
-      if (!isFinite(total) || total<=0 || !isFinite(stableCap)) return null;
-      const value = total - stableCap;
-      const updatedAt = Number(global?.data?.updated_at)*1000 || Date.now();
-      return { value, change24h: change, updatedAt, source:"CoinGecko" };
+      const snap = await fetchJSON("https://api.coingecko.com/api/v3/global", 9000);
+      const total = Number(snap?.data?.total_market_cap?.usd);
+      const change = Number(snap?.data?.market_cap_change_percentage_24h_usd);
+      if (!isFinite(total) || total<=0) return null;
+      const updatedAt = Number(snap?.data?.updated_at)*1000 || Date.now();
+      return { value: total, change24h: change, updatedAt, source:"CoinGecko" };
     } catch { return null; }
   }
 
@@ -684,9 +679,10 @@
     const vs = viewSeries.length?viewSeries:series;
     drawSvgLine(svg, sampleSeries(vs));
     setAxisLabels(axis, vs);
-    const r1=computeReturn(series,365);
-    const r3=computeReturn(series,1095);
-    const r5=computeReturn(series,1825);
+    const base = vs.length ? vs : series;
+    const r1=computeReturn(base,365);
+    const r3=computeReturn(base,1095);
+    const r5=computeReturn(base,1825);
     if (k1) k1.textContent=fmtPct(r1);
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
@@ -698,53 +694,31 @@
       const lbl = LANG === "fr" ? "Période" : "Range";
       range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
     }
-    installHover("#adoptionChart", "#adoptionHover", vs, (v)=>fmtNum(v,1), true);
+    installHover("#adoptionChart", "#adoptionHover", vs, (v)=>fmtUsd(v,0), false);
   }
 
-  function initSignatureModal(){
-    const modal=$("#signatureModal");
-    const frame=$("#signatureFrame");
-    if (!modal || !frame) return;
-    const closeBtn=$(".signatureClose");
+  function initSignatureEmbeds(){
     const tabBtns=$$('[data-signature-view]');
+    const signFrame=$("#signatureSign");
+    const verifyFrame=$("#signatureVerify");
+    if (!tabBtns.length || !signFrame || !verifyFrame) return;
 
-    const navSig=$("#navSignature");
-    const footerSig=$("#footerSignature");
-
+    let signLoaded=false, verifyLoaded=false;
     const setActive=(view)=>{
       tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
-    };
-
-    const open=(view="sign")=>{
-      const src=view==="verify" ? fromRoot("verify.html") : fromRoot("sign.html");
-      frame.src=src;
-      modal.classList.add("is-open");
-      document.body.classList.add("no-scroll");
-      setActive(view);
-    };
-
-    const close=()=>{
-      modal.classList.remove("is-open");
-      document.body.classList.remove("no-scroll");
+      signFrame.classList.toggle("active", view==="sign");
+      verifyFrame.classList.toggle("active", view==="verify");
+      if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html"); signLoaded=true; }
+      if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html"); verifyLoaded=true; }
     };
 
     tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
-      const view=b.dataset.signatureView||"sign";
       e.preventDefault();
-      open(view);
+      const view=b.dataset.signatureView||"sign";
+      setActive(view);
     }));
 
-    [navSig, footerSig].forEach(link => {
-      if (!link) return;
-      link.dataset.signatureLink="true";
-      link.addEventListener("click", (e)=>{ e.preventDefault(); open("sign"); });
-    });
-
-    if (closeBtn) closeBtn.addEventListener("click", close);
-    modal.addEventListener("click", (e)=>{ if (e.target===modal) close(); });
-    document.addEventListener("keydown", (e)=>{ if (e.key==="Escape" && modal.classList.contains("is-open")) close(); });
-
-    if (location.hash==="#signature") open("sign");
+    setActive(location.hash==="#signature" ? "sign" : "sign");
   }
 
   async function init() {
@@ -763,7 +737,7 @@
     initCalc(cfg, pricesUSD, yields);
 
     const marketBtns = $$('[data-market]');
-    const periodBtns = $$('[data-period]');
+    const periodCards = $$('[data-period-card]');
     const adoptionBtns = $$('[data-adoption-period]');
     const storedMarket = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || "total";
     const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
@@ -774,14 +748,14 @@
     let periodDays = storedPeriod;
     let adoptionPeriod = storedAdoption;
     setActiveTab("[data-market]", active);
-    setActiveChip("[data-period]", String(periodDays));
+    setActiveChip("[data-period-card]", String(periodDays));
     setActiveChip("[data-adoption-period]", String(adoptionPeriod));
 
     const cacheMarket = await firstJSON(
       [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
       null
     );
-    const cacheTotalEx = await firstJSON(
+    const cacheCap = await firstJSON(
       [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
       { series:[] }
     );
@@ -801,12 +775,12 @@
       let series=[], source="", isIndex=sym==="total", updatedAt=Date.now();
 
       if (sym === "total") {
-        const fallbackSeries = normalizeSeriesDaily((cacheTotalEx?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
+        const fallbackSeries = normalizeSeriesDaily((cacheCap?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
         series = fallbackSeries;
-        source = cacheTotalEx?.meta?.source || "cache";
-        updatedAt = Date.parse(cacheTotalEx?.meta?.last_updated) || updatedAt;
+        source = cacheCap?.meta?.source || "cache";
+        updatedAt = Date.parse(cacheCap?.meta?.last_updated) || updatedAt;
 
-        const snap = await loadTotalExStableSnapshot();
+        const snap = await loadMarketCapSnapshot();
         if (snap && isFinite(snap.value)) {
           const lastTs = series[series.length-1]?.[0] || 0;
           const point=[Date.now(), Number((snap.value/1e9).toFixed(2))];
@@ -814,6 +788,7 @@
           source = snap.source || "live";
           updatedAt = snap.updatedAt || point[0];
         }
+        isIndex=false;
       } else {
         const cache = cacheSeries(sym);
         series = cache;
@@ -840,12 +815,12 @@
       await refresh(active);
     }));
 
-    periodBtns.forEach(b => b.addEventListener("click", async () => {
-      const d=Number(b.dataset.period||0);
+    periodCards.forEach(b => b.addEventListener("click", async () => {
+      const d=Number(b.dataset.periodCard||0);
       if (!d || d===periodDays) return;
       periodDays=d;
       localStorage.setItem("bp_market_period", String(periodDays));
-      setActiveChip("[data-period]", String(periodDays));
+      setActiveChip("[data-period-card]", String(periodDays));
       await refresh(active);
     }));
 
@@ -864,6 +839,7 @@
 
     await refresh(active);
     await refreshAdoption();
+    initSignatureEmbeds();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

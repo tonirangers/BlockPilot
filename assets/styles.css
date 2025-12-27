@@ -209,6 +209,9 @@ img{max-width:100%; display:block}
 }
 .kpi .k{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:rgba(13,35,31,.55); font-weight:900}
 .kpi .v{font-size:22px; font-weight:950; margin-top:6px}
+.kpiRow--clickable{gap:12px}
+.kpiRow--clickable .kpi{cursor:pointer; text-align:left; transition:background .15s, border-color .15s; width:100%; display:block}
+.kpiRow--clickable .kpi.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38)}
 
 .chartBox{
   height:260px;
@@ -351,14 +354,9 @@ img{max-width:100%; display:block}
 
 .signatureIntro{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:14px; align-items:start;}
 .signatureIntro .btn{margin-top:10px;}
-.signatureModal{position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; padding:20px; z-index:80;}
-.signatureModal.is-open{display:flex;}
-.signatureModal__inner{background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:0 20px 60px rgba(0,0,0,.12); width: min(1020px, 96vw); height: min(720px, 90vh); display:flex; flex-direction:column; overflow:hidden;}
-.signatureModal__header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line); background:rgba(238,247,245,.86);}
-.signatureModal__header .chip{border:1px solid rgba(13,35,31,.14); background:#fff;}
-.signatureModal__header .chip.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38);}
-.signatureClose{border:1px solid rgba(13,35,31,.14); background:#fff; border-radius:12px; padding:8px 12px; font-size:18px; cursor:pointer;}
-.signatureModal iframe{flex:1; border:0; width:100%;}
+.signatureFrames{margin-top:16px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow);}
+.signatureFrames iframe{display:none; width:100%; border:0; min-height:640px; background:#fff;}
+.signatureFrames iframe.active{display:block;}
 .no-scroll{overflow:hidden;}
 
 @media (max-width: 980px){

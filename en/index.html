@@ -35,16 +35,15 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — You keep the key, we pilot yield & allocation.</h1>
+          <h1 class="h1">BlockPilot — You keep the key, we run yield & allocation.</h1>
 
           <p class="lead">
-            One client = one vault. Vault in your name. Withdrawals validated by your signature.
+            Individual mandate. Safe in your name. Withdrawals validated by your signature.
           </p>
 
           <ul class="heroPoints" aria-label="Highlights">
-            <li>Vault in your name (you stay owner)</li>
-            <li>We operate allocation + returns (public protocols)</li>
-            <li>On/off-ramp support (IBAN, card, etc.)</li>
+            <li>I operate yield & allocation (public protocols); you keep ownership.</li>
+            <li>Simple on/off-ramp: IBAN, card, crypto.</li>
           </ul>
 
           <div class="ctaRow">
@@ -57,16 +56,16 @@
           <div class="cardTitle">How it works</div>
           <div class="miniGrid">
             <div class="mini">
-              <strong>1) Vault setup + rule</strong>
-              <span>Safe in your name with the agreed withdrawal rule.</span>
+              <strong>1) Vault + rule</strong>
+              <span>Configure the Safe and withdrawal rule (per profile).</span>
             </div>
             <div class="mini">
               <strong>2) Deposit / withdraw</strong>
-              <span>Guided on/off-ramp (IBAN, card, etc.).</span>
+              <span>Guided on/off-ramp (IBAN, card, crypto).</span>
             </div>
             <div class="mini">
-              <strong>3) Strategy + review</strong>
-              <span>Allocation, yield, and periodic statement.</span>
+              <strong>3) Strategy + statement</strong>
+              <span>Allocation, yield, periodic statement.</span>
             </div>
           </div>
         </aside>
@@ -77,14 +76,10 @@
   <section id="performance" class="section section--tight">
     <div class="container">
       <h2 class="h2">Performance</h2>
-      <p class="p">Long-run (1–3–5y): market context + indicative yield by asset class.</p>
 
       <div class="grid2" style="margin-top:18px;">
         <div class="card cardPad">
           <div class="cardTitle">Market context</div>
-          <p class="small">
-            Total crypto market cap ex-stables + major coins (long run 1/3/5y).
-          </p>
 
           <div class="marketTabs" style="margin-top:12px;">
             <button class="tabBtn" type="button" data-market="total">Market cap</button>
@@ -93,16 +88,10 @@
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
           </div>
 
-          <div class="periodTabs" aria-label="Period">
-            <button class="chip" type="button" data-period="365">1y</button>
-            <button class="chip" type="button" data-period="1095">3y</button>
-            <button class="chip" type="button" data-period="1825">5y</button>
-          </div>
-
-          <div class="kpiRow">
-            <div class="kpi"><div class="k">1y</div><div class="v" id="kpi1y">—</div></div>
-            <div class="kpi"><div class="k">3y</div><div class="v" id="kpi3y">—</div></div>
-            <div class="kpi"><div class="k">5y</div><div class="v" id="kpi5y">—</div></div>
+          <div class="kpiRow kpiRow--clickable" id="marketPeriods">
+            <button class="kpi" type="button" data-period-card="365"><div class="k">1y</div><div class="v" id="kpi1y">—</div></button>
+            <button class="kpi" type="button" data-period-card="1095"><div class="k">3y</div><div class="v" id="kpi3y">—</div></button>
+            <button class="kpi" type="button" data-period-card="1825"><div class="k">5y</div><div class="v" id="kpi5y">—</div></button>
           </div>
 
           <div class="chartBox" id="marketChart">
@@ -118,8 +107,8 @@
           <div class="adoptionBox">
             <div class="adoptionHeader">
               <div>
-                <div class="cardTitle">Cash on-chain</div>
-                <p class="small">Stablecoins in circulation (USD), index base 100.</p>
+                <div class="cardTitle">Adoption</div>
+                <p class="small">Global DeFi TVL (USD).</p>
               </div>
               <div class="periodTabs" aria-label="Adoption period">
                 <button class="chip" type="button" data-adoption-period="365">1y</button>
@@ -281,27 +270,17 @@
   <section id="signature" class="section section--tight">
     <div class="container">
       <h2 class="h2">Signature</h2>
-      <p class="p">Sign or verify BlockPilot conditions directly in-page. Logic is unchanged; this is a UI wrapper.</p>
+      <p class="p">Sign or verify BlockPilot terms in-page. Logic is unchanged; this is a UI wrapper.</p>
       <div class="scenarios" style="margin-top:14px;">
         <button class="chip" type="button" data-signature-view="sign">Sign</button>
         <button class="chip" type="button" data-signature-view="verify">Verify</button>
       </div>
+      <div class="signatureFrames">
+        <iframe id="signatureSign" title="Sign" loading="lazy"></iframe>
+        <iframe id="signatureVerify" title="Verify" loading="lazy"></iframe>
+      </div>
     </div>
   </section>
-
-  <div class="signatureModal" id="signatureModal" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
-    <div class="signatureModal__inner">
-      <div class="signatureModal__header">
-        <div class="cardTitle" id="signatureTitle">Signature</div>
-        <div class="scenarios">
-          <button class="chip" type="button" data-signature-view="sign">Sign</button>
-          <button class="chip" type="button" data-signature-view="verify">Verify</button>
-        </div>
-        <button class="btn btn--ghost signatureClose" type="button" aria-label="Close">×</button>
-      </div>
-      <iframe id="signatureFrame" title="Signature"></iframe>
-    </div>
-  </div>
 
   <footer class="footer">
     <div class="container">

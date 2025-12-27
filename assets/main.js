@@ -247,6 +247,10 @@
     return out;
   }
 
+  function latestTs(series){
+    return Array.isArray(series) && series.length ? series[series.length-1][0] : Date.now();
+  }
+
   async function loadPricesUSD(cfg) {
     const cacheKey="bp_prices_usd_v2";
     const cachedRaw=localStorage.getItem(cacheKey);
@@ -536,6 +540,8 @@
     const cap12Tok=$("#cap12Tok");
     const val12Flat=$("#val12Flat");
     const val12Scn=$("#val12Scn");
+    const valScenarioRow=$("#valScenarioRow");
+    const valFlatRow=$("#valFlatRow");
     const comp12Tok=$("#comp12Tok");
     const comp3Tok=$("#comp3Tok");
     const comp5Tok=$("#comp5Tok");
@@ -619,6 +625,16 @@
       const scnVal = tokSel*px*priceGrowth(durationYears);
       if (val12Flat) val12Flat.textContent=fmtUsd(flatVal,0);
       if (val12Scn) val12Scn.textContent=fmtUsd(scnVal,0);
+
+      const redundantPrice = isStable && Math.abs(scnVal - flatVal) < 1e-6;
+      if (valScenarioRow) {
+        valScenarioRow.classList.toggle("simRow--primaryValue", !redundantPrice);
+        valScenarioRow.classList.toggle("is-redundant", !!redundantPrice);
+      }
+      if (valFlatRow) {
+        valFlatRow.classList.toggle("simRow--primaryValue", !!redundantPrice);
+        valFlatRow.classList.remove("is-redundant");
+      }
 
       if (comp12Tok) comp12Tok.textContent=`${fmtNum(tok1, maxDec)} ${unit}`;
       if (comp3Tok) comp3Tok.textContent=`${fmtNum(tok3, maxDec)} ${unit}`;
@@ -860,41 +876,68 @@
       [fromRoot(`data/market.json${cacheBust}`), `../data/market.json${cacheBust}`,`./data/market.json${cacheBust}`],
       null
     );
+    const cacheSeries = (k) => normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     const priceSeries={
-      btc: normalizeSeriesDaily((cacheMarket?.btc||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
-      eth: normalizeSeriesDaily((cacheMarket?.eth||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
-      bnb: normalizeSeriesDaily((cacheMarket?.bnb||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])))
+      btc: cacheSeries("btc"),
+      eth: cacheSeries("eth"),
+      bnb: cacheSeries("bnb")
     };
-    const totalIndexSeries = buildEqualWeightedIndex(priceSeries);
+    const totalCacheSeries = cacheSeries("total");
 
-    function cacheSeries(k){
-      return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
+    const seriesStore={
+      btc: priceSeries.btc,
+      eth: priceSeries.eth,
+      bnb: priceSeries.bnb
+    };
+
+    async function fetchSeries(sym){
+      const cache = cacheSeries(sym);
+      seriesStore[sym]=cache.length ? cache : seriesStore[sym];
+      let source = cacheMarket?.meta?.source || "cache";
+      let updatedAt = Date.parse(cacheMarket?.meta?.updatedAt) || latestTs(seriesStore[sym]);
+
+      const live = await loadMarketSeriesLive(sym);
+      if (live.length) {
+        seriesStore[sym]=live;
+        source = "Binance (live)";
+        updatedAt = live[live.length-1][0];
+      }
+
+      return { series: seriesStore[sym], source, updatedAt };
+    }
+
+    function buildTotalFromStore(){
+      const idx = buildEqualWeightedIndex(seriesStore);
+      if (idx && idx.length) return { series: idx, source: "Equal-weighted index", updatedAt: latestTs(idx) };
+      const updatedAt = Date.parse(cacheMarket?.meta?.updatedAt) || latestTs(totalCacheSeries);
+      return { series: totalCacheSeries, source: cacheMarket?.meta?.source?.total || cacheMarket?.meta?.source || "cache", updatedAt };
     }
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
       if (empty) { empty.style.display="flex"; empty.textContent=T.loading; }
-      let series=[], source="", isIndex=sym==="total", updatedAt=Date.now();
+      const isIndex=sym==="total";
 
       if (sym === "total") {
-        series = totalIndexSeries;
-        source = "Equal-weighted index";
-        updatedAt = series?.[series.length-1]?.[0] || updatedAt;
-      } else {
-        const cache = cacheSeries(sym);
-        series = cache;
-        source = cacheMarket?.meta?.source || "cache";
-        updatedAt = Date.parse(cacheMarket?.meta?.updatedAt) || updatedAt;
+        const initial = buildTotalFromStore();
+        setMarketUI({ ...initial, isIndex:true, periodDays });
 
-        const live = await loadMarketSeriesLive(sym);
-        if (live.length) {
-          series = live;
-          source = "Binance (live)";
-          updatedAt = live[live.length-1][0];
-        }
+        Promise.all([fetchSeries("btc"), fetchSeries("eth"), fetchSeries("bnb")]).then(() => {
+          if (active !== "total") return;
+          const next = buildTotalFromStore();
+          setMarketUI({ ...next, isIndex:true, periodDays });
+        });
+        return;
       }
 
-      setMarketUI({ series, source, isIndex, updatedAt, periodDays });
+      const cacheResult = { series: cacheSeries(sym), source: cacheMarket?.meta?.source || "cache", updatedAt: Date.parse(cacheMarket?.meta?.updatedAt) || Date.now() };
+      seriesStore[sym] = cacheResult.series.length ? cacheResult.series : seriesStore[sym];
+      setMarketUI({ ...cacheResult, isIndex, periodDays });
+
+      const liveResult = await fetchSeries(sym);
+      if (liveResult?.series?.length) {
+        setMarketUI({ ...liveResult, isIndex, periodDays });
+      }
     }
 
     marketBtns.forEach(b => b.addEventListener("click", async () => {

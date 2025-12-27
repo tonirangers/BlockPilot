@@ -184,6 +184,36 @@
     return [...m.entries()].sort((a,b)=>a[0]-b[0]);
   }
 
+  function buildEqualWeightedIndex(seriesMap) {
+    const keys=["btc","eth","bnb"];
+    const maps = keys.map(k=>{
+      const m=new Map();
+      (seriesMap?.[k]||[]).forEach(p=>{
+        const t=dayTs(p?.[0]);
+        const v=Number(p?.[1]);
+        if (isFinite(t) && isFinite(v) && v>0) m.set(t, v);
+      });
+      return m;
+    });
+    if (!maps.every(m=>m.size)) return [];
+    const common=[...maps[0].keys()].filter(ts=>maps[1].has(ts)&&maps[2].has(ts)).sort((a,b)=>a-b);
+    if (!common.length) return [];
+
+    const baseTs=common[0];
+    const base=maps.map(m=>Number(m.get(baseTs))).map(v=>isFinite(v)&&v>0?v:null);
+    if (base.some(v=>v===null)) return [];
+
+    const out=[];
+    for (const ts of common) {
+      const vals=maps.map(m=>Number(m.get(ts)));
+      if (vals.some(v=>!isFinite(v)||v<=0)) continue;
+      const norms=vals.map((v,i)=>v/base[i]*100);
+      const idx=norms.reduce((a,v)=>a+v,0)/norms.length;
+      out.push([ts, Number(idx.toFixed(2))]);
+    }
+    return out;
+  }
+
   async function loadPricesUSD(cfg) {
     const cacheKey="bp_prices_usd_v2";
     const cachedRaw=localStorage.getItem(cacheKey);
@@ -325,13 +355,16 @@
     const last=series[series.length-1][0];
     const span=last-first || 1;
     const show=(p)=>{
-      const label=isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0);
+      const val = fmtVal ? fmtVal(p[1]) : (isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0));
+      const label=isIndex ? `Indice ${val}` : val;
       hover.textContent = `${label} · ${fmtDate(p[0])}`;
       hover.style.display="block";
     };
     box.onmousemove = (e)=>{
       const rect=box.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
+      const padFrac = 20/1000;
+      const rawRatio = (e.clientX-rect.left)/rect.width;
+      const ratio = Math.min(1-padFrac, Math.max(padFrac, rawRatio));
       const t = first + span*ratio;
       const p = nearestByTime(series, t);
       if (p) show(p);
@@ -748,58 +781,26 @@
       [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
       null
     );
-    const cacheCap = await firstJSON(
-      [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
-      { series:[] }
-    );
-    const adoptionCache = await firstJSON(
-      [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
-      { series:[], meta:{} }
-    );
-    const marketCapIndex = cacheMarket?.meta?.totalKind === "index";
-    const totalSeriesCount = Array.isArray(cacheCap?.series) ? cacheCap.series.length : 0;
-    if (!totalSeriesCount && marketCapIndex) {
-      const totalBtn = document.querySelector('[data-market="total"]');
-      if (totalBtn) totalBtn.remove();
-      marketBtns = $$('[data-market]');
-      availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
-      if (active === "total") active = availableMarkets[0] || "btc";
-      setActiveTab("[data-market]", active);
-    }
+    const priceSeries={
+      btc: normalizeSeriesDaily((cacheMarket?.btc||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
+      eth: normalizeSeriesDaily((cacheMarket?.eth||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
+      bnb: normalizeSeriesDaily((cacheMarket?.bnb||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])))
+    };
+    const totalIndexSeries = buildEqualWeightedIndex(priceSeries);
 
     const adoptionSection=document.querySelector(".adoptionBox");
     const adoptionNotice=$("#adoptionNotice");
+    if (adoptionSection) adoptionSection.style.display="none";
+    if (adoptionNotice) {
+      adoptionNotice.style.display="block";
+      adoptionNotice.textContent = LANG === "fr" ? "Adoption: bientôt disponible." : "Adoption: coming soon.";
+    }
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }
-    const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
-    const adoptionMeta = adoptionCache?.meta || {};
-    const adoptionCount = adoptionSeries.length;
-    const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
-    const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-    const adoptionReliable = adoptionCount >= 30 && adoptionMax > 0 && !adoptionHasNaN;
-    const adoptionRenderable = adoptionSeries.length >= 2 && isFinite(adoptionMax);
-
-    const chart = document.querySelector("#adoptionChart");
-    if (!adoptionRenderable) {
-      if (chart) chart.style.display = "none";
-      if (adoptionSection) adoptionSection.style.display="none";
-      if (adoptionNotice) {
-        adoptionNotice.style.display="block";
-        adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
-          ? T.adoptionUnavailable
-          : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
-      }
-    } else {
-      if (chart) chart.style.display = "";
-      if (adoptionSection) adoptionSection.style.display="";
-      if (adoptionNotice) adoptionNotice.style.display = adoptionReliable ? "none" : "block";
-      if (adoptionNotice && !adoptionReliable) {
-        adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
-          ? T.adoptionUnavailable
-          : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
-      }
-    }
+    const adoptionSeries = [];
+    const adoptionMeta = {};
+    const adoptionRenderable = false;
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
@@ -807,20 +808,9 @@
       let series=[], source="", isIndex=sym==="total", updatedAt=Date.now();
 
       if (sym === "total") {
-        const fallbackSeries = normalizeSeriesDaily((cacheCap?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
-        series = fallbackSeries;
-        source = cacheCap?.meta?.source || "cache";
-        updatedAt = Date.parse(cacheCap?.meta?.last_updated) || updatedAt;
-
-        const snap = await loadMarketCapSnapshot();
-        if (snap && isFinite(snap.value)) {
-          const lastTs = series[series.length-1]?.[0] || 0;
-          const point=[Date.now(), Number((snap.value/1e9).toFixed(2))];
-          if (point[0] > lastTs) series = series.concat([point]);
-          source = snap.source || "live";
-          updatedAt = snap.updatedAt || point[0];
-        }
-        isIndex=false;
+        series = totalIndexSeries;
+        source = "Equal-weighted index";
+        updatedAt = series?.[series.length-1]?.[0] || updatedAt;
       } else {
         const cache = cacheSeries(sym);
         series = cache;

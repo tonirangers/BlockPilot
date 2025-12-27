@@ -83,7 +83,7 @@
           <div class="cardTitle">Market context</div>
 
           <div class="marketTabs" style="margin-top:12px;">
-            <button class="tabBtn" type="button" data-market="total">Market cap</button>
+            <button class="tabBtn" type="button" data-market="total">TOTAL</button>
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
             <button class="tabBtn" type="button" data-market="eth">ETH</button>
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
@@ -102,25 +102,8 @@
             <div class="chartHover" id="marketHover"></div>
           </div>
 
-          <div class="adoptionBox">
-            <div class="adoptionHeader">
-              <div>
-                <div class="cardTitle">Adoption</div>
-                <p class="small">Global DeFi TVL (USD).</p>
-              </div>
-            </div>
-            <div class="kpiRow kpiRow--clickable" id="adoptionPeriods">
-              <button class="kpi" type="button" data-adoption-card="365"><div class="k">1y</div><div class="v" id="adopt1y">—</div></button>
-              <button class="kpi" type="button" data-adoption-card="1095"><div class="k">3y</div><div class="v" id="adopt3y">—</div></button>
-              <button class="kpi" type="button" data-adoption-card="1825"><div class="k">5y</div><div class="v" id="adopt5y">—</div></button>
-            </div>
-            <div class="chartBox" id="adoptionChart">
-              <div class="chartEmpty" id="adoptionEmpty">Loading…</div>
-              <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
-              <div class="chartHover" id="adoptionHover"></div>
-            </div>
-          </div>
-          <div class="small" id="adoptionNotice" style="display:none; margin-top:10px;"></div>
+          <div class="adoptionBox" style="display:none;"></div>
+          <div class="small" id="adoptionNotice" style="margin-top:10px;">Adoption: coming soon.</div>
 
         </div>
 

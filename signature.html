@@ -32,15 +32,20 @@
 
   <main class="section section--tight" id="signature">
     <div class="container">
-      <h1 class="h1">Signature</h1>
+      <div class="signatureIntro">
+        <div>
+          <h1 class="h1">Signature</h1>
+          <p class="lead">Signer ou vérifier vos documents BPC sans quitter le site.</p>
+        </div>
+      </div>
+
       <div class="signatureTabs">
         <button class="tabBtn" type="button" data-signature-view="sign">Signer</button>
         <button class="tabBtn" type="button" data-signature-view="verify">Vérifier</button>
       </div>
 
-      <div class="signatureFrames">
-        <iframe id="signatureSign" title="Signer" loading="lazy"></iframe>
-        <iframe id="signatureVerify" title="Vérifier" loading="lazy"></iframe>
+      <div class="signatureFrames signatureFrames--single">
+        <iframe id="signatureFrame" title="Signer" loading="lazy" allowtransparency="true"></iframe>
       </div>
     </div>
   </main>

@@ -35,7 +35,7 @@
       menu: "Menu",
       close: "Fermer",
       lastUpdated: "Dernière mise à jour",
-      adoptionUnavailable: "Données adoption indisponibles."
+      adoptionUnavailable: "Données en cours de calibration."
     },
     en: {
       loading: "Loading…",
@@ -49,7 +49,7 @@
       menu: "Menu",
       close: "Close",
       lastUpdated: "Last updated",
-      adoptionUnavailable: "Adoption data unavailable."
+      adoptionUnavailable: "Data being calibrated."
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -203,47 +203,51 @@
   }
 
   async function loadMarketSeriesLive(sym) {
-    if (location.protocol === "file:") return [];
-
-    const cacheKey="bp_mkt_"+sym+"_usd_v2";
-    const cachedRaw=localStorage.getItem(cacheKey);
-    const now=Date.now();
-    if (cachedRaw) {
-      try {
-        const c=JSON.parse(cachedRaw);
-        if (c.ts && (now-c.ts)<12*60*60*1000 && Array.isArray(c.series) && c.series.length) return c.series;
-      } catch {}
-    }
-
-    const symbolMap={ btc:"BTCUSDT", eth:"ETHUSDT", bnb:"BNBUSDT" };
-    const ticker=symbolMap[sym];
-    if (!ticker) return [];
-
-    async function fetchKlines(startTime){
-      const url=`https://api.binance.com/api/v3/klines?symbol=${ticker}&interval=1d&startTime=${startTime}&endTime=${Date.now()}&limit=1000`;
-      const res=await fetchJSON(url, 9000);
-      return Array.isArray(res) ? res : [];
-    }
-
-    const days=1825;
-    const start=now - days*DAY;
-    let cursor=start;
-    let all=[];
     try {
-      while (cursor < now) {
-        const chunk=await fetchKlines(cursor);
-        if (!chunk.length) break;
-        all = all.concat(chunk);
-        const last=Number(chunk[chunk.length-1]?.[0]);
-        if (!isFinite(last) || chunk.length < 1000) break;
-        cursor = last + DAY;
+      if (location.protocol === "file:") return [];
+
+      const cacheKey="bp_mkt_"+sym+"_usd_v2";
+      const cachedRaw=localStorage.getItem(cacheKey);
+      const now=Date.now();
+      if (cachedRaw) {
+        try {
+          const c=JSON.parse(cachedRaw);
+          if (c.ts && (now-c.ts)<12*60*60*1000 && Array.isArray(c.series) && c.series.length) return c.series;
+        } catch {}
       }
-    } catch { all=[]; }
 
-    const series=normalizeSeriesDaily(all.map(k=>[Number(k?.[0]), Number(k?.[4])]).filter(p=>isFinite(p[0]) && isFinite(p[1])));
+      const symbolMap={ btc:"BTCUSDT", eth:"ETHUSDT", bnb:"BNBUSDT" };
+      const ticker=symbolMap[sym];
+      if (!ticker) return [];
 
-    if (series.length) localStorage.setItem(cacheKey, JSON.stringify({ ts:now, series }));
-    return series;
+      async function fetchKlines(startTime){
+        const url=`https://api.binance.com/api/v3/klines?symbol=${ticker}&interval=1d&startTime=${startTime}&endTime=${Date.now()}&limit=1000`;
+        const res=await fetchJSON(url, 9000);
+        return Array.isArray(res) ? res : [];
+      }
+
+      const days=1825;
+      const start=now - days*DAY;
+      let cursor=start;
+      let all=[];
+      try {
+        while (cursor < now) {
+          const chunk=await fetchKlines(cursor);
+          if (!chunk.length) break;
+          all = all.concat(chunk);
+          const last=Number(chunk[chunk.length-1]?.[0]);
+          if (!isFinite(last) || chunk.length < 1000) break;
+          cursor = last + DAY;
+        }
+      } catch { all=[]; }
+
+      const series=normalizeSeriesDaily(all.map(k=>[Number(k?.[0]), Number(k?.[4])]).filter(p=>isFinite(p[0]) && isFinite(p[1])));
+
+      if (series.length) localStorage.setItem(cacheKey, JSON.stringify({ ts:now, series }));
+      return series;
+    } catch {
+      return [];
+    }
   }
 
   function computeTotalEqualWeighted(btc, eth, bnb) {
@@ -333,12 +337,10 @@
     const k1=$("#kpi1y");
     const k3=$("#kpi3y");
     const k5=$("#kpi5y");
-    const axis=$("#marketAxis");
 
     if (!series || series.length<2) {
       if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
       if (svg) svg.innerHTML="";
-      if (axis) axis.innerHTML="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       return;
     }
@@ -356,10 +358,10 @@
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
 
-    drawSvgLine(svg, sampleSeries(viewSeries));
-    setAxisLabels(axis, viewSeries);
+    const sampled = sampleSeries(viewSeries);
+    drawSvgLine(svg, sampled);
 
-    installHover("#marketChart", "#marketHover", viewSeries, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+    installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
   }
 
   function computeTokens(principalTokens, apr, years) {
@@ -632,7 +634,6 @@
   function setAdoptionUI(series, meta, periodDays){
     const empty=$("#adoptionEmpty");
     const svg=$("#adoptionSvg");
-    const axis=$("#adoptionAxis");
     const upd=$("#adoptionUpdated");
     const range=$("#adoptionRange");
     const k1=$("#adopt1y");
@@ -642,7 +643,6 @@
     if (!series || series.length<2){
       if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
       if (svg) svg.innerHTML="";
-      if (axis) axis.innerHTML="";
       if (upd) upd.textContent="";
       if (range) range.textContent="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
@@ -652,8 +652,8 @@
     if (empty) empty.style.display="none";
     const viewSeries = sliceWindow(series, periodDays||1825);
     const vs = viewSeries.length?viewSeries:series;
-    drawSvgLine(svg, sampleSeries(vs));
-    setAxisLabels(axis, vs);
+    const sampled = sampleSeries(vs);
+    drawSvgLine(svg, sampled);
     const base = vs.length ? vs : series;
     const r1=computeReturn(base,365);
     const r3=computeReturn(base,1095);
@@ -669,7 +669,7 @@
       const lbl = LANG === "fr" ? "Période" : "Range";
       range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
     }
-    installHover("#adoptionChart", "#adoptionHover", vs, (v)=>fmtUsd(v,0), false);
+    installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtUsd(v,0), false);
   }
 
   function initSignatureEmbeds(){
@@ -683,8 +683,8 @@
       tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
       signFrame.classList.toggle("active", view==="sign");
       verifyFrame.classList.toggle("active", view==="verify");
-      if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html"); signLoaded=true; }
-      if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html"); verifyLoaded=true; }
+      if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html?embed=1"); signLoaded=true; }
+      if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?embed=1"); verifyLoaded=true; }
     };
 
     tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
@@ -757,7 +757,8 @@
     }
     const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     const adoptionMeta = adoptionCache?.meta || {};
-    const adoptionReliable = adoptionSeries.length > 10 && !String(adoptionMeta?.source||"").includes("synthetic");
+    const adoptionVals = adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v));
+    const adoptionReliable = adoptionVals.length > 20 && Math.max(...adoptionVals) > 10 && !String(adoptionMeta?.source||"").includes("synthetic");
     if (!adoptionReliable) {
       if (adoptionSection) adoptionSection.style.display="none";
       if (adoptionNotice) { adoptionNotice.style.display="block"; adoptionNotice.textContent=T.adoptionUnavailable; }

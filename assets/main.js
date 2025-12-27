@@ -787,7 +787,7 @@
     const pricesUSD = await loadPricesUSD(cfg);
     initCalc(cfg, pricesUSD, yields);
 
-    const marketBtns = $$('[data-market]');
+    let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     const capBtns = $$('[data-cap-card]');
     const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
@@ -838,6 +838,7 @@
       if (livePoint[0] > lastTs) marketCapSeries = marketCapSeries.concat([livePoint]);
       marketCapSeries = sanitizeSeriesUSD(marketCapSeries);
     }
+    if (adoptionSection) adoptionSection.style.display = adoptionReliable ? "block" : "none";
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");

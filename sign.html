@@ -86,7 +86,7 @@
       </div>
       <div class="doc-details" id="techDetails" aria-hidden="true">
         <div><strong>PDF:</strong> <span id="pdfName">BPC_Terms.pdf</span></div>
-        <div><strong>Hash:</strong> <span id="pdfHash">…</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><strong>Hash:</strong> <span id="pdfHash">…</span><button class="copy-btn ghost" type="button" id="copyHash">Copier</button></div>
       </div>
 
       <div class="token-box" id="tokenBox" style="display:none;"></div>
@@ -165,6 +165,8 @@
     if (docLabel) docLabel.textContent = t('docLabel');
     const techBtn=document.getElementById('toggleTech');
     if (techBtn) techBtn.textContent = t('techDetails');
+    const copyHashBtn=document.getElementById('copyHash');
+    if (copyHashBtn) copyHashBtn.textContent = t('copyTokenAction');
     const tokenBox=document.getElementById('tokenBox');
     if (tokenBox && tokenBox.dataset.token){
       tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${tokenBox.dataset.token}</code><button class="copy-btn" type="button" onclick="copyText('${tokenBox.dataset.token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;
@@ -206,6 +208,8 @@
   document.getElementById('tab-standard').addEventListener('click', () => { mode='standard'; updateHeadings(); applyMode(true); });
   document.getElementById('tab-seed').addEventListener('click', () => { mode='seed'; updateHeadings(); applyMode(true); });
   document.getElementById('signBtn').addEventListener('click', signTerms);
+  const copyHashBtn=document.getElementById('copyHash');
+  if (copyHashBtn) copyHashBtn.addEventListener('click', () => copyText(pdfHash || document.getElementById('pdfHash')?.textContent || ''));
 
   function getHashParams() {
     const h = (location.hash||'').replace(/^#/,'');

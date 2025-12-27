@@ -20,8 +20,8 @@
         <div class="nav__links" aria-label="Navigation">
           <a href="#performance">Performance</a>
           <a href="#security">Sécurité</a>
-          <a id="navSignature" href="#signature">Signature</a>
-          <a id="navCall" class="nav__call" href="#">Réserver un appel</a>
+          <a id="navSignature" href="../sign.html">Signature</a>
+          <a id="navCall" href="#">Réserver un appel</a>
         </div>
 
         <div class="lang" aria-label="Language">
@@ -39,7 +39,7 @@
           <h1 class="h1">BlockPilot — Gestion privée crypto, 1 client = 1 coffre.</h1>
 
           <p class="lead">
-            Vous gardez la propriété et la clé. Nous opérons le rendement et l’allocation, avec retraits validés par votre signature.
+            Vous gardez la propriété et la clé. Nous opérons le rendement et l’allocation, retraits validés par votre signature.
           </p>
 
           <ul class="heroPoints" aria-label="Clés">
@@ -55,30 +55,38 @@
         </div>
 
         <aside id="setup" class="card cardPad">
-          <div class="cardTitle">Comment ça marche</div>
-          <p class="cardSub">3 étapes, puis un suivi régulier.</p>
-
+          <div class="cardTitle">Ce que vous faites</div>
           <div class="miniGrid">
             <div class="mini">
-              <strong>1) Coffre Safe + règle de retrait</strong>
-              <span>Safe à votre nom + règle signature/cosignature.</span>
+              <strong>1) Votre coffre</strong>
+              <span>Safe à votre nom, règle de retrait convenue.</span>
             </div>
             <div class="mini">
-              <strong>2) Dépôt (IBAN / carte)</strong>
-              <span>Selon éligibilité, dépôt accompagné.</span>
+              <strong>2) Dépôt accompagné</strong>
+              <span>On/off ramp éligible (IBAN, carte, Zeal, etc.).</span>
             </div>
             <div class="mini">
-              <strong>3) Stratégie + relevé</strong>
-              <span>Allocation + rendement + revue régulière.</span>
+              <strong>3) Validation</strong>
+              <span>Vous signez les retraits ou co-signez selon la règle.</span>
             </div>
           </div>
 
           <div class="hr"></div>
 
-          <div class="kicker" aria-label="Setup tags">
-            <span>1 client = 1 Safe</span>
-            <span>Retrait selon règle</span>
-            <span>On-chain + relevé</span>
+          <div class="cardTitle">Ce qu’on opère</div>
+          <div class="miniGrid">
+            <div class="mini">
+              <strong>Allocation + rendement</strong>
+              <span>Stratégies pilotées (protocoles publics, on-chain).</span>
+            </div>
+            <div class="mini">
+              <strong>Suivi 7 jours</strong>
+              <span>Mise en place et revue initiale sous 7 jours ouvrés.</span>
+            </div>
+            <div class="mini">
+              <strong>Reporting</strong>
+              <span>Transparence on-chain + relevé périodique.</span>
+            </div>
           </div>
         </aside>
       </div>
@@ -122,6 +130,7 @@
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
             <div class="chartRange" id="marketRange"></div>
             <div class="chartUpdate" id="marketUpdated"></div>
+            <div class="chartHover" id="marketHover"></div>
           </div>
           <div class="small" id="marketMeta" style="margin-top:10px;"></div>
 
@@ -137,12 +146,18 @@
                 <button class="chip" type="button" data-adoption-period="1825">5 ans</button>
               </div>
             </div>
+            <div class="kpiRow">
+              <div class="kpi"><div class="k">1 an</div><div class="v" id="adopt1y">—</div></div>
+              <div class="kpi"><div class="k">3 ans</div><div class="v" id="adopt3y">—</div></div>
+              <div class="kpi"><div class="k">5 ans</div><div class="v" id="adopt5y">—</div></div>
+            </div>
             <div class="chartBox" id="adoptionChart">
               <div class="chartEmpty" id="adoptionEmpty">Chargement…</div>
               <div class="chartAxis" id="adoptionAxis"></div>
               <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
               <div class="chartRange" id="adoptionRange"></div>
               <div class="chartUpdate" id="adoptionUpdated"></div>
+              <div class="chartHover" id="adoptionHover"></div>
             </div>
           </div>
         </div>
@@ -323,8 +338,8 @@
       <span> · </span>
       <a id="footerTerms" href="#">Conditions (PDF)</a>
       <span> · </span>
-      <a id="footerSignature" href="#signature">Signature</a>
-      <span class="small" style="margin-left:10px;">© BlockPilot</span>
+      <a id="footerSignature" href="../sign.html">Signature</a>
+      <span class="small" style="margin-left:10px;">© BlockPilot 2025</span>
     </div>
   </footer>
 

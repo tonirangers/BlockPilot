@@ -4,88 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BPC — Sign (Standard & Seed)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  
   <style>
-    :root{
-      --brand:#0c7a73; --brandH:#09615c; --ghost:#e7f4f3;
-      --ink:#0b2725; --muted:#5a6a68; --ok:#22a06b; --okH:#1a8156;
-      --card:#ffffff; --soft:#f5f7f7; --stroke:#e5eceb;
-    }
     *{box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#f2f5f5;color:var(--ink);
-      display:flex;flex-direction:column;align-items:center;padding:40px 20px;margin:0;min-height:100vh;gap:16px}
-    .lite-header{width:100%;max-width:1100px;background:rgba(238,247,245,.86);border:1px solid var(--stroke);border-radius:14px;padding:12px 16px;box-shadow:0 8px 24px rgba(13,35,31,.06);display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .lite-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:800}
-    .lite-brand img{height:52px;width:52px;border-radius:12px;border:1px solid var(--stroke);background:#fff;padding:6px}
-    .lite-links{display:flex;gap:14px;flex-wrap:wrap;font-weight:700;color:var(--muted)}
-    .lite-links a{text-decoration:none;color:inherit;padding:6px 8px;border-radius:10px;border:1px solid transparent}
-    .lite-links a:hover{border-color:var(--stroke);color:var(--ink)}
-    .container{background:var(--card);padding:30px;border-radius:16px;
-      box-shadow:0 0 20px rgba(0,0,0,.05);max-width:680px;width:100%;text-align:center}
-    .logo{height:150px;display:block;margin:0 auto 12px}
-    .tabs{display:flex;gap:8px;justify-content:center;margin:8px 0 16px}
-    .tab{padding:8px 12px;border-radius:999px;background:var(--ghost);color:var(--brand);
-      text-decoration:none;font-weight:600;cursor:pointer;user-select:none;border:1px solid transparent}
-    .tab:hover{border-color:var(--stroke)}
-    .tab.active{background:var(--brand);color:#fff}
-    h1{font-size:26px;margin:0 0 10px}
-    p{font-size:16px;margin-bottom:16px}
-    .btn{display:flex;align-items:center;justify-content:center;width:100%;margin:10px 0;
-      padding:14px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer}
-    .btn-ghost{background:var(--ghost);color:var(--brand)}
-    .btn-primary{background:var(--brand);color:#fff}
-    .btn-primary:hover{background:var(--brandH)}
+    body{background:var(--bg);color:var(--ink);margin:0;min-height:100vh;display:flex;flex-direction:column;}
+    .sign-shell{flex:1;display:flex;flex-direction:column;gap:20px;align-items:center;padding:30px 18px 50px;}
+    .sign-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;max-width:760px;width:100%;}
+    .sign-card h1{font-size:26px;margin:0 0 10px;}
+    .sign-card p{font-size:16px;margin-bottom:12px;}
+    .sign-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px;}
+    .sign-tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(11,111,102,.08);color:var(--brand);font-weight:800;cursor:pointer;}
+    .sign-tab.active{background:var(--brand);color:#fff;border-color:rgba(11,111,102,.55);}
+    .sign-row{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;}
+    .sign-btn{display:flex;align-items:center;justify-content:center;flex:1 1 220px;padding:14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid rgba(13,35,31,.14);background:rgba(255,255,255,.9);cursor:pointer;}
+    .sign-btn.primary{background:var(--brand);color:#fff;border-color:rgba(11,111,102,.55);}
+    .sign-btn.ghost{background:rgba(11,111,102,.08);color:var(--brand);}
     .hash-line{font-size:14px;color:var(--muted);margin:18px 0;word-break:break-word}
-    .output-box{background:var(--soft);padding:16px;border-radius:12px;margin-top:20px;text-align:left;
-      overflow-wrap:anywhere;border:1px solid var(--stroke)}
-    .copy-btn{background:var(--ok);color:#fff;padding:10px 14px;border:0;border-radius:8px;font-size:14px;
-      margin:6px 6px 0 0;cursor:pointer;display:inline-block}
-    .copy-btn:hover{background:var(--okH)}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .row .btn{flex:1 1 240px}
+    .output-box{background:rgba(238,247,245,.35);padding:16px;border-radius:12px;margin-top:14px;text-align:left;overflow-wrap:anywhere;border:1px solid var(--line)}
+    .copy-btn{background:var(--brand);color:#fff;padding:10px 14px;border:0;border-radius:10px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
+    .copy-btn:hover{background:var(--brand2)}
     .small{font-size:13px;color:var(--muted);margin-top:8px}
     .muted{color:var(--muted)}
     .actions{margin-top:8px}
   </style>
+
 </head>
 <body>
-  <div class="lite-header">
-    <a class="lite-brand" href="fr/" aria-label="BlockPilot">
-      <img src="logo.png" alt="BlockPilot" />
-      <span>BlockPilot</span>
-    </a>
-    <div class="lite-links" aria-label="Navigation">
-      <a href="fr/">FR</a>
-      <a href="en/">EN</a>
-      <a href="verify.html">Vérifier / Verify</a>
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="./fr/" aria-label="BlockPilot">
+          <img class="brand__logo" src="logo.png" alt="BlockPilot" />
+        </a>
+        <div class="nav__links" aria-label="Navigation">
+          <a href="./fr/">FR</a>
+          <a href="./en/">EN</a>
+          <a href="./verify.html">Verify</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="sign-shell">
+    <div class="sign-card">
+      <div style="text-align:center;">
+        <img src="logo.png" alt="BPC" style="height:72px;width:72px;border-radius:14px;border:1px solid var(--line);box-shadow:0 10px 24px rgba(13,35,31,.08);margin:0 auto 12px;" onerror="this.style.display='none'">
+      </div>
+
+      <div class="sign-tabs" role="tablist">
+        <span class="sign-tab" id="tab-standard">Standard</span>
+        <span class="sign-tab" id="tab-seed">Seed</span>
+      </div>
+
+      <h1 id="title">Sign Terms &amp; Conditions</h1>
+      <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
+
+      <div class="sign-row">
+        <a id="viewPdfBtn" class="sign-btn ghost" href="./BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
+        <button id="signBtn" class="sign-btn primary" disabled>⏳ Preparing…</button>
+      </div>
+
+      <div class="hash-line">PDF (<span id="pdfName">BPC_Terms.pdf</span>) • Keccak-256: <span id="pdfHash">…</span></div>
+
+      <div id="signatureOutput"></div>
+
+      <p class="small">✅ You can verify signatures anytime on <a href="verify.html">verify.html</a>.</p>
     </div>
   </div>
-
-  <div class="container">
-    <a href="sign.html" aria-label="Home"><img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'"></a>
-
-    <nav class="tabs">
-      <span class="tab" id="tab-standard">Standard</span>
-      <span class="tab" id="tab-seed">Seed</span>
-    </nav>
-
-    <h1 id="title">Sign Terms &amp; Conditions</h1>
-    <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
-
-    <div class="row">
-      <a id="viewPdfBtn" class="btn btn-ghost" href="./BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
-      <button id="signBtn" class="btn btn-primary" disabled>⏳ Preparing…</button>
-    </div>
-
-    <div class="hash-line">PDF (<span id="pdfName">BPC_Terms.pdf</span>) • Keccak-256: <span id="pdfHash">…</span></div>
-
-    <div id="signatureOutput"></div>
-
-    <p class="small">✅ You can verify signatures anytime on <a href="verify.html">verify.html</a>.</p>
-  </div>
-
 <script>
   // ---- Config
   const PDFs = { standard: './BPC_Terms.pdf', seed: './BPC_Terms_Seed.pdf' };

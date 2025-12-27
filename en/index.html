@@ -20,8 +20,8 @@
         <div class="nav__links" aria-label="Navigation">
           <a href="#performance">Performance</a>
           <a href="#security">Security</a>
-          <a id="navSignature" href="#signature">Signature</a>
-          <a id="navCall" class="nav__call" href="#">Book a call</a>
+          <a id="navSignature" href="../sign.html">Signature</a>
+          <a id="navCall" href="#">Book a call</a>
         </div>
 
         <div class="lang" aria-label="Language">
@@ -36,16 +36,16 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Private crypto management, you keep ownership.</h1>
+          <h1 class="h1">BlockPilot — Private crypto management, one vault per client.</h1>
 
           <p class="lead">
-            You keep the vault in your name. We operate yield and allocation, withdrawals validated with your signature.
+            You keep ownership and the key. We run yield + allocation, withdrawals validated with your signature.
           </p>
 
           <ul class="heroPoints" aria-label="Highlights">
             <li>Crypto vault in your name (smart wallet)</li>
-            <li>Yield + allocation operated for you</li>
-            <li>Withdraw anytime with your signature</li>
+            <li>Managed yield + allocation</li>
+            <li>Withdraw with your signature</li>
           </ul>
 
           <div class="ctaRow">
@@ -55,30 +55,38 @@
         </div>
 
         <aside id="setup" class="card cardPad">
-          <div class="cardTitle">How it works</div>
-          <p class="cardSub">3 steps, then regular tracking.</p>
-
+          <div class="cardTitle">What you do</div>
           <div class="miniGrid">
             <div class="mini">
-              <strong>1) Safe vault + withdrawal rule</strong>
-              <span>Safe in your name + signature/co-signature rule.</span>
+              <strong>1) Your vault</strong>
+              <span>Safe in your name, agreed withdrawal rule.</span>
             </div>
             <div class="mini">
-              <strong>2) Deposit (IBAN / card)</strong>
-              <span>Eligibility-based, guided deposit.</span>
+              <strong>2) Guided deposit</strong>
+              <span>Eligible on/off ramp (IBAN, card, Zeal, etc.).</span>
             </div>
             <div class="mini">
-              <strong>3) Strategy + statement</strong>
-              <span>Allocation + yield + regular review.</span>
+              <strong>3) Sign withdrawals</strong>
+              <span>You sign withdrawals or co-sign per rule.</span>
             </div>
           </div>
 
           <div class="hr"></div>
 
-          <div class="kicker" aria-label="Setup tags">
-            <span>1 client = 1 Safe</span>
-            <span>Withdraw by rule</span>
-            <span>On-chain + statement</span>
+          <div class="cardTitle">What we operate</div>
+          <div class="miniGrid">
+            <div class="mini">
+              <strong>Allocation + yield</strong>
+              <span>Strategies on public protocols (on-chain).</span>
+            </div>
+            <div class="mini">
+              <strong>7-day setup</strong>
+              <span>Setup + first review within 7 business days.</span>
+            </div>
+            <div class="mini">
+              <strong>Reporting</strong>
+              <span>On-chain transparency + periodic statement.</span>
+            </div>
           </div>
         </aside>
       </div>
@@ -122,6 +130,7 @@
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
             <div class="chartRange" id="marketRange"></div>
             <div class="chartUpdate" id="marketUpdated"></div>
+            <div class="chartHover" id="marketHover"></div>
           </div>
           <div class="small" id="marketMeta" style="margin-top:10px;"></div>
 
@@ -137,12 +146,18 @@
                 <button class="chip" type="button" data-adoption-period="1825">5y</button>
               </div>
             </div>
+            <div class="kpiRow">
+              <div class="kpi"><div class="k">1y</div><div class="v" id="adopt1y">—</div></div>
+              <div class="kpi"><div class="k">3y</div><div class="v" id="adopt3y">—</div></div>
+              <div class="kpi"><div class="k">5y</div><div class="v" id="adopt5y">—</div></div>
+            </div>
             <div class="chartBox" id="adoptionChart">
               <div class="chartEmpty" id="adoptionEmpty">Loading…</div>
               <div class="chartAxis" id="adoptionAxis"></div>
               <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
               <div class="chartRange" id="adoptionRange"></div>
               <div class="chartUpdate" id="adoptionUpdated"></div>
+              <div class="chartHover" id="adoptionHover"></div>
             </div>
           </div>
 
@@ -324,8 +339,8 @@
       <span> · </span>
       <a id="footerTerms" href="#">Terms (PDF)</a>
       <span> · </span>
-      <a id="footerSignature" href="#signature">Signature</a>
-      <span class="small" style="margin-left:10px;">© BlockPilot</span>
+      <a id="footerSignature" href="../sign.html">Signature</a>
+      <span class="small" style="margin-left:10px;">© BlockPilot 2025</span>
     </div>
   </footer>
 

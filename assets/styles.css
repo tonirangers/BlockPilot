@@ -147,6 +147,8 @@ img{max-width:100%; display:block}
   color:#fff;
 }
 .btn--primary:hover{background:var(--brand2)}
+.btn--text{background:transparent; border:0; box-shadow:none; padding:0; color:var(--brand2); font-weight:900;}
+.btn--text:hover{color:var(--brand)}
 .btn--ghost{background:rgba(255,255,255,.72)}
 .btn--ghost:hover{background:#fff}
 .btn--text{background:none; border:none; box-shadow:none; padding:10px 0; text-decoration:underline; text-underline-offset:4px; color:var(--muted);}
@@ -228,6 +230,21 @@ img{max-width:100%; display:block}
   font-weight:850;
   padding:14px;
   text-align:center;
+}
+.chartHover{
+  position:absolute;
+  right:8px;
+  top:8px;
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:6px 10px;
+  font-weight:800;
+  font-size:13px;
+  color:var(--ink);
+  box-shadow:0 10px 24px rgba(13,35,31,.08);
+  display:none;
+  pointer-events:none;
 }
 .chartRange,.chartUpdate{position:absolute; font-size:12px; color:rgba(13,35,31,.55);}
 .chartRange{left:12px; bottom:10px;}

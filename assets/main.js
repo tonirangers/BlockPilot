@@ -303,6 +303,30 @@
     });
   }
 
+  function installHover(boxSel, hoverSel, series, fmtVal=fmtNum, isIndex=false){
+    const box=$(boxSel);
+    const hover=$(hoverSel);
+    if (!box || !hover){ return; }
+    if (!series || !series.length){ hover.style.display="none"; return; }
+    const first=series[0][0];
+    const last=series[series.length-1][0];
+    const span=last-first || 1;
+    const show=(p)=>{
+      const label=isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0);
+      hover.textContent = `${label} · ${fmtDate(p[0])}`;
+      hover.style.display="block";
+    };
+    box.onmousemove = (e)=>{
+      const rect=box.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
+      const t = first + span*ratio;
+      const p = nearestByTime(series, t);
+      if (p) show(p);
+    };
+    box.onmouseleave = ()=>{ hover.style.display="none"; };
+    show(series[series.length-1]);
+  }
+
   function setMarketUI({ series, source, isIndex, updatedAt, periodDays }) {
     const empty=$("#marketEmpty");
     const svg=$("#marketSvg");
@@ -359,6 +383,7 @@
       const lbl = LANG === "fr" ? "Période" : "Range";
       range.textContent=`${lbl}: ${fmtDate(first)} – ${fmtDate(last[0])}`;
     }
+    installHover("#marketChart", "#marketHover", viewSeries, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
   }
 
   function computeTokens(principalTokens, apr, years) {
@@ -640,27 +665,40 @@
     const axis=$("#adoptionAxis");
     const upd=$("#adoptionUpdated");
     const range=$("#adoptionRange");
+    const k1=$("#adopt1y");
+    const k3=$("#adopt3y");
+    const k5=$("#adopt5y");
+    const hover=$("#adoptionHover");
     if (!series || series.length<2){
       if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
       if (svg) svg.innerHTML="";
       if (axis) axis.innerHTML="";
       if (upd) upd.textContent="";
       if (range) range.textContent="";
+      [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
+      if (hover) hover.style.display="none";
       return;
     }
     if (empty) empty.style.display="none";
     const viewSeries = sliceWindow(series, periodDays||1825);
-    drawSvgLine(svg, sampleSeries(viewSeries.length?viewSeries:series));
-    setAxisLabels(axis, viewSeries.length?viewSeries:series);
+    const vs = viewSeries.length?viewSeries:series;
+    drawSvgLine(svg, sampleSeries(vs));
+    setAxisLabels(axis, vs);
+    const r1=computeReturn(series,365);
+    const r3=computeReturn(series,1095);
+    const r5=computeReturn(series,1825);
+    if (k1) k1.textContent=fmtPct(r1);
+    if (k3) k3.textContent=fmtPct(r3);
+    if (k5) k5.textContent=fmtPct(r5);
     if (upd){
       const ts = Date.parse(meta?.last_updated) || series[series.length-1][0];
       upd.textContent = `${T.lastUpdated || "Last updated"}: ${fmtDate(ts)}`;
     }
-    if (range && (viewSeries.length||series.length)){
-      const vs = viewSeries.length?viewSeries:series;
+    if (range && vs.length){
       const lbl = LANG === "fr" ? "Période" : "Range";
       range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
     }
+    installHover("#adoptionChart", "#adoptionHover", vs, (v)=>fmtNum(v,1), true);
   }
 
   function initSignatureModal(){
@@ -719,7 +757,6 @@
     );
 
     applyLinks(cfg);
-    initSignatureModal();
 
     const yields = fillApr(cfg);
     const pricesUSD = await loadPricesUSD(cfg);
@@ -731,7 +768,8 @@
     const storedMarket = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || "total";
     const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
     const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
-    const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || 1825;
+    const defaultAdopt = Number(cfg?.defaults?.adoptionPeriod || 1825);
+    const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || defaultAdopt;
     let active = storedMarket;
     let periodDays = storedPeriod;
     let adoptionPeriod = storedAdoption;

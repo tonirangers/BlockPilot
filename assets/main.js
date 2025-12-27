@@ -739,12 +739,13 @@
     const marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     const adoptionBtns = $$('[data-adoption-period]');
-    const storedMarket = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || "total";
+    const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
+    let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || availableMarkets[0] || "btc";
+    if (!availableMarkets.includes(active)) active = availableMarkets[0] || "btc";
     const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
     const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
     const defaultAdopt = Number(cfg?.defaults?.adoptionPeriod || 1825);
     const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || defaultAdopt;
-    let active = storedMarket;
     let periodDays = storedPeriod;
     let adoptionPeriod = storedAdoption;
     setActiveTab("[data-market]", active);
@@ -839,7 +840,6 @@
 
     await refresh(active);
     await refreshAdoption();
-    initSignatureEmbeds();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

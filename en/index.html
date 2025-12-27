@@ -100,7 +100,6 @@
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
             <div class="chartHover" id="marketHover"></div>
           </div>
-          <div class="small" id="marketMeta" style="margin-top:10px;"></div>
 
           <div class="adoptionBox">
             <div class="adoptionHeader">
@@ -108,16 +107,11 @@
                 <div class="cardTitle">Adoption</div>
                 <p class="small">Global DeFi TVL (USD).</p>
               </div>
-              <div class="periodTabs" aria-label="Adoption period">
-                <button class="chip" type="button" data-adoption-period="365">1y</button>
-                <button class="chip" type="button" data-adoption-period="1095">3y</button>
-                <button class="chip" type="button" data-adoption-period="1825">5y</button>
-              </div>
             </div>
-            <div class="kpiRow">
-              <div class="kpi"><div class="k">1y</div><div class="v" id="adopt1y">—</div></div>
-              <div class="kpi"><div class="k">3y</div><div class="v" id="adopt3y">—</div></div>
-              <div class="kpi"><div class="k">5y</div><div class="v" id="adopt5y">—</div></div>
+            <div class="kpiRow kpiRow--clickable" id="adoptionPeriods">
+              <button class="kpi" type="button" data-adoption-card="365"><div class="k">1y</div><div class="v" id="adopt1y">—</div></button>
+              <button class="kpi" type="button" data-adoption-card="1095"><div class="k">3y</div><div class="v" id="adopt3y">—</div></button>
+              <button class="kpi" type="button" data-adoption-card="1825"><div class="k">5y</div><div class="v" id="adopt5y">—</div></button>
             </div>
             <div class="chartBox" id="adoptionChart">
               <div class="chartEmpty" id="adoptionEmpty">Loading…</div>
@@ -125,6 +119,7 @@
               <div class="chartHover" id="adoptionHover"></div>
             </div>
           </div>
+          <div class="small" id="adoptionNotice" style="display:none; margin-top:10px;"></div>
 
         </div>
 
@@ -144,8 +139,8 @@
 
             <div class="formRow">
               <div>
-                <div class="small" style="margin-bottom:6px;">Amount (€)</div>
-                <input class="input" id="amountEUR" inputmode="decimal" placeholder="10000" />
+                <div class="small" style="margin-bottom:6px;">Amount ($)</div>
+                <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Asset</div>
@@ -262,29 +257,9 @@
     </div>
   </section>
 
-  <section id="signature" class="section section--tight">
-    <div class="container">
-      <h2 class="h2">Signature</h2>
-      <p class="p">Sign or verify BlockPilot terms in-page. Logic is unchanged; this is a UI wrapper.</p>
-      <div class="scenarios" style="margin-top:14px;">
-        <button class="chip" type="button" data-signature-view="sign">Sign</button>
-        <button class="chip" type="button" data-signature-view="verify">Verify</button>
-      </div>
-      <div class="signatureFrames">
-        <iframe id="signatureSign" title="Sign" loading="lazy"></iframe>
-        <iframe id="signatureVerify" title="Verify" loading="lazy"></iframe>
-      </div>
-    </div>
-  </section>
-
   <footer class="footer">
     <div class="container">
-      <span>Contact:</span> <a id="footerEmail" href="#">Email</a>
-      <span> · </span>
-      <a id="footerTerms" href="#">Terms (PDF)</a>
-      <span> · </span>
-      <a id="footerSignature" href="../signature.html">Signature</a>
-      <span class="small" style="margin-left:10px;">© BlockPilot 2025</span>
+      <span>© BlockPilot 2025</span>
     </div>
   </footer>
 

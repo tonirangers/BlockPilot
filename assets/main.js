@@ -385,6 +385,7 @@
     const assetSel=$("#assetSel");
     const stableNote=$("#stableScenarioNote");
     const scenarioWrap=$("#priceScenarios");
+    const durationWrap=$("#durationChips");
 
     const depTok=$("#depTok");
     const cap12Tok=$("#cap12Tok");
@@ -402,6 +403,7 @@
 
     const scenarios = Array.isArray(cfg?.price_scenarios) && cfg.price_scenarios.length ? cfg.price_scenarios : [0,0.2,0.5];
     let scenario=Number(cfg?.defaults?.scenario ?? scenarios[1] ?? 0.2);
+    let durationYears=1;
 
     function renderScenarioChips(){
       if (!scenarioWrap) return [];
@@ -418,6 +420,7 @@
     }
 
     const chips = renderScenarioChips();
+    const durationChips = durationWrap ? Array.from(durationWrap.querySelectorAll(".chip")) : [];
 
     function setChipsEnabled(isStable) {
       chips.forEach(ch => {
@@ -458,15 +461,16 @@
       const tok1=computeTokens(principalTok, apr, 1);
       const tok3=computeTokens(principalTok, apr, 3);
       const tok5=computeTokens(principalTok, apr, 5);
+      const tokSel=computeTokens(principalTok, apr, durationYears);
 
       const unit=asset==="stables"?"STABLE":asset.toUpperCase();
       const maxDec=asset==="stables"?2:6;
 
       if (depTok) depTok.textContent=`${fmtNum(principalTok, maxDec)} ${unit}`;
-      if (cap12Tok) cap12Tok.textContent=`${fmtNum(tok1, maxDec)} ${unit}`;
+      if (cap12Tok) cap12Tok.textContent=`${fmtNum(tokSel, maxDec)} ${unit}`;
 
-      const flatVal = tok1*px;
-      const scnVal = tok1*px*priceGrowth(1);
+      const flatVal = tokSel*px;
+      const scnVal = tokSel*px*priceGrowth(durationYears);
       if (val12Flat) val12Flat.textContent=fmtUsd(flatVal,0);
       if (val12Scn) val12Scn.textContent=fmtUsd(scnVal,0);
 
@@ -483,7 +487,7 @@
         : T.priceHint(fmtNum(px,0), unit, scenario);
 
       if (priceMeta) priceMeta.textContent=pxTxt;
-    }
+    } 
 
     if (amount) amount.value=String(cfg?.defaults?.amountUSD ?? 10000);
     if (assetSel) assetSel.value=cfg?.defaults?.asset ?? "stables";
@@ -493,6 +497,14 @@
       if (asset==="stables") return;
       scenario=Number(ch.dataset.scn ?? 0);
       setActiveChip("#priceScenarios .chip", String(scenario));
+      recalc();
+    }));
+
+    durationChips.forEach(ch => ch.addEventListener("click", () => {
+      const d=Number(ch.dataset.duration||0);
+      if (!d || d===durationYears) return;
+      durationYears=d;
+      setActiveChip("#durationChips .chip", String(durationYears));
       recalc();
     }));
 
@@ -506,6 +518,7 @@
       });
     }
 
+    setActiveChip("#durationChips .chip", String(durationYears));
     recalc();
   }
 
@@ -537,8 +550,8 @@
     const signature=cfg?.links?.signature || "../sign.html";
     const navSignature=$("#navSignature");
     const footerSignature=$("#footerSignature");
-    if (navSignature) navSignature.href=resolveHref(signature);
-    if (footerSignature) footerSignature.href=resolveHref(signature);
+    if (navSignature && !navSignature.getAttribute("href")?.startsWith("#")) navSignature.href=resolveHref(signature);
+    if (footerSignature && !footerSignature.getAttribute("href")?.startsWith("#")) footerSignature.href=resolveHref(signature);
 
     const docs=cfg?.links?.docs || "";
     const navDocs=$("#navDocs");
@@ -567,6 +580,7 @@
 
     $$('a[href^="#"]').forEach(a => {
       a.addEventListener("click", (e) => {
+        if (a.id === "navSignature" || a.dataset.signatureLink === "true") return;
         const href=a.getAttribute("href");
         if (!href || href==="#") return;
         const el=document.getElementById(href.slice(1));
@@ -620,25 +634,79 @@
     } catch { return null; }
   }
 
-  function setAdoptionUI(series, meta){
+  function setAdoptionUI(series, meta, periodDays){
     const empty=$("#adoptionEmpty");
     const svg=$("#adoptionSvg");
     const axis=$("#adoptionAxis");
     const upd=$("#adoptionUpdated");
+    const range=$("#adoptionRange");
     if (!series || series.length<2){
       if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
       if (svg) svg.innerHTML="";
       if (axis) axis.innerHTML="";
       if (upd) upd.textContent="";
+      if (range) range.textContent="";
       return;
     }
     if (empty) empty.style.display="none";
-    drawSvgLine(svg, sampleSeries(series));
-    setAxisLabels(axis, series);
+    const viewSeries = sliceWindow(series, periodDays||1825);
+    drawSvgLine(svg, sampleSeries(viewSeries.length?viewSeries:series));
+    setAxisLabels(axis, viewSeries.length?viewSeries:series);
     if (upd){
       const ts = Date.parse(meta?.last_updated) || series[series.length-1][0];
       upd.textContent = `${T.lastUpdated || "Last updated"}: ${fmtDate(ts)}`;
     }
+    if (range && (viewSeries.length||series.length)){
+      const vs = viewSeries.length?viewSeries:series;
+      const lbl = LANG === "fr" ? "Période" : "Range";
+      range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
+    }
+  }
+
+  function initSignatureModal(){
+    const modal=$("#signatureModal");
+    const frame=$("#signatureFrame");
+    if (!modal || !frame) return;
+    const closeBtn=$(".signatureClose");
+    const tabBtns=$$('[data-signature-view]');
+
+    const navSig=$("#navSignature");
+    const footerSig=$("#footerSignature");
+
+    const setActive=(view)=>{
+      tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
+    };
+
+    const open=(view="sign")=>{
+      const src=view==="verify" ? fromRoot("verify.html") : fromRoot("sign.html");
+      frame.src=src;
+      modal.classList.add("is-open");
+      document.body.classList.add("no-scroll");
+      setActive(view);
+    };
+
+    const close=()=>{
+      modal.classList.remove("is-open");
+      document.body.classList.remove("no-scroll");
+    };
+
+    tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
+      const view=b.dataset.signatureView||"sign";
+      e.preventDefault();
+      open(view);
+    }));
+
+    [navSig, footerSig].forEach(link => {
+      if (!link) return;
+      link.dataset.signatureLink="true";
+      link.addEventListener("click", (e)=>{ e.preventDefault(); open("sign"); });
+    });
+
+    if (closeBtn) closeBtn.addEventListener("click", close);
+    modal.addEventListener("click", (e)=>{ if (e.target===modal) close(); });
+    document.addEventListener("keydown", (e)=>{ if (e.key==="Escape" && modal.classList.contains("is-open")) close(); });
+
+    if (location.hash==="#signature") open("sign");
   }
 
   async function init() {
@@ -651,6 +719,7 @@
     );
 
     applyLinks(cfg);
+    initSignatureModal();
 
     const yields = fillApr(cfg);
     const pricesUSD = await loadPricesUSD(cfg);
@@ -658,12 +727,17 @@
 
     const marketBtns = $$('[data-market]');
     const periodBtns = $$('[data-period]');
+    const adoptionBtns = $$('[data-adoption-period]');
     const storedMarket = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || "total";
-    const storedPeriod = Number(localStorage.getItem("bp_market_period")) || Number(cfg?.defaults?.marketPeriod || 365);
+    const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
+    const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
+    const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || 1825;
     let active = storedMarket;
     let periodDays = storedPeriod;
+    let adoptionPeriod = storedAdoption;
     setActiveTab("[data-market]", active);
     setActiveChip("[data-period]", String(periodDays));
+    setActiveChip("[data-adoption-period]", String(adoptionPeriod));
 
     const cacheMarket = await firstJSON(
       [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
@@ -673,9 +747,15 @@
       [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
       { series:[] }
     );
+    const adoptionCache = await firstJSON(
+      [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
+      { series:[], meta:{} }
+    );
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }
+    const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
+    const adoptionMeta = adoptionCache?.meta || {};
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
@@ -731,7 +811,21 @@
       await refresh(active);
     }));
 
+    async function refreshAdoption(){
+      setAdoptionUI(adoptionSeries, adoptionMeta, adoptionPeriod);
+    }
+
+    adoptionBtns.forEach(b => b.addEventListener("click", () => {
+      const d=Number(b.dataset.adoptionPeriod||0);
+      if (!d || d===adoptionPeriod) return;
+      adoptionPeriod=d;
+      localStorage.setItem("bp_adoption_period", String(adoptionPeriod));
+      setActiveChip("[data-adoption-period]", String(adoptionPeriod));
+      refreshAdoption();
+    }));
+
     await refresh(active);
+    await refreshAdoption();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

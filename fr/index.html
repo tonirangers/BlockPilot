@@ -18,14 +18,10 @@
         <button class="navToggle" id="navToggle" type="button" aria-expanded="false">Menu</button>
 
         <div class="nav__links" aria-label="Navigation">
-          <a href="#overview">Vue d’ensemble</a>
           <a href="#performance">Performance</a>
-          <a href="#yield">Rendement</a>
           <a href="#security">Sécurité</a>
-          <a id="navCall" class="nav__call" href="#">Appel</a>
-          <a id="navDocs" class="disabled" href="#">Docs</a>
-          <a id="navSignature" href="../sign.html">Signature</a>
-          <a id="navCall" class="nav__call" href="#">Réserver</a>
+          <a id="navSignature" href="#signature">Signature</a>
+          <a id="navCall" class="nav__call" href="#">Réserver un appel</a>
         </div>
 
         <div class="lang" aria-label="Language">
@@ -40,22 +36,21 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Vous gardez la clé, on pilote rendement et allocation.</h1>
+          <h1 class="h1">BlockPilot — Gestion privée crypto, 1 client = 1 coffre.</h1>
 
           <p class="lead">
-            Coffre crypto à votre nom, mandat individuel, retraits validés par votre signature.
+            Vous gardez la propriété et la clé. Nous opérons le rendement et l’allocation, avec retraits validés par votre signature.
           </p>
 
           <ul class="heroPoints" aria-label="Clés">
-            <li>Votre coffre crypto (smart wallet) à votre nom</li>
-            <li>Rendement + allocation pilotés pour vous</li>
+            <li>Coffre crypto à votre nom (smart wallet)</li>
+            <li>Rendement + allocation pilotés</li>
             <li>Retrait à la demande par votre signature</li>
           </ul>
 
           <div class="ctaRow">
             <a class="btn btn--primary" id="ctaCall" href="#">Réserver un appel</a>
             <a class="btn btn--text" href="#performance">Voir performance</a>
-            <a class="btn btn--text" id="ctaEmail" href="#">Contact</a>
           </div>
         </div>
 
@@ -99,7 +94,7 @@
         <div class="card cardPad">
           <div class="cardTitle">Contexte marché</div>
           <p class="small">
-            Capitalisation totale crypto hors stables + coins majeurs.
+            Capitalisation totale crypto hors stables + coins majeurs (long run 1/3/5 ans).
           </p>
 
           <div class="marketTabs" style="margin-top:12px;">
@@ -132,13 +127,21 @@
 
           <div class="adoptionBox">
             <div class="adoptionHeader">
-              <div class="cardTitle" style="margin:0; font-size:16px;">Adoption</div>
-              <div class="small">Indicateur public d’adoption (index base 100).</div>
+              <div>
+                <div class="cardTitle">Adoption</div>
+                <p class="small">Stablecoins en circulation (USD), index base 100.</p>
+              </div>
+              <div class="periodTabs" aria-label="Période adoption">
+                <button class="chip" type="button" data-adoption-period="365">1 an</button>
+                <button class="chip" type="button" data-adoption-period="1095">3 ans</button>
+                <button class="chip" type="button" data-adoption-period="1825">5 ans</button>
+              </div>
             </div>
-            <div class="chartBox chartBox--mini" id="adoptionChart">
+            <div class="chartBox" id="adoptionChart">
               <div class="chartEmpty" id="adoptionEmpty">Chargement…</div>
               <div class="chartAxis" id="adoptionAxis"></div>
-              <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="chartRange" id="adoptionRange"></div>
               <div class="chartUpdate" id="adoptionUpdated"></div>
             </div>
           </div>
@@ -146,7 +149,7 @@
 
         <div id="yield" class="card cardPad">
           <div class="cardTitle">Rendement + prix + intérêts composés</div>
-          <p class="cardSub">Tokens gagnés (yield), prix du token, puis intérêts composés.</p>
+          <p class="cardSub">Tout en $. Vous gagnez des tokens, leur prix peut bouger, les intérêts se réinvestissent.</p>
 
           <div class="yieldCards" style="margin-top:12px;">
             <div class="ycard"><div class="t">Stables</div><div class="n" id="aprStables">—</div><div class="u">APR</div></div>
@@ -174,6 +177,15 @@
               </div>
             </div>
 
+            <div class="scenarios" aria-label="Durée">
+              <span class="small">Durée</span>
+              <div class="scenarioChips" id="durationChips">
+                <button class="chip" type="button" data-duration="1">1 an</button>
+                <button class="chip" type="button" data-duration="3">3 ans</button>
+                <button class="chip" type="button" data-duration="5">5 ans</button>
+              </div>
+            </div>
+
             <div class="scenarios" aria-label="Scénario prix">
               <span class="small">Scénario prix</span>
               <div class="scenarioChips" id="priceScenarios"></div>
@@ -188,7 +200,7 @@
                 <div class="simRow"><div class="l">Montant déposé</div><div class="r" id="depTok">—</div></div>
               </div>
               <div>
-                <div class="small">À 12 mois</div>
+                <div class="small">Résultat (durée sélectionnée)</div>
                 <div class="simRow"><div class="l">Tokens avec intérêts</div><div class="r" id="cap12Tok">—</div></div>
                 <div class="simRow"><div class="l">Valeur (scénario prix)</div><div class="r" id="val12Scn">—</div></div>
                 <div class="simRow"><div class="l">Valeur prix plat</div><div class="r" id="val12Flat">—</div></div>
@@ -269,17 +281,50 @@
     </div>
   </section>
 
+  <section id="signature" class="section section--tight">
+    <div class="container">
+      <h2 class="h2">Signature</h2>
+      <p class="p">Signer ou vérifier les conditions BlockPilot, dans la même page.</p>
+      <div class="card cardPad signatureIntro">
+        <div>
+          <div class="cardTitle">Signer</div>
+          <p class="cardSub">Génère une signature BPC1 compatible (message et hash identiques).</p>
+          <button class="btn btn--primary" type="button" data-signature-view="sign">Ouvrir signer</button>
+        </div>
+        <div>
+          <div class="cardTitle">Vérifier</div>
+          <p class="cardSub">Contrôlez un token BPC1 ou un hash PDF existant.</p>
+          <button class="btn btn--ghost" type="button" data-signature-view="verify">Ouvrir vérifier</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="signatureModal" id="signatureModal" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
+    <div class="signatureModal__inner">
+      <div class="signatureModal__header">
+        <div>
+          <div class="cardTitle" id="signatureTitle">Signature BlockPilot</div>
+          <p class="small">Signer ou vérifier sans changer d’onglet.</p>
+        </div>
+        <div class="signatureTabs">
+          <button class="chip" type="button" data-signature-view="sign">Signer</button>
+          <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
+        </div>
+        <button class="signatureClose" type="button" aria-label="Fermer">×</button>
+      </div>
+      <iframe id="signatureFrame" title="Signature" src="" loading="lazy"></iframe>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container">
       <span>Contact :</span> <a id="footerEmail" href="#">Email</a>
       <span> · </span>
       <a id="footerTerms" href="#">Conditions (PDF)</a>
       <span> · </span>
-      <a id="footerDocs" class="disabled" href="#">Docs</a>
-      <span> · </span>
-      <a id="footerSignature" href="../sign.html">Signature</a>
-      <span> · </span>
-      <span class="small">© BlockPilot</span>
+      <a id="footerSignature" href="#signature">Signature</a>
+      <span class="small" style="margin-left:10px;">© BlockPilot</span>
     </div>
   </footer>
 

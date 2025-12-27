@@ -787,7 +787,7 @@
     const pricesUSD = await loadPricesUSD(cfg);
     initCalc(cfg, pricesUSD, yields);
 
-    const marketBtns = $$('[data-market]');
+    let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     const capBtns = $$('[data-cap-card]');
     const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
@@ -836,6 +836,19 @@
       if (livePoint[0] > lastTs) marketCapSeries = marketCapSeries.concat([livePoint]);
       marketCapSeries = sanitizeSeriesUSD(marketCapSeries);
     }
+
+    const adoptionSeries = sanitizeSeriesUSD(scaleSeriesToUSD(adoptionCache?.series));
+    const adoptionMeta = adoptionCache?.meta || {};
+    const adoptionCount = adoptionSeries.length;
+    const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
+    const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
+    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e8 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
+
+    if (adoptionNotice) {
+      adoptionNotice.style.display = adoptionReliable ? "none" : "block";
+      adoptionNotice.textContent = T.adoptionUnavailable;
+    }
+    if (adoptionSection) adoptionSection.style.display = adoptionReliable ? "block" : "none";
 
     async function refresh(sym) {
       const empty=$("#marketEmpty");
@@ -893,6 +906,15 @@
       if (capNotice) capNotice.style.display="none";
       setCapUI(marketCapSeries, marketCapMeta, capPeriod);
     }
+
+    capBtns.forEach(b => b.addEventListener("click", () => {
+      const d=Number(b.dataset.capCard||0);
+      if (!d || d===capPeriod) return;
+      capPeriod=d;
+      localStorage.setItem("bp_cap_period", String(capPeriod));
+      setActiveChip("[data-cap-card]", String(capPeriod));
+      refreshCap();
+    }));
 
     capBtns.forEach(b => b.addEventListener("click", () => {
       const d=Number(b.dataset.capCard||0);

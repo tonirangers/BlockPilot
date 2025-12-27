@@ -181,6 +181,8 @@ img{max-width:100%; display:block}
 
 .grid2{display:grid; grid-template-columns: 1.1fr .9fr; gap:18px}
 .grid3{display:grid; grid-template-columns: repeat(3,1fr); gap:16px}
+.performanceLayout{display:grid; gap:18px}
+.performanceCard--simulation .simBox{margin-top:0}
 
 .h2{font-size:38px; margin:0 0 10px; letter-spacing:-.01em}
 .p{margin:0; color:rgba(13,35,31,.70); font-weight:650; font-size:18px}

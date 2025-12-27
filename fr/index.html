@@ -90,8 +90,8 @@
     <div class="container">
       <h2 class="h2">Performance & rendement</h2>
 
-      <div class="grid2" style="margin-top:18px;">
-        <div class="card cardPad">
+      <div class="performanceLayout" style="margin-top:18px;">
+        <div class="card cardPad performanceCard performanceCard--market">
           <div class="cardTitle">Contexte marché</div>
           <div class="cardHint">Marché = évolution des prix (indice).</div>
 
@@ -117,7 +117,7 @@
 
         </div>
 
-        <div id="yield" class="card cardPad">
+        <div id="yield" class="card cardPad performanceCard performanceCard--yield">
           <div class="cardTitle">Rendement + prix + intérêts composés</div>
           <p class="cardSub">Votre performance totale combine le rendement intrinsèque (tokens générés) et l’évolution de la valeur des actifs. Les intérêts sont réinvestis (effet composé).</p>
           <div class="cardHint">Rendement = tokens générés. Total = rendement + effet composé.</div>
@@ -129,6 +129,9 @@
               <div class="ycard"><div class="t">BNB</div><div class="n" id="aprBnb">—</div><div class="u">APY (indicatif)</div></div>
             </div>
 
+        </div>
+
+        <div class="card cardPad performanceCard performanceCard--simulation">
           <div class="simBox">
             <div class="simTitle">Simulez la croissance de votre patrimoine</div>
 

@@ -659,11 +659,11 @@
     const k3=$("#adopt3y");
     const k5=$("#adopt5y");
     const hover=$("#adoptionHover");
+    if (upd) { upd.textContent=""; upd.style.display="none"; }
+    if (range) { range.textContent=""; range.style.display="none"; }
     if (!series || series.length<2){
       if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
       if (svg) svg.innerHTML="";
-      if (upd) upd.textContent="";
-      if (range) range.textContent="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       if (hover) hover.style.display="none";
       return;
@@ -680,14 +680,6 @@
     if (k1) k1.textContent=fmtPct(r1);
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
-    if (upd){
-      const ts = Date.parse(meta?.last_updated) || series[series.length-1][0];
-      upd.textContent = `${T.lastUpdated || "Last updated"}: ${fmtDate(ts)}`;
-    }
-    if (range && vs.length){
-      const lbl = LANG === "fr" ? "Période" : "Range";
-      range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
-    }
     installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtUsd(v,0), false);
   }
 
@@ -736,7 +728,7 @@
     const pricesUSD = await loadPricesUSD(cfg);
     initCalc(cfg, pricesUSD, yields);
 
-    const marketBtns = $$('[data-market]');
+    let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     let adoptionBtns = $$('[data-adoption-card]');
     let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);

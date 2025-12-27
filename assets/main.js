@@ -736,7 +736,7 @@
     const pricesUSD = await loadPricesUSD(cfg);
     initCalc(cfg, pricesUSD, yields);
 
-    const marketBtns = $$('[data-market]');
+    let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     let adoptionBtns = $$('[data-adoption-card]');
     let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);

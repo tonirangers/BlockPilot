@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BPC — Verify (Standard & Seed)</title>
+  <title>BPC — Vérification</title>
   <link rel="stylesheet" href="./assets/styles.css" />
   <script>const EMBED = new URLSearchParams(location.search).get('embed')==='1'; if (EMBED) document.documentElement.classList.add('embed');</script>
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
@@ -16,9 +16,7 @@
     .embed .container{box-shadow:none;border:0;border-radius:0;padding:0;background:transparent;text-align:left;}
     .logo{height:96px;width:96px;display:block;margin:0 auto 12px;border-radius:18px;border:1px solid var(--line);box-shadow:0 10px 24px rgba(13,35,31,.08)}
     .embed .logo{display:none;}
-    .tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 16px}
-    .tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(11,111,102,.08);color:var(--brand);text-decoration:none;font-weight:800;cursor:pointer;user-select:none}
-    .tab.active{background:var(--brand);color:#fff;border-color:rgba(11,111,102,.55)}
+    .note{font-size:14px;margin:0 0 12px;color:rgba(13,35,31,.65);font-weight:750;}
     h2{font-size:24px;margin:0 0 10px}
     p{font-size:16px;margin:0 0 14px;color:var(--muted);font-weight:650}
     .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:14px;border-radius:14px;font-size:16px;font-weight:900;text-decoration:none;border:1px solid rgba(13,35,31,.14);cursor:pointer;background:var(--brand);color:#fff;box-shadow:0 12px 26px rgba(13,35,31,.06)}
@@ -36,13 +34,9 @@
   <div class="container">
     <a href="index.html" aria-label="Home"><img src="logo.png" alt="BPC" class="logo" onerror="this.style.display='none'"></a>
 
-    <nav class="tabs">
-      <span class="tab" id="tab-standard">Standard</span>
-      <span class="tab" id="tab-seed">Seed</span>
-    </nav>
-
-    <h2>Verify Signature</h2>
-    <p class="muted">Paste your <b>verify token</b> (starts with <code>BPC1.</code>) or a full block (new or legacy).</p>
+    <h2 id="title">Verify Signature</h2>
+    <p class="muted" id="intro">Paste your <b>verify token</b> (starts with <code>BPC1.</code>) or a full block (new or legacy).</p>
+    <p class="note" id="modeNote">Standard &amp; Seed documents are detected automatically.</p>
 
     <textarea id="inputData" placeholder="BPC1.eyJhZGRyZXNzIjoiMHh...  OR
 
@@ -69,19 +63,22 @@ Signature:
 
 <script>
   const PDFs = { standard: 'BPC_Terms.pdf', seed: 'BPC_Terms_Seed.pdf' };
-  let mode = 'standard';
-  let defaultPdf = PDFs[mode];
+  const DOC_IDS = { standard: 'BPC_Terms v1.0 (2025-11-07)', seed: 'BPC_Terms_Seed v1.0 (2025-11-07)' };
+
+  function inferDocId(pdf){
+    if (!pdf) return null;
+    const key = pdf.toLowerCase().includes('seed') ? 'seed' : 'standard';
+    return DOC_IDS[key];
+  }
 
   function renderCopy(){
     document.documentElement.lang = lang;
-    const tabStd=document.getElementById('tab-standard');
-    const tabSeed=document.getElementById('tab-seed');
-    if (tabStd) tabStd.textContent=t('tabStandard');
-    if (tabSeed) tabSeed.textContent=t('tabSeed');
-    const titleEl=document.querySelector('h2');
+    const titleEl=document.getElementById('title');
     if (titleEl) titleEl.textContent=t('title');
-    const intro=document.querySelector('p.muted');
+    const intro=document.getElementById('intro');
     if (intro) intro.textContent=t('intro');
+    const note=document.getElementById('modeNote');
+    if (note) note.textContent=t('modeNote');
     const box=document.getElementById('inputData');
     if (box) box.placeholder=t('placeholder');
     const btn=document.getElementById('verifyBtn');
@@ -90,14 +87,16 @@ Signature:
 
   const STR = {
     en: {
-      tabStandard:'Standard', tabSeed:'Seed', title:'Verify Signature', intro:'Paste your verify token (starts with BPC1.) or a full block (new or legacy).',
-      placeholder:`BPC1.eyJhZGRyZXNzIjoiMHh...  OR\n\nSigned as: 0x...\nDoc ID: BPC_Terms v1.0 (2025-11-07)\nOrigin: https://yourdomain.tld\nPDF: BPC_Terms.pdf\nPDF Hash: 0x...\nTimestamp: 2025-...\nSignature:\n0x...\n\n—OR—\n\nSigned as: 0x... as of 2025-...\nSignature:\n0x...                    ← legacy v0`,
+      title:'Verify signature', intro:'Paste your verification token (starts with BPC1.) or a signed block (new or legacy).',
+      modeNote:'Standard & Seed are detected automatically.',
+      placeholder:`BPC1.eyJhZGRyZXNzIjoiMHh...  OR\n\nSigned as: 0x...\nDoc ID: BPC_Terms v1.0 (2025-11-07)\nOrigin: https://blockpilot.co\nPDF: BPC_Terms.pdf\nPDF Hash: 0x...\nTimestamp: 2025-...\nSignature:\n0x...\n\n—OR—\n\nSigned as: 0x... as of 2025-...\nSignature:\n0x...                    ← legacy v0`,
       verifyBtn:'🔍 Verify', signatureOnly:'The signature alone is not enough. Paste the BPC1 token generated after signing.',
       pasteGuidance:'Paste a BPC1 token, a new-format block, or a legacy block.', invalidSig:'❌ Error verifying signature'
     },
     fr: {
-      tabStandard:'Standard', tabSeed:'Seed', title:'Vérifier la signature', intro:'Collez votre token de vérification (commence par BPC1.) ou un bloc complet (nouveau ou legacy).',
-      placeholder:`BPC1.eyJhZGRyZXNzIjoiMHh...  OU\n\nSigned as: 0x...\nDoc ID: BPC_Terms v1.0 (2025-11-07)\nOrigin: https://yourdomain.tld\nPDF: BPC_Terms.pdf\nPDF Hash: 0x...\nTimestamp: 2025-...\nSignature:\n0x...\n\n—OU—\n\nSigned as: 0x... as of 2025-...\nSignature:\n0x...                    ← legacy v0`,
+      title:'Vérifier la signature', intro:'Collez votre token de vérification (commence par BPC1.) ou un bloc signé (nouveau ou legacy).',
+      modeNote:'Standard & Seed sont détectés automatiquement.',
+      placeholder:`BPC1.eyJhZGRyZXNzIjoiMHh...  OU\n\nSigned as: 0x...\nDoc ID: BPC_Terms v1.0 (2025-11-07)\nOrigin: https://blockpilot.co\nPDF: BPC_Terms.pdf\nPDF Hash: 0x...\nTimestamp: 2025-...\nSignature:\n0x...\n\n—OU—\n\nSigned as: 0x... as of 2025-...\nSignature:\n0x...                    ← legacy v0`,
       verifyBtn:'🔍 Vérifier', signatureOnly:'La signature seule ne suffit pas. Collez le token BPC1 généré après signature.',
       pasteGuidance:'Collez un token BPC1, un bloc nouveau format ou un bloc legacy.', invalidSig:'❌ Erreur lors de la vérification'
     }
@@ -114,7 +113,6 @@ Signature:
     lang = getLang();
     renderCopy();
     const params = getHashParams();
-    if (params.mode === 'seed') setMode('seed', false);
     if (params.token) {
       document.getElementById('inputData').value = params.token;
       verify();
@@ -123,8 +121,6 @@ Signature:
   window.addEventListener('storage', (e)=>{
     if (e.key === 'bp_lang') { lang = getLang(); renderCopy(); }
   });
-  document.getElementById('tab-standard').addEventListener('click', () => setMode('standard', true));
-  document.getElementById('tab-seed').addEventListener('click', () => setMode('seed', true));
   document.getElementById('verifyBtn').addEventListener('click', verify);
 
   function getHashParams() {
@@ -135,12 +131,6 @@ Signature:
       if (k) o[decodeURIComponent(k)] = v ? decodeURIComponent(v) : '';
     });
     return o;
-  }
-  function setMode(m, pushHash){
-    mode = m; defaultPdf = PDFs[mode];
-    document.getElementById('tab-standard').classList.toggle('active', mode==='standard');
-    document.getElementById('tab-seed').classList.toggle('active', mode==='seed');
-    if (pushHash) location.hash = `mode=${mode}`;
   }
 
   async function verify() {
@@ -153,7 +143,6 @@ Signature:
     let input = box.value.trim();
     if (!input) return;
 
-    // normalize CRLF → LF (Windows paste friendly)
     input = input.replace(/\r\n/g, '\n');
 
     if (input.startsWith('0x') && !input.includes('\n')) {
@@ -163,36 +152,33 @@ Signature:
     }
 
     try {
-      let address, pdf = defaultPdf, pdfHash = null, timestamp, signature, isLegacy = false, docId = null, origin = null;
+      let address, pdf = null, pdfHash = null, timestamp, signature, isLegacy = false, docId = null, origin = null;
+      let fromToken = false;
 
       if (input.startsWith('BPC1.')) {
-        // token mode
+        fromToken = true;
         const json = decodeURIComponent(escape(atob(input.slice(5))));
         const p = JSON.parse(json);
         address   = p.address;
-        pdf       = p.pdf || defaultPdf;
+        pdf       = p.pdf || null;
         pdfHash   = p.pdfHash || null;
         timestamp = p.timestamp;
         signature = p.signature;
         docId     = p.docId || null;
         origin    = p.origin || null;
       } else {
-        // v1 block (with Doc ID & Origin)
         let m = input.match(
           /Signed as: (0x[a-fA-F0-9]{40})\nDoc ID: (.+?)\nOrigin: (.+?)\nPDF: (.+?)\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s
         );
         if (m) {
           [, address, docId, origin, pdf, pdfHash, timestamp, signature] = m;
         } else {
-          // new block (sans docId/origin, génération précédente)
           m = input.match(
             /Signed as: (0x[a-fA-F0-9]{40})\nPDF Hash: (0x[a-fA-F0-9]{64})\nTimestamp: (.*?)\nSignature:\n(0x[a-fA-F0-9]{130,})/s
           );
           if (m) {
             [, address, pdfHash, timestamp, signature] = m;
-            // pdf = defaultPdf
           } else {
-            // legacy v0 (pas de hash, pas de pdf)
             m = input.match(/Signed as: (0x[a-fA-F0-9]{40}) as of (.*?)\s*Signature:\s*(0x[a-fA-F0-9]{130,})/s);
             if (!m) {
               out.classList.add('err'); out.style.display='block';
@@ -204,44 +190,64 @@ Signature:
         }
       }
 
-      // Rebuild exact message
-      const message = isLegacy
-        ? `I, ${address}, agree to the BPC Terms (see ${pdf}) as of ${timestamp}`
-        : (docId && origin)
-          ? `I, ${address}, agree to the BPC Terms (${pdf})
-Doc ID: ${docId}
-Origin: ${origin}
+      const attempts=[];
+      const primaryDocId = docId || inferDocId(pdf);
+      const safePdf = (p)=> p || PDFs.standard;
+      if (fromToken) {
+        attempts.push({ pdf: safePdf(pdf), docId, origin });
+      } else if (docId || pdf) {
+        attempts.push({ pdf: safePdf(pdf), docId: primaryDocId, origin });
+      } else {
+        attempts.push({ pdf: PDFs.standard, docId: DOC_IDS.standard });
+        attempts.push({ pdf: PDFs.seed, docId: DOC_IDS.seed });
+      }
+
+      let matched = null;
+      for (const attempt of attempts) {
+        const usePdf = safePdf(attempt.pdf);
+        const useDoc = attempt.docId || inferDocId(usePdf);
+        const useOrigin = attempt.origin || origin;
+        const message = isLegacy
+          ? `I, ${address}, agree to the BPC Terms (see ${usePdf}) as of ${timestamp}`
+          : (useDoc && useOrigin)
+            ? `I, ${address}, agree to the BPC Terms (${usePdf})
+Doc ID: ${useDoc}
+Origin: ${useOrigin}
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`
-          : `I, ${address}, agree to the BPC Terms (${pdf})
+            : `I, ${address}, agree to the BPC Terms (${usePdf})
 PDF Hash: ${pdfHash}
 Signed on: ${timestamp}`;
 
-      const recovered = ethers.utils.verifyMessage(message, signature);
+        const recovered = ethers.utils.verifyMessage(message, signature);
+        if (recovered?.toLowerCase() === address?.toLowerCase()) {
+          matched = { usePdf, useDoc, useOrigin, recovered };
+          break;
+        }
+      }
 
-      if (recovered.toLowerCase() === address.toLowerCase()) {
-        out.classList.add('ok'); out.style.display='block';
-        out.innerHTML = `✅ <b>Valid Signature</b><br>
-Recovered Address: <code>${recovered}</code><br>
-${docId ? `Doc ID: <code>${docId}</code><br>` : ``}
-${origin ? `Origin: <code>${origin}</code><br>` : ``}
-PDF: <code>${pdf}</code><br>` +
-(isLegacy ? `PDF Hash: <i>not present in legacy signature</i><br>` : `PDF Hash: <code>${pdfHash}</code><br>`) +
-`Timestamp: <code>${timestamp}</code>`;
-      } else {
+      if (!matched) {
         out.classList.add('err'); out.style.display='block';
-        out.innerHTML = `❌ <b>Invalid Signature</b><br>Recovered Address: <code>${recovered}</code>`;
+        out.innerHTML = `❌ <b>Invalid Signature</b>`;
         return;
       }
 
-      // Optional: compare current server PDF hash
+      out.classList.add('ok'); out.style.display='block';
+      out.innerHTML = `✅ <b>Valid Signature</b><br>
+Recovered Address: <code>${matched.recovered}</code><br>
+${matched.useDoc ? `Doc ID: <code>${matched.useDoc}</code><br>` : ``}
+${matched.useOrigin ? `Origin: <code>${matched.useOrigin}</code><br>` : ``}
+PDF: <code>${matched.usePdf}</code><br>` +
+      (isLegacy ? `PDF Hash: <i>not present in legacy signature</i><br>` : `PDF Hash: <code>${pdfHash}</code><br>`) +
+      `Timestamp: <code>${timestamp}</code>`;
+
       try {
-        const res = await fetch(pdf, { cache:'no-store' });
+        const res = await fetch(matched.usePdf, { cache:'no-store' });
         if (res.ok) {
           const buf = new Uint8Array(await res.arrayBuffer());
           const actual = '0x' + keccak256(buf);
           if (!isLegacy && pdfHash && actual.toLowerCase() === pdfHash.toLowerCase()) {
-            pdfBox.className='result ok'; pdfBox.innerHTML='🧮 PDF hash matches on server.'; 
+            pdfBox.className='result ok'; pdfBox.innerHTML='🧮 PDF hash matches on server.';
           } else if (!isLegacy && pdfHash) {
             pdfBox.className='result warn';
             pdfBox.innerHTML = `⚠️ PDF hash mismatch on server.<br>Expected: <code>${pdfHash}</code><br>Server: <code>${actual}</code>`;

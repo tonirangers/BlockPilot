@@ -1,5 +1,5 @@
 /* assets/main.js */
-(() => {
+(async () => {
   const $ = (s, el=document) => el.querySelector(s);
   const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
 
@@ -53,6 +53,7 @@
     }
   };
   const T = I18N[LANG] || I18N.fr;
+  try { localStorage.setItem("bp_lang", LANG); } catch {}
 
   const SCRIPT_URL = (() => {
     try {
@@ -102,7 +103,10 @@
   }
 
   function setActiveChip(groupSel, key) {
-    $$(groupSel).forEach(b => b.classList.toggle("active", String(b.dataset.scn) === String(key)));
+    $$(groupSel).forEach(b => {
+      const data = b.dataset.scn ?? b.dataset.periodCard ?? b.dataset.capCard ?? b.dataset.adoptionCard ?? b.dataset.duration;
+      b.classList.toggle("active", String(data) === String(key));
+    });
   }
   function setActiveTab(groupSel, key) {
     $$(groupSel).forEach(b => b.classList.toggle("active", b.dataset.market === key));
@@ -159,8 +163,10 @@
   }
 
   function sampleSeries(series, maxPoints=220) {
-    if (!series || series.length<=maxPoints) return series;
-    const step=Math.ceil(series.length/maxPoints);
+    if (!series || !series.length) return [];
+    const target=Math.max(maxPoints, 20);
+    if (series.length<=target) return series;
+    const step=Math.max(1, Math.floor(series.length/target));
     const out=[];
     for (let i=0;i<series.length;i+=step) out.push(series[i]);
     if (out[out.length-1]!==series[series.length-1]) out.push(series[series.length-1]);
@@ -180,6 +186,57 @@
       m.set(t, v);
     }
     return [...m.entries()].sort((a,b)=>a[0]-b[0]);
+  }
+
+  function sanitizeSeriesUSD(series) {
+    const clean = (series||[])
+      .map(p=>[Number(p?.[0]), Number(p?.[1])])
+      .filter(p=>isFinite(p[0]) && isFinite(p[1]))
+      .sort((a,b)=>a[0]-b[0]);
+    if (clean.length < 2) return clean;
+    const last = clean[clean.length-1][1];
+    const tail = clean.slice(-6,-1).map(p=>p[1]).filter(v=>isFinite(v));
+    const baselineArr = tail.length ? tail.slice().sort((a,b)=>a-b) : [clean[clean.length-2][1]];
+    const mid = baselineArr[Math.floor((baselineArr.length-1)/2)] || baselineArr[0];
+    if (isFinite(last) && isFinite(mid) && last > mid*4) return clean.slice(0,-1);
+    return clean;
+  }
+
+  function scaleSeriesToUSD(series){
+    const vals=(series||[]).map(p=>Number(p?.[1])).filter(isFinite);
+    const max = vals.length ? Math.max(...vals) : 0;
+    const factor = max && max < 1e7 ? 1e9 : 1;
+    return (series||[]).map(p=>[Number(p?.[0]), Number(p?.[1])*factor]);
+  }
+
+  function buildEqualWeightedIndex(seriesMap) {
+    const keys=["btc","eth","bnb"];
+    const maps = keys.map(k=>{
+      const m=new Map();
+      (seriesMap?.[k]||[]).forEach(p=>{
+        const t=dayTs(p?.[0]);
+        const v=Number(p?.[1]);
+        if (isFinite(t) && isFinite(v) && v>0) m.set(t, v);
+      });
+      return m;
+    });
+    if (!maps.every(m=>m.size)) return [];
+    const common=[...maps[0].keys()].filter(ts=>maps[1].has(ts)&&maps[2].has(ts)).sort((a,b)=>a-b);
+    if (!common.length) return [];
+
+    const baseTs=common[0];
+    const base=maps.map(m=>Number(m.get(baseTs))).map(v=>isFinite(v)&&v>0?v:null);
+    if (base.some(v=>v===null)) return [];
+
+    const out=[];
+    for (const ts of common) {
+      const vals=maps.map(m=>Number(m.get(ts)));
+      if (vals.some(v=>!isFinite(v)||v<=0)) continue;
+      const norms=vals.map((v,i)=>v/base[i]*100);
+      const idx=norms.reduce((a,v)=>a+v,0)/norms.length;
+      out.push([ts, Number(idx.toFixed(2))]);
+    }
+    return out;
   }
 
   async function loadPricesUSD(cfg) {
@@ -323,13 +380,16 @@
     const last=series[series.length-1][0];
     const span=last-first || 1;
     const show=(p)=>{
-      const label=isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0);
+      const val = fmtVal ? fmtVal(p[1]) : (isIndex ? fmtNum(p[1],0) : fmtUsd(p[1],0));
+      const label=isIndex ? `${LANG==="fr"?"Indice":"Index"} ${val}` : val;
       hover.textContent = `${label} · ${fmtDate(p[0])}`;
       hover.style.display="block";
     };
     box.onmousemove = (e)=>{
       const rect=box.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
+      const padFrac = 20/1000;
+      const rawRatio = (e.clientX-rect.left)/rect.width;
+      const ratio = Math.min(1-padFrac, Math.max(padFrac, rawRatio));
       const t = first + span*ratio;
       const p = nearestByTime(series, t);
       if (p) show(p);
@@ -344,6 +404,7 @@
     const k1=$("#kpi1y");
     const k3=$("#kpi3y");
     const k5=$("#kpi5y");
+    const axis=$("#marketAxis");
 
     if (!series || series.length<2) {
       if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
@@ -361,22 +422,22 @@
     const r1=computeReturn(base,365);
     const r3=computeReturn(base,1095);
     const r5=computeReturn(base,1825);
-    if (k1) k1.textContent=fmtPct(r1);
-    if (k3) k3.textContent=fmtPct(r3);
-    if (k5) k5.textContent=fmtPct(r5);
+      if (k1) k1.textContent=fmtPct(r1);
+      if (k3) k3.textContent=fmtPct(r3);
+      if (k5) k5.textContent=fmtPct(r5);
 
-if (axis) { axis.innerHTML=""; axis.style.display="none"; }
+      if (axis) { axis.innerHTML=""; axis.style.display="none"; }
 
-if (viewSeries.length > 5) {
-  const last=viewSeries[viewSeries.length-1][1];
-  const prev=viewSeries[viewSeries.length-2][1] || last;
-  if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
-}
+      if (viewSeries.length > 5) {
+        const last=viewSeries[viewSeries.length-1][1];
+        const prev=viewSeries[viewSeries.length-2][1] || last;
+        if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
+      }
 
-const sampled = sampleSeries(viewSeries);
-drawSvgLine(svg, sampled);
+      const sampled = sampleSeries(viewSeries);
+      drawSvgLine(svg, sampled);
 
-installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+      installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
 
   }
 
@@ -647,27 +708,28 @@ installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):f
     } catch { return null; }
   }
 
-  function setAdoptionUI(series, meta, periodDays){
-    const empty=$("#adoptionEmpty");
-    const svg=$("#adoptionSvg");
-    const upd=$("#adoptionUpdated");
-    const range=$("#adoptionRange");
-    const k1=$("#adopt1y");
-    const k3=$("#adopt3y");
-    const k5=$("#adopt5y");
-    const hover=$("#adoptionHover");
+  function setCapUI(series, meta, periodDays){
+    const empty=$("#capEmpty");
+    const svg=$("#capSvg");
+    const k1=$("#cap1y");
+    const k3=$("#cap3y");
+    const k5=$("#cap5y");
+    const hover=$("#capHover");
     if (!series || series.length<2){
       if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
       if (svg) svg.innerHTML="";
-      if (upd) upd.textContent="";
-      if (range) range.textContent="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       if (hover) hover.style.display="none";
       return;
     }
     if (empty) empty.style.display="none";
-    const viewSeries = sliceWindow(series, periodDays||1825);
-    const vs = viewSeries.length?viewSeries:series;
+    let viewSeries = sliceWindow(series, periodDays||1825);
+    let vs = viewSeries.length?viewSeries:series;
+    if (vs.length > 5) {
+      const last=vs[vs.length-1][1];
+      const prev=vs[vs.length-2][1] || last;
+      if (isFinite(last) && isFinite(prev) && last > prev*4) vs = vs.slice(0,-1);
+    }
     const sampled = sampleSeries(vs);
     drawSvgLine(svg, sampled);
     const base = vs.length ? vs : series;
@@ -677,46 +739,37 @@ installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):f
     if (k1) k1.textContent=fmtPct(r1);
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
-    if (upd){
-      const ts = Date.parse(meta?.last_updated) || series[series.length-1][0];
-      upd.textContent = `${T.lastUpdated || "Last updated"}: ${fmtDate(ts)}`;
-    }
-    if (range && vs.length){
-      const lbl = LANG === "fr" ? "Période" : "Range";
-      range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
-    }
-    installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtUsd(v,0), false);
+    installHover("#capChart", "#capHover", sampled, (v)=>fmtUsd(v,0), false);
   }
 
-  function initSignatureEmbeds(){
-    const tabBtns=$$('[data-signature-view]');
-    const signFrame=$("#signatureSign");
-    const verifyFrame=$("#signatureVerify");
-    if (!tabBtns.length || !signFrame || !verifyFrame) return;
+    function initSignatureEmbeds(){
+      const tabBtns=$$('[data-signature-view]');
+      const frame=$("#signatureFrame");
+      if (!tabBtns.length || !frame) return;
 
-    const inLocale=/\/(en|fr)\/signature\.html$/i.test(location.pathname);
-    const basePath=inLocale ? "../" : "./";
-    const signSrc=resolveHref(basePath+"sign.html");
-    const verifySrc=resolveHref(basePath+"verify.html");
+      const srcFor=(view)=>{
+        const page=view==="verify" ? "verify" : "sign";
+        return fromRoot(`${page}.html?embed=1`);
+      };
 
-    let signLoaded=false, verifyLoaded=false;
-    const setActive=(view)=>{
-      tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
-      signFrame.classList.toggle("active", view==="sign");
-      verifyFrame.classList.toggle("active", view==="verify");
-if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html?embed=1"); signLoaded=true; }
-if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?embed=1"); verifyLoaded=true; }
+      let current="";
+      const setActive=(view)=>{
+        const v=view==="verify" ? "verify" : "sign";
+        if (current===v) return;
+        current=v;
+        tabBtns.forEach(b=>b.classList.toggle("active", (b.dataset.signatureView||"sign")===v));
+        frame.src=srcFor(v);
+        frame.title = v==="verify" ? (LANG==="fr"?"Vérifier":"Verify") : (LANG==="fr"?"Signer":"Sign");
+      };
 
-    };
+      tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
+        e.preventDefault();
+        setActive(b.dataset.signatureView||"sign");
+      }));
 
-    tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
-      e.preventDefault();
-      const view=b.dataset.signatureView||"sign";
-      setActive(view);
-    }));
-
-    setActive(location.hash==="#signature" ? "sign" : "sign");
-  }
+      const defaultView = location.hash==="#verify" ? "verify" : "sign";
+      setActive(defaultView);
+    }
 
   async function init() {
     enableSmoothScroll();
@@ -736,68 +789,54 @@ if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?emb
 
     const marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
-    let adoptionBtns = $$('[data-adoption-card]');
-    let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
-    let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || availableMarkets[0] || "btc";
-    if (!availableMarkets.includes(active)) active = availableMarkets[0] || "btc";
-    const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
-    const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
-    const defaultAdopt = Number(cfg?.defaults?.adoptionPeriod || 1825);
-    const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || defaultAdopt;
-    let periodDays = storedPeriod;
-    let adoptionPeriod = storedAdoption;
+    const capBtns = $$('[data-cap-card]');
+    const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
+    const defaultActive = "total";
+    let active = localStorage.getItem("bp_market_sel") || defaultActive;
+    if (!availableMarkets.includes(active)) active = availableMarkets.includes(defaultActive) ? defaultActive : (availableMarkets[0] || "btc");
+    const defaultPeriod = 1825;
+    const defaultCapPeriod = 1825;
+    const allowedPeriods = new Set(periodCards.map(p=>String(Number(p.dataset.periodCard||0))).filter(Boolean));
+    const allowedCapPeriods = new Set(capBtns.map(p=>String(Number(p.dataset.capCard||0))).filter(Boolean));
+    const storedPeriod = Number(localStorage.getItem("bp_market_period"));
+    const storedCap = Number(localStorage.getItem("bp_cap_period"));
+    let periodDays = allowedPeriods.has(String(storedPeriod)) ? storedPeriod : defaultPeriod;
+    let capPeriod = allowedCapPeriods.has(String(storedCap)) ? storedCap : defaultCapPeriod;
     setActiveTab("[data-market]", active);
     setActiveChip("[data-period-card]", String(periodDays));
-    setActiveChip("[data-adoption-card]", String(adoptionPeriod));
+    setActiveChip("[data-cap-card]", String(capPeriod));
 
+    const cacheBust=`?t=${dayTs(Date.now())}`;
     const cacheMarket = await firstJSON(
-      [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
+      [fromRoot(`data/market.json${cacheBust}`), `../data/market.json${cacheBust}`,`./data/market.json${cacheBust}`],
       null
     );
     const cacheCap = await firstJSON(
-      [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
-      { series:[] }
-    );
-    const adoptionCache = await firstJSON(
-      [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
+      [fromRoot(`data/market_total_ex_stables.json${cacheBust}`), `../data/market_total_ex_stables.json${cacheBust}`,`./data/market_total_ex_stables.json${cacheBust}`],
       { series:[], meta:{} }
     );
-    const marketCapIndex = (cacheMarket?.meta?.totalKind === "index") || String(cacheCap?.meta?.source||"").includes("synthetic");
-    if (marketCapIndex) {
-      const totalBtn = document.querySelector('[data-market="total"]');
-      if (totalBtn) totalBtn.remove();
-      marketBtns = $$('[data-market]');
-      availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
-      if (active === "total") active = availableMarkets[0] || "btc";
-      setActiveTab("[data-market]", active);
-    }
+    const priceSeries={
+      btc: normalizeSeriesDaily((cacheMarket?.btc||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
+      eth: normalizeSeriesDaily((cacheMarket?.eth||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1]))),
+      bnb: normalizeSeriesDaily((cacheMarket?.bnb||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])))
+    };
+    const totalIndexSeries = buildEqualWeightedIndex(priceSeries);
 
-    const adoptionSection=document.querySelector(".adoptionBox");
-    const adoptionNotice=$("#adoptionNotice");
+    const capNotice=$("#capNotice");
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     }
-    const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
-    const adoptionMeta = adoptionCache?.meta || {};
-const adoptionCount = adoptionSeries.length;
-const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
-const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
 
-const chart = document.querySelector("#adoptionChart");
-if (!adoptionReliable) {
-  if (chart) chart.style.display = "none";
-  if (adoptionNotice) {
-    adoptionNotice.style.display="block";
-    adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
-      ? T.adoptionUnavailable
-      : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
-  }
-} else {
-  if (chart) chart.style.display = "";
-  if (adoptionNotice) adoptionNotice.style.display="none";
-}
+    const marketCapSeriesCache = sanitizeSeriesUSD(scaleSeriesToUSD(cacheCap?.series));
+    const marketCapMeta = cacheCap?.meta || {};
 
+    let marketCapSeries = marketCapSeriesCache;
+    const snap = await loadMarketCapSnapshot();
+    if (snap && isFinite(snap.value)) {
+      const lastTs = marketCapSeries[marketCapSeries.length-1]?.[0] || 0;
+      const livePoint=[Date.now(), snap.value];
+      if (livePoint[0] > lastTs) marketCapSeries = marketCapSeries.concat([livePoint]);
+      marketCapSeries = sanitizeSeriesUSD(marketCapSeries);
     }
 
     async function refresh(sym) {
@@ -806,20 +845,9 @@ if (!adoptionReliable) {
       let series=[], source="", isIndex=sym==="total", updatedAt=Date.now();
 
       if (sym === "total") {
-        const fallbackSeries = normalizeSeriesDaily((cacheCap?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
-        series = fallbackSeries;
-        source = cacheCap?.meta?.source || "cache";
-        updatedAt = Date.parse(cacheCap?.meta?.last_updated) || updatedAt;
-
-        const snap = await loadMarketCapSnapshot();
-        if (snap && isFinite(snap.value)) {
-          const lastTs = series[series.length-1]?.[0] || 0;
-          const point=[Date.now(), Number((snap.value/1e9).toFixed(2))];
-          if (point[0] > lastTs) series = series.concat([point]);
-          source = snap.source || "live";
-          updatedAt = snap.updatedAt || point[0];
-        }
-        isIndex=false;
+        series = totalIndexSeries;
+        source = "Equal-weighted index";
+        updatedAt = series?.[series.length-1]?.[0] || updatedAt;
       } else {
         const cache = cacheSeries(sym);
         series = cache;
@@ -855,21 +883,30 @@ if (!adoptionReliable) {
       await refresh(active);
     }));
 
-    async function refreshAdoption(){
-      setAdoptionUI(adoptionSeries, adoptionMeta, adoptionPeriod);
+    async function refreshCap(){
+      if (!marketCapSeries || marketCapSeries.length<2) {
+        if (capNotice) { capNotice.style.display="block"; capNotice.textContent=T.adoptionUnavailable; }
+        const capBox=document.querySelector("#capChart");
+        if (capBox) capBox.style.display="none";
+        return;
+      }
+      const capBox=document.querySelector("#capChart");
+      if (capBox) capBox.style.display="block";
+      if (capNotice) capNotice.style.display="none";
+      setCapUI(marketCapSeries, marketCapMeta, capPeriod);
     }
 
-    adoptionBtns.forEach(b => b.addEventListener("click", () => {
-      const d=Number(b.dataset.adoptionCard||0);
-      if (!d || d===adoptionPeriod) return;
-      adoptionPeriod=d;
-      localStorage.setItem("bp_adoption_period", String(adoptionPeriod));
-      setActiveChip("[data-adoption-card]", String(adoptionPeriod));
-      refreshAdoption();
+    capBtns.forEach(b => b.addEventListener("click", () => {
+      const d=Number(b.dataset.capCard||0);
+      if (!d || d===capPeriod) return;
+      capPeriod=d;
+      localStorage.setItem("bp_cap_period", String(capPeriod));
+      setActiveChip("[data-cap-card]", String(capPeriod));
+      refreshCap();
     }));
 
     await refresh(active);
-    if (adoptionReliable) await refreshAdoption();
+    await refreshCap();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

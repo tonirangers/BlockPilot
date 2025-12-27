@@ -1,5 +1,5 @@
 /* assets/main.js */
-(() => {
+(async () => {
   const $ = (s, el=document) => el.querySelector(s);
   const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
 
@@ -159,8 +159,10 @@
   }
 
   function sampleSeries(series, maxPoints=220) {
-    if (!series || series.length<=maxPoints) return series;
-    const step=Math.ceil(series.length/maxPoints);
+    if (!series || !series.length) return [];
+    const target=Math.max(maxPoints, 20);
+    if (series.length<=target) return series;
+    const step=Math.max(1, Math.floor(series.length/target));
     const out=[];
     for (let i=0;i<series.length;i+=step) out.push(series[i]);
     if (out[out.length-1]!==series[series.length-1]) out.push(series[series.length-1]);
@@ -344,6 +346,7 @@
     const k1=$("#kpi1y");
     const k3=$("#kpi3y");
     const k5=$("#kpi5y");
+    const axis=$("#marketAxis");
 
     if (!series || series.length<2) {
       if (empty) { empty.style.display="flex"; empty.textContent=T.marketUnavailable; }
@@ -361,22 +364,22 @@
     const r1=computeReturn(base,365);
     const r3=computeReturn(base,1095);
     const r5=computeReturn(base,1825);
-    if (k1) k1.textContent=fmtPct(r1);
-    if (k3) k3.textContent=fmtPct(r3);
-    if (k5) k5.textContent=fmtPct(r5);
+      if (k1) k1.textContent=fmtPct(r1);
+      if (k3) k3.textContent=fmtPct(r3);
+      if (k5) k5.textContent=fmtPct(r5);
 
-if (axis) { axis.innerHTML=""; axis.style.display="none"; }
+      if (axis) { axis.innerHTML=""; axis.style.display="none"; }
 
-if (viewSeries.length > 5) {
-  const last=viewSeries[viewSeries.length-1][1];
-  const prev=viewSeries[viewSeries.length-2][1] || last;
-  if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
-}
+      if (viewSeries.length > 5) {
+        const last=viewSeries[viewSeries.length-1][1];
+        const prev=viewSeries[viewSeries.length-2][1] || last;
+        if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
+      }
 
-const sampled = sampleSeries(viewSeries);
-drawSvgLine(svg, sampled);
+      const sampled = sampleSeries(viewSeries);
+      drawSvgLine(svg, sampled);
 
-installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+      installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
 
   }
 
@@ -656,11 +659,11 @@ installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):f
     const k3=$("#adopt3y");
     const k5=$("#adopt5y");
     const hover=$("#adoptionHover");
+    if (upd) { upd.textContent=""; upd.style.display="none"; }
+    if (range) { range.textContent=""; range.style.display="none"; }
     if (!series || series.length<2){
       if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
       if (svg) svg.innerHTML="";
-      if (upd) upd.textContent="";
-      if (range) range.textContent="";
       [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
       if (hover) hover.style.display="none";
       return;
@@ -677,46 +680,37 @@ installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):f
     if (k1) k1.textContent=fmtPct(r1);
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
-    if (upd){
-      const ts = Date.parse(meta?.last_updated) || series[series.length-1][0];
-      upd.textContent = `${T.lastUpdated || "Last updated"}: ${fmtDate(ts)}`;
-    }
-    if (range && vs.length){
-      const lbl = LANG === "fr" ? "Période" : "Range";
-      range.textContent = `${lbl}: ${fmtDate(vs[0][0])} – ${fmtDate(vs[vs.length-1][0])}`;
-    }
     installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtUsd(v,0), false);
   }
 
-  function initSignatureEmbeds(){
-    const tabBtns=$$('[data-signature-view]');
-    const signFrame=$("#signatureSign");
-    const verifyFrame=$("#signatureVerify");
-    if (!tabBtns.length || !signFrame || !verifyFrame) return;
+    function initSignatureEmbeds(){
+      const tabBtns=$$('[data-signature-view]');
+      const frame=$("#signatureFrame");
+      if (!tabBtns.length || !frame) return;
 
-    const inLocale=/\/(en|fr)\/signature\.html$/i.test(location.pathname);
-    const basePath=inLocale ? "../" : "./";
-    const signSrc=resolveHref(basePath+"sign.html");
-    const verifySrc=resolveHref(basePath+"verify.html");
+      const srcFor=(view)=>{
+        const page=view==="verify" ? "verify" : "sign";
+        return fromRoot(`${page}.html?embed=1`);
+      };
 
-    let signLoaded=false, verifyLoaded=false;
-    const setActive=(view)=>{
-      tabBtns.forEach(b=>b.classList.toggle("active", b.dataset.signatureView===view));
-      signFrame.classList.toggle("active", view==="sign");
-      verifyFrame.classList.toggle("active", view==="verify");
-if (view==="sign" && !signLoaded){ signFrame.src=fromRoot("sign.html?embed=1"); signLoaded=true; }
-if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?embed=1"); verifyLoaded=true; }
+      let current="";
+      const setActive=(view)=>{
+        const v=view==="verify" ? "verify" : "sign";
+        if (current===v) return;
+        current=v;
+        tabBtns.forEach(b=>b.classList.toggle("active", (b.dataset.signatureView||"sign")===v));
+        frame.src=srcFor(v);
+        frame.title = v==="verify" ? (LANG==="fr"?"Vérifier":"Verify") : (LANG==="fr"?"Signer":"Sign");
+      };
 
-    };
+      tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
+        e.preventDefault();
+        setActive(b.dataset.signatureView||"sign");
+      }));
 
-    tabBtns.forEach(b=>b.addEventListener("click", (e)=>{
-      e.preventDefault();
-      const view=b.dataset.signatureView||"sign";
-      setActive(view);
-    }));
-
-    setActive(location.hash==="#signature" ? "sign" : "sign");
-  }
+      const defaultView = location.hash==="#verify" ? "verify" : "sign";
+      setActive(defaultView);
+    }
 
   async function init() {
     enableSmoothScroll();
@@ -734,7 +728,7 @@ if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?emb
     const pricesUSD = await loadPricesUSD(cfg);
     initCalc(cfg, pricesUSD, yields);
 
-    const marketBtns = $$('[data-market]');
+    let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
     let adoptionBtns = $$('[data-adoption-card]');
     let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
@@ -779,25 +773,25 @@ if (view==="verify" && !verifyLoaded){ verifyFrame.src=fromRoot("verify.html?emb
     }
     const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     const adoptionMeta = adoptionCache?.meta || {};
-const adoptionCount = adoptionSeries.length;
-const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
-const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
+    const adoptionCount = adoptionSeries.length;
+    const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
+    const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
+    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
 
-const chart = document.querySelector("#adoptionChart");
-if (!adoptionReliable) {
-  if (chart) chart.style.display = "none";
-  if (adoptionNotice) {
-    adoptionNotice.style.display="block";
-    adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
-      ? T.adoptionUnavailable
-      : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
-  }
-} else {
-  if (chart) chart.style.display = "";
-  if (adoptionNotice) adoptionNotice.style.display="none";
-}
-
+    const chart = document.querySelector("#adoptionChart");
+    if (!adoptionReliable) {
+      if (chart) chart.style.display = "none";
+      if (adoptionSection) adoptionSection.style.display="none";
+      if (adoptionNotice) {
+        adoptionNotice.style.display="block";
+        adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
+          ? T.adoptionUnavailable
+          : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
+      }
+    } else {
+      if (chart) chart.style.display = "";
+      if (adoptionSection) adoptionSection.style.display="";
+      if (adoptionNotice) adoptionNotice.style.display="none";
     }
 
     async function refresh(sym) {

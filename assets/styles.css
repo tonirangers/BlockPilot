@@ -358,6 +358,8 @@ img{max-width:100%; display:block}
 .signatureFrames{margin-top:16px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow);}
 .signatureFrames iframe{display:none; width:100%; border:0; min-height:760px; background:#fff;}
 .signatureFrames iframe.active{display:block;}
+.signatureFrames--single{box-shadow:none; border:0; padding:0; background:transparent; overflow:hidden;}
+.signatureFrames--single iframe{display:block; min-height:820px; background:transparent;}
 .signatureTabs{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
 .no-scroll{overflow:hidden;}
 

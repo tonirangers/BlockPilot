@@ -103,7 +103,10 @@
   }
 
   function setActiveChip(groupSel, key) {
-    $$(groupSel).forEach(b => b.classList.toggle("active", String(b.dataset.scn) === String(key)));
+    $$(groupSel).forEach(b => {
+      const data = b.dataset.scn ?? b.dataset.periodCard ?? b.dataset.capCard ?? b.dataset.adoptionCard ?? b.dataset.duration;
+      b.classList.toggle("active", String(data) === String(key));
+    });
   }
   function setActiveTab(groupSel, key) {
     $$(groupSel).forEach(b => b.classList.toggle("active", b.dataset.market === key));
@@ -705,39 +708,6 @@
     } catch { return null; }
   }
 
-  function setAdoptionUI(series, meta, periodDays){
-    const empty=$("#adoptionEmpty");
-    const svg=$("#adoptionSvg");
-    const upd=$("#adoptionUpdated");
-    const range=$("#adoptionRange");
-    const k1=$("#adopt1y");
-    const k3=$("#adopt3y");
-    const k5=$("#adopt5y");
-    const hover=$("#adoptionHover");
-    if (upd) { upd.textContent=""; upd.style.display="none"; }
-    if (range) { range.textContent=""; range.style.display="none"; }
-    if (!series || series.length<2){
-      if (empty){ empty.style.display="flex"; empty.textContent=T.adoptionUnavailable; }
-      if (svg) svg.innerHTML="";
-      [k1,k3,k5].forEach(el=>{ if (el) el.textContent="—"; });
-      if (hover) hover.style.display="none";
-      return;
-    }
-    if (empty) empty.style.display="none";
-    const viewSeries = sliceWindow(series, periodDays||1825);
-    const vs = viewSeries.length?viewSeries:series;
-    const sampled = sampleSeries(vs);
-    drawSvgLine(svg, sampled);
-    const base = vs.length ? vs : series;
-    const r1=computeReturn(base,365);
-    const r3=computeReturn(base,1095);
-    const r5=computeReturn(base,1825);
-    if (k1) k1.textContent=fmtPct(r1);
-    if (k3) k3.textContent=fmtPct(r3);
-    if (k5) k5.textContent=fmtPct(r5);
-    installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtUsd(v,0), false);
-  }
-
   function setCapUI(series, meta, periodDays){
     const empty=$("#capEmpty");
     const svg=$("#capSvg");
@@ -753,8 +723,13 @@
       return;
     }
     if (empty) empty.style.display="none";
-    const viewSeries = sliceWindow(series, periodDays||1825);
-    const vs = viewSeries.length?viewSeries:series;
+    let viewSeries = sliceWindow(series, periodDays||1825);
+    let vs = viewSeries.length?viewSeries:series;
+    if (vs.length > 5) {
+      const last=vs[vs.length-1][1];
+      const prev=vs[vs.length-2][1] || last;
+      if (isFinite(last) && isFinite(prev) && last > prev*4) vs = vs.slice(0,-1);
+    }
     const sampled = sampleSeries(vs);
     drawSvgLine(svg, sampled);
     const base = vs.length ? vs : series;
@@ -814,35 +789,28 @@
 
     let marketBtns = $$('[data-market]');
     const periodCards = $$('[data-period-card]');
-    let adoptionBtns = $$('[data-adoption-card]');
-    let capBtns = $$('[data-cap-card]');
-    let availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
-    let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || availableMarkets[0] || "btc";
-    if (!availableMarkets.includes(active)) active = availableMarkets[0] || "btc";
+    const capBtns = $$('[data-cap-card]');
+    const availableMarkets = marketBtns.map(b=>b.dataset.market).filter(Boolean);
+    const defaultActive = "total";
+    let active = localStorage.getItem("bp_market_sel") || cfg?.defaults?.marketDefault || defaultActive;
+    if (!availableMarkets.includes(active)) active = availableMarkets.includes(defaultActive) ? defaultActive : (availableMarkets[0] || "btc");
     const defaultPeriod = Number(cfg?.defaults?.marketPeriod || 1825);
     const storedPeriod = Number(localStorage.getItem("bp_market_period")) || defaultPeriod;
-    const defaultAdopt = Number(cfg?.defaults?.adoptionPeriod || 1825);
-    const defaultCapPeriod = Number(cfg?.defaults?.capPeriod || 1825);
-    const storedAdoption = Number(localStorage.getItem("bp_adoption_period")) || defaultAdopt;
+    const defaultCapPeriod = 1825;
     const storedCap = Number(localStorage.getItem("bp_cap_period")) || defaultCapPeriod;
     let periodDays = storedPeriod;
-    let adoptionPeriod = storedAdoption;
     let capPeriod = storedCap;
     setActiveTab("[data-market]", active);
     setActiveChip("[data-period-card]", String(periodDays));
-    setActiveChip("[data-adoption-card]", String(adoptionPeriod));
     setActiveChip("[data-cap-card]", String(capPeriod));
 
+    const cacheBust=`?t=${dayTs(Date.now())}`;
     const cacheMarket = await firstJSON(
-      [fromRoot("data/market.json"), "../data/market.json","./data/market.json"],
+      [fromRoot(`data/market.json${cacheBust}`), `../data/market.json${cacheBust}`,`./data/market.json${cacheBust}`],
       null
     );
     const cacheCap = await firstJSON(
-      [fromRoot("data/market_total_ex_stables.json"), "../data/market_total_ex_stables.json","./data/market_total_ex_stables.json"],
-      { series:[], meta:{} }
-    );
-    const adoptionCache = await firstJSON(
-      [fromRoot("data/adoption.json"), "../data/adoption.json","./data/adoption.json"],
+      [fromRoot(`data/market_total_ex_stables.json${cacheBust}`), `../data/market_total_ex_stables.json${cacheBust}`,`./data/market_total_ex_stables.json${cacheBust}`],
       { series:[], meta:{} }
     );
     const priceSeries={
@@ -852,8 +820,6 @@
     };
     const totalIndexSeries = buildEqualWeightedIndex(priceSeries);
 
-    const adoptionSection=document.querySelector(".adoptionBox");
-    const adoptionNotice=$("#adoptionNotice");
     const capNotice=$("#capNotice");
     function cacheSeries(k){
       return normalizeSeriesDaily((cacheMarket?.[k]||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
@@ -928,16 +894,6 @@
       await refresh(active);
     }));
 
-    async function refreshAdoption(){
-      if (!adoptionReliable) {
-        if (adoptionNotice) adoptionNotice.style.display="block";
-        if (adoptionSection) adoptionSection.style.display="none";
-        return;
-      }
-      if (adoptionSection) adoptionSection.style.display="block";
-      setAdoptionUI(adoptionSeries, adoptionMeta, adoptionPeriod);
-    }
-
     async function refreshCap(){
       if (!marketCapSeries || marketCapSeries.length<2) {
         if (capNotice) { capNotice.style.display="block"; capNotice.textContent=T.adoptionUnavailable; }
@@ -951,13 +907,13 @@
       setCapUI(marketCapSeries, marketCapMeta, capPeriod);
     }
 
-    adoptionBtns.forEach(b => b.addEventListener("click", () => {
-      const d=Number(b.dataset.adoptionCard||0);
-      if (!d || d===adoptionPeriod) return;
-      adoptionPeriod=d;
-      localStorage.setItem("bp_adoption_period", String(adoptionPeriod));
-      setActiveChip("[data-adoption-card]", String(adoptionPeriod));
-      refreshAdoption();
+    capBtns.forEach(b => b.addEventListener("click", () => {
+      const d=Number(b.dataset.capCard||0);
+      if (!d || d===capPeriod) return;
+      capPeriod=d;
+      localStorage.setItem("bp_cap_period", String(capPeriod));
+      setActiveChip("[data-cap-card]", String(capPeriod));
+      refreshCap();
     }));
 
     capBtns.forEach(b => b.addEventListener("click", () => {
@@ -971,7 +927,6 @@
 
     await refresh(active);
     await refreshCap();
-    await refreshAdoption();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

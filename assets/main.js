@@ -363,18 +363,21 @@
     if (k3) k3.textContent=fmtPct(r3);
     if (k5) k5.textContent=fmtPct(r5);
 
-    if (axis) { axis.innerHTML=""; axis.style.display="none"; }
 
-    if (viewSeries.length > 5) {
-      const last=viewSeries[viewSeries.length-1][1];
-      const prev=viewSeries[viewSeries.length-2][1] || last;
-      if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
-    }
+if (axis) { axis.innerHTML=""; axis.style.display="none"; }
 
-    const sampled = sampleSeries(viewSeries);
-    drawSvgLine(svg, sampled);
+if (viewSeries.length > 5) {
+  const last=viewSeries[viewSeries.length-1][1];
+  const prev=viewSeries[viewSeries.length-2][1] || last;
+  if (isFinite(last) && isFinite(prev) && last > prev*4) viewSeries = viewSeries.slice(0,-1);
+}
 
-    installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+const sampled = sampleSeries(viewSeries);
+drawSvgLine(svg, sampled);
+
+installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
+
+
   }
 
   function computeTokens(principalTokens, apr, years) {
@@ -777,16 +780,26 @@
     }
     const adoptionSeries = normalizeSeriesDaily((adoptionCache?.series||[]).map(p=>[Number(p[0]),Number(p[1])]).filter(p=>isFinite(p[0])&&isFinite(p[1])));
     const adoptionMeta = adoptionCache?.meta || {};
-    const adoptionCount = adoptionSeries.length;
-    const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
-    const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
-    const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
-    if (!adoptionReliable) {
-      if (adoptionSection) adoptionSection.style.display="none";
-      if (adoptionNotice) {
-        adoptionNotice.style.display="block";
-        adoptionNotice.textContent = LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.";
-      }
+const adoptionCount = adoptionSeries.length;
+const adoptionMax = adoptionCount ? Math.max(...adoptionSeries.map(p=>p[1]).filter(v=>isFinite(v))) : 0;
+const adoptionHasNaN = (adoptionCache?.series||[]).some(p=>!isFinite(Number(p?.[1])));
+const adoptionReliable = adoptionCount >= 30 && adoptionMax >= 1e6 && !adoptionHasNaN && !String(adoptionMeta?.source||"").includes("synthetic");
+
+if (!adoptionReliable) {
+  const chart = document.querySelector("#adoptionChart");
+  if (chart) chart.style.display = "none";
+  if (adoptionNotice) {
+    adoptionNotice.style.display="block";
+    adoptionNotice.textContent = (typeof T !== "undefined" && T.adoptionUnavailable)
+      ? T.adoptionUnavailable
+      : (LANG === "fr" ? "Données en cours de calibration." : "Data being calibrated.");
+  }
+} else {
+  const chart = document.querySelector("#adoptionChart");
+  if (chart) chart.style.display = "";
+  if (adoptionNotice) adoptionNotice.style.display="none";
+}
+
     }
 
     async function refresh(sym) {

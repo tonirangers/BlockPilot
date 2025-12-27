@@ -82,6 +82,7 @@
           <div class="cardTitle">Contexte marché</div>
 
           <div class="marketTabs" style="margin-top:12px;">
+            <button class="tabBtn" type="button" data-market="total">Market cap</button>
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
             <button class="tabBtn" type="button" data-market="eth">ETH</button>
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
@@ -95,6 +96,7 @@
 
           <div class="chartBox" id="marketChart">
             <div class="chartEmpty" id="marketEmpty">Chargement…</div>
+            <div class="chartAxis" id="marketAxis"></div>
             <svg class="chartSvg" id="marketSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
             <div class="chartHover" id="marketHover"></div>
           </div>
@@ -141,8 +143,8 @@
 
             <div class="formRow">
               <div>
-                <div class="small" style="margin-bottom:6px;">Montant ($)</div>
-                <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
+                <div class="small" style="margin-bottom:6px;">Montant (€)</div>
+                <input class="input" id="amountEUR" inputmode="decimal" placeholder="10000" />
               </div>
               <div>
                 <div class="small" style="margin-bottom:6px;">Actif</div>
@@ -255,6 +257,21 @@
             <li>Guard / monitoring selon profil de risque.</li>
           </ul>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="signature" class="section section--tight">
+    <div class="container">
+      <h2 class="h2">Signature</h2>
+      <p class="p">Signer ou vérifier les conditions BlockPilot avec l’outil existant, intégré au site.</p>
+      <div class="scenarios" style="margin-top:14px;">
+        <button class="chip" type="button" data-signature-view="sign">Signer</button>
+        <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
+      </div>
+      <div class="signatureFrames">
+        <iframe id="signatureSign" title="Signer" loading="lazy"></iframe>
+        <iframe id="signatureVerify" title="Vérifier" loading="lazy"></iframe>
       </div>
     </div>
   </section>

@@ -32,12 +32,12 @@
 
   <main class="section section--tight" id="signature">
     <div class="container">
-      <h1 class="h2">Signature / Sign</h1>
-      <p class="p">Signez ou vérifiez les conditions BlockPilot dans la même page. Logic unchanged; UI only.</p>
+      <h1 class="h1">Signature</h1>
+      <p class="p">Signer ou vérifier les conditions BlockPilot directement sur cette page.</p>
 
       <div class="scenarios" style="margin-top:14px;">
-        <button class="chip" type="button" data-signature-view="sign">Signer / Sign</button>
-        <button class="chip" type="button" data-signature-view="verify">Vérifier / Verify</button>
+        <button class="chip" type="button" data-signature-view="sign">Signer</button>
+        <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
       </div>
 
       <div class="signatureFrames">
@@ -49,32 +49,10 @@
 
   <footer class="footer">
     <div class="container">
-      <span>Contact:</span> <a id="footerEmail" href="#">Email</a>
-      <span> · </span>
-      <a id="footerTerms" href="#">Conditions (PDF)</a>
-      <span> · </span>
-      <a id="footerSignature" href="./signature.html">Signature</a>
-      <span class="small" style="margin-left:10px;">© BlockPilot 2025</span>
+      <span>© BlockPilot 2025</span>
     </div>
   </footer>
 
   <script src="./assets/main.js" defer></script>
-  <script>
-    (function(){
-      const $=(s)=>document.querySelector(s);
-      const $$=(s)=>Array.from(document.querySelectorAll(s));
-      function setActive(view){
-        const sign=$('#signatureSign');
-        const verify=$('#signatureVerify');
-        $$('[data-signature-view]').forEach(b=>b.classList.toggle('active', b.dataset.signatureView===view));
-        if (sign) sign.style.display = view==='sign'? 'block':'none';
-        if (verify) verify.style.display = view==='verify'? 'block':'none';
-        if (view==='sign' && sign && !sign.src) sign.src='sign.html?embed=1';
-        if (view==='verify' && verify && !verify.src) verify.src='verify.html?embed=1';
-      }
-      $$('[data-signature-view]').forEach(b=>b.addEventListener('click',()=>setActive(b.dataset.signatureView||'sign')));
-      setActive('sign');
-    })();
-  </script>
 </body>
 </html>

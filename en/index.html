@@ -20,8 +20,7 @@
         <div class="nav__links" aria-label="Navigation">
           <a href="#performance">Performance</a>
           <a href="#security">Security</a>
-          <a id="navSignature" href="../sign.html">Signature</a>
-          <a id="navCall" href="#">Book a call</a>
+          <a id="navSignature" href="#signature">Signature</a>
         </div>
 
         <div class="lang" aria-label="Language">
@@ -36,56 +35,38 @@
     <div class="container">
       <div class="hero__grid">
         <div>
-          <h1 class="h1">BlockPilot — Private crypto management, one vault per client.</h1>
+          <h1 class="h1">BlockPilot — You keep the key, we pilot yield & allocation.</h1>
 
           <p class="lead">
-            You keep ownership and the key. We run yield + allocation, withdrawals validated with your signature.
+            One client = one vault. Vault in your name. Withdrawals validated by your signature.
           </p>
 
           <ul class="heroPoints" aria-label="Highlights">
-            <li>Crypto vault in your name (smart wallet)</li>
-            <li>Managed yield + allocation</li>
-            <li>Withdraw with your signature</li>
+            <li>Vault in your name (you stay owner)</li>
+            <li>We operate allocation + returns (public protocols)</li>
+            <li>On/off-ramp support (IBAN, card, etc.)</li>
           </ul>
 
           <div class="ctaRow">
-            <a class="btn btn--primary" id="ctaCall" href="#">Book a call</a>
-            <a class="btn btn--text" href="#performance">See performance</a>
+            <a class="btn btn--primary" id="ctaCall" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
+            <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
           </div>
         </div>
 
         <aside id="setup" class="card cardPad">
-          <div class="cardTitle">What you do</div>
+          <div class="cardTitle">How it works</div>
           <div class="miniGrid">
             <div class="mini">
-              <strong>1) Your vault</strong>
-              <span>Safe in your name, agreed withdrawal rule.</span>
+              <strong>1) Vault setup + rule</strong>
+              <span>Safe in your name with the agreed withdrawal rule.</span>
             </div>
             <div class="mini">
-              <strong>2) Guided deposit</strong>
-              <span>Eligible on/off ramp (IBAN, card, Zeal, etc.).</span>
+              <strong>2) Deposit / withdraw</strong>
+              <span>Guided on/off-ramp (IBAN, card, etc.).</span>
             </div>
             <div class="mini">
-              <strong>3) Sign withdrawals</strong>
-              <span>You sign withdrawals or co-sign per rule.</span>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="cardTitle">What we operate</div>
-          <div class="miniGrid">
-            <div class="mini">
-              <strong>Allocation + yield</strong>
-              <span>Strategies on public protocols (on-chain).</span>
-            </div>
-            <div class="mini">
-              <strong>7-day setup</strong>
-              <span>Setup + first review within 7 business days.</span>
-            </div>
-            <div class="mini">
-              <strong>Reporting</strong>
-              <span>On-chain transparency + periodic statement.</span>
+              <strong>3) Strategy + review</strong>
+              <span>Allocation, yield, and periodic statement.</span>
             </div>
           </div>
         </aside>
@@ -106,7 +87,7 @@
           </p>
 
           <div class="marketTabs" style="margin-top:12px;">
-            <button class="tabBtn" type="button" data-market="total">TOTAL (ex-stables)</button>
+            <button class="tabBtn" type="button" data-market="total">Market cap</button>
             <button class="tabBtn" type="button" data-market="btc">BTC</button>
             <button class="tabBtn" type="button" data-market="eth">ETH</button>
             <button class="tabBtn" type="button" data-market="bnb">BNB</button>
@@ -137,7 +118,7 @@
           <div class="adoptionBox">
             <div class="adoptionHeader">
               <div>
-                <div class="cardTitle">Adoption</div>
+                <div class="cardTitle">Cash on-chain</div>
                 <p class="small">Stablecoins in circulation (USD), index base 100.</p>
               </div>
               <div class="periodTabs" aria-label="Adoption period">
@@ -300,18 +281,10 @@
   <section id="signature" class="section section--tight">
     <div class="container">
       <h2 class="h2">Signature</h2>
-      <p class="p">Sign or verify BlockPilot terms without leaving the page.</p>
-      <div class="card cardPad signatureIntro">
-        <div>
-          <div class="cardTitle">Sign</div>
-          <p class="cardSub">Generates the same BPC1 signature (message + hash unchanged).</p>
-          <button class="btn btn--primary" type="button" data-signature-view="sign">Open sign</button>
-        </div>
-        <div>
-          <div class="cardTitle">Verify</div>
-          <p class="cardSub">Check a BPC1 token or an existing PDF hash.</p>
-          <button class="btn btn--ghost" type="button" data-signature-view="verify">Open verify</button>
-        </div>
+      <p class="p">Sign or verify BlockPilot conditions directly in-page. Logic is unchanged; this is a UI wrapper.</p>
+      <div class="scenarios" style="margin-top:14px;">
+        <button class="chip" type="button" data-signature-view="sign">Sign</button>
+        <button class="chip" type="button" data-signature-view="verify">Verify</button>
       </div>
     </div>
   </section>
@@ -319,17 +292,14 @@
   <div class="signatureModal" id="signatureModal" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
     <div class="signatureModal__inner">
       <div class="signatureModal__header">
-        <div>
-          <div class="cardTitle" id="signatureTitle">BlockPilot Signature</div>
-          <p class="small">Sign or verify in the same tab.</p>
-        </div>
-        <div class="signatureTabs">
+        <div class="cardTitle" id="signatureTitle">Signature</div>
+        <div class="scenarios">
           <button class="chip" type="button" data-signature-view="sign">Sign</button>
           <button class="chip" type="button" data-signature-view="verify">Verify</button>
         </div>
-        <button class="signatureClose" type="button" aria-label="Close">×</button>
+        <button class="btn btn--ghost signatureClose" type="button" aria-label="Close">×</button>
       </div>
-      <iframe id="signatureFrame" title="Signature" src="" loading="lazy"></iframe>
+      <iframe id="signatureFrame" title="Signature"></iframe>
     </div>
   </div>
 
@@ -339,7 +309,7 @@
       <span> · </span>
       <a id="footerTerms" href="#">Terms (PDF)</a>
       <span> · </span>
-      <a id="footerSignature" href="../sign.html">Signature</a>
+      <a id="footerSignature" href="#signature">Signature</a>
       <span class="small" style="margin-left:10px;">© BlockPilot 2025</span>
     </div>
   </footer>

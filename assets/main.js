@@ -112,12 +112,14 @@
     $$(groupSel).forEach(b => b.classList.toggle("active", b.dataset.market === key));
   }
 
+  const CHART_VIEW = { width:1000, height:300, pad:24 };
+
   function drawSvgLine(svgEl, points) {
     if (!svgEl) return;
     svgEl.innerHTML = "";
     if (!points || points.length < 2) return;
 
-    const w=1000,h=300,pad=20;
+    const w=CHART_VIEW.width, h=CHART_VIEW.height, pad=CHART_VIEW.pad;
     const xs=points.map(p=>p[0]), ys=points.map(p=>p[1]);
     const xMin=Math.min(...xs), xMax=Math.max(...xs);
     const yMin=Math.min(...ys), yMax=Math.max(...ys);
@@ -368,6 +370,8 @@
     if (!series || !series.length) return;
     const first=series[0][0], last=series[series.length-1][0];
     const span=last-first || 1;
+    const padPct=(CHART_VIEW.pad/CHART_VIEW.width)*100;
+    const usable=100-padPct*2;
     const ticks=[];
     const pushTick=(ts,label)=>{ if (ts>=first && ts<=last && !ticks.find(t=>t.ts===ts)) ticks.push({ ts, label }); };
 
@@ -397,7 +401,7 @@
       const spanEl=document.createElement("span");
       spanEl.textContent=t.label;
       spanEl.className="axisTick";
-      spanEl.style.left = `${((t.ts-first)/span)*100}%`;
+      spanEl.style.left = `${padPct + usable*((t.ts-first)/span)}%`;
       el.appendChild(spanEl);
     });
     el.style.display = ticks.length ? "block" : "none";
@@ -425,20 +429,33 @@
       hover.style.display="block";
       hover.style.right="auto";
     };
-    box.onmousemove = (e)=>{
-      const rect=box.getBoundingClientRect();
+
+    const clear=()=>{ hover.style.display="none"; };
+    const handlePoint=(clientX, clientY)=>{
+      if (clientX===undefined || clientY===undefined) { clear(); return; }
       const plotRect=svg?.getBoundingClientRect?.();
-      const insidePlot = plotRect && e.clientX>=plotRect.left && e.clientX<=plotRect.right && e.clientY>=plotRect.top && e.clientY<=plotRect.bottom;
-      if (plotRect && !insidePlot) { hover.style.display="none"; return; }
-      const baseLeft = plotRect ? plotRect.left : rect.left;
-      const baseWidth = plotRect ? plotRect.width : rect.width;
-      const ratioRaw = (e.clientX-baseLeft)/baseWidth;
-      if (ratioRaw<0 || ratioRaw>1) { hover.style.display="none"; return; }
+      if (!plotRect) { clear(); return; }
+      const padX=plotRect.width*(CHART_VIEW.pad/CHART_VIEW.width);
+      const padY=plotRect.height*(CHART_VIEW.pad/CHART_VIEW.height);
+      const innerLeft=plotRect.left+padX;
+      const innerRight=plotRect.right-padX;
+      const innerTop=plotRect.top+padY;
+      const innerBottom=plotRect.bottom-padY;
+      if (clientX<innerLeft || clientX>innerRight || clientY<innerTop || clientY>innerBottom) { clear(); return; }
+      const ratioRaw=(clientX-innerLeft)/(innerRight-innerLeft);
+      if (ratioRaw<0 || ratioRaw>1) { clear(); return; }
       const t = first + span*ratioRaw;
       const p = nearestByTime(series, t);
-      if (p) show(p, e.clientX, e.clientY);
+      if (p) show(p, clientX, clientY);
     };
-    box.onmouseleave = ()=>{ hover.style.display="none"; };
+
+    box.onmousemove = (e)=>handlePoint(e.clientX, e.clientY);
+    box.addEventListener("touchmove", (e)=>{
+      const t=e.touches?.[0];
+      if (t) handlePoint(t.clientX, t.clientY);
+    }, { passive:true });
+    ["mouseleave","pointerleave"].forEach(evt=>box.addEventListener(evt, clear));
+    box.addEventListener("touchend", clear);
     show(series[series.length-1]);
   }
 

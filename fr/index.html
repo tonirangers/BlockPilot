@@ -48,6 +48,17 @@
             <li>Entrées/sorties simples: virement, carte ou crypto.</li>
           </ul>
 
+          <div class="heroGet" aria-label="Ce que vous obtenez">
+            <div class="small">Ce que vous obtenez</div>
+            <ul class="bullets">
+              <li>Coffre Safe à votre nom</li>
+              <li>Stratégie personnalisée</li>
+              <li>Relevé trimestriel clair</li>
+              <li>Règles de retrait (signature/cosignature)</li>
+              <li>Liens de vérification (Zeal/DeBank/Etherscan)</li>
+            </ul>
+          </div>
+
           <div class="ctaRow">
             <a class="btn btn--primary" id="ctaCall" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Réserver un appel</a>
             <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
@@ -155,14 +166,14 @@
             <div class="hr"></div>
 
             <div class="simGrid simGrid--stack">
-              <div>
+              <div class="simSummaryMeta">
                 <div class="small">Dépôt</div>
                 <div class="simRow"><div class="l">Montant déposé</div><div class="r" id="depTok">—</div></div>
+                <div class="simRow"><div class="l">Tokens avec intérêts</div><div class="r" id="cap12Tok">—</div></div>
               </div>
               <div>
                 <div class="small">Résultat (durée sélectionnée)</div>
-                <div class="simRow"><div class="l">Tokens avec intérêts</div><div class="r" id="cap12Tok">—</div></div>
-                <div class="simRow simRow--value"><div class="l">Valeur (scénario prix)</div><div class="r simValueCell" id="val12Scn">—</div></div>
+                <div class="simRow simRow--value simRow--primaryValue"><div class="l">Valeur (scénario prix)</div><div class="r simValueCell" id="val12Scn">—</div></div>
                 <div class="simRow simRow--value"><div class="l">Valeur prix plat</div><div class="r simValueCell" id="val12Flat">—</div></div>
                 <div class="small" id="priceMeta" style="margin-top:10px;"></div>
               </div>
@@ -200,7 +211,7 @@
         <div class="grid3">
           <div>
             <div class="cardTitle">Propriété</div>
-            <p class="cardSub">Le coffre (Safe) est à votre nom, visible <span class="tip" title="On-chain = vérifiable publiquement">on-chain</span>.</p>
+            <p class="cardSub">Le coffre (Safe) est à votre nom, visible <span class="tip tip--plain" title="On-chain = vérifiable publiquement">on-chain</span>.</p>
           </div>
           <div>
             <div class="cardTitle">Retrait</div>
@@ -208,7 +219,7 @@
           </div>
           <div>
             <div class="cardTitle">Transparence</div>
-            <p class="cardSub">Historique <span class="tip" title="On-chain = vérifiable publiquement">on-chain</span> + relevé périodique.</p>
+            <p class="cardSub">Historique <span class="tip tip--plain" title="On-chain = vérifiable publiquement">on-chain</span> + relevé périodique.</p>
           </div>
         </div>
       </div>

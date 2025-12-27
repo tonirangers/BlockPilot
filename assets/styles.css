@@ -215,6 +215,7 @@ img{max-width:100%; display:block}
 .kpiRow--clickable .kpi.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38)}
 
 .chartBox{
+  --chart-pad:16px;
   height:260px;
   width:100%;
   border:1px solid var(--line);
@@ -222,11 +223,12 @@ img{max-width:100%; display:block}
   background:linear-gradient(180deg, rgba(238,247,245,.26), rgba(255,255,255,.88));
   overflow:hidden;
   position:relative;
-  padding:10px 12px 38px;
+  padding:var(--chart-pad);
+  padding-bottom:calc(var(--chart-pad) + 32px);
 }
-.chartSvg{position:absolute; top:6px; left:6px; right:6px; bottom:34px; display:block; width:auto; height:auto;}
+.chartSvg{position:absolute; inset:var(--chart-pad); inset-block-end:calc(var(--chart-pad) + 30px); display:block; width:calc(100% - var(--chart-pad)*2); height:calc(100% - var(--chart-pad)*2 - 30px);}
 
-.chartAxis{display:none; position:absolute; left:12px; right:12px; bottom:10px; height:18px; font-size:12px; color:rgba(13,35,31,.55); pointer-events:none;}
+.chartAxis{display:none; position:absolute; left:var(--chart-pad); right:var(--chart-pad); bottom:12px; height:18px; font-size:12px; color:rgba(13,35,31,.55); pointer-events:none;}
 .chartAxis .axisTick{position:absolute; transform:translateX(-50%); white-space:nowrap;}
 .chartAxis .axisTick:last-child{transform:translateX(-50%);}
 .chartEmpty{
@@ -294,9 +296,9 @@ img{max-width:100%; display:block}
 }
 .simTitle{font-weight:950; margin:0 0 8px; font-size:16px}
 .simGrid{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
-.simGrid--wide{grid-template-columns: repeat(2,minmax(0,1fr));}
+.simGrid--wide{grid-template-columns: repeat(auto-fit,minmax(240px,1fr));}
 .simGrid--stack{grid-template-columns: 1fr;}
-.simRow{ 
+.simRow{
   display:grid;
   grid-template-columns: 1fr auto;
   align-items:baseline;
@@ -307,7 +309,7 @@ img{max-width:100%; display:block}
 }
 .simRow:last-child{border-bottom:0}
 .simRow .l{color:rgba(13,35,31,.62); font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:0;}
-.simRow .r{font-size:18px; font-weight:1000; text-align:right;}
+.simRow .r{font-size:18px; font-weight:1000; text-align:right; white-space:nowrap;}
 .compDetails{display:none; margin-top:14px; align-items:start;}
 .compDetails.is-open{display:grid;}
 .compDetails .simRow .l{white-space:normal; overflow:visible;}
@@ -335,8 +337,34 @@ img{max-width:100%; display:block}
 
 .simRow--value .l{color:rgba(13,35,31,.68);}
 .simValueCol{background:rgba(11,111,102,.05); border-radius:14px; padding:8px 10px;}
-.simValueCell{background:#fff; padding:6px 10px; border-radius:10px; box-shadow:0 4px 10px rgba(13,35,31,.06);}
+.simValueCell{background:#fff; padding:6px 10px; border-radius:10px; box-shadow:0 4px 10px rgba(13,35,31,.06); white-space:nowrap;}
 .simRow--value .simValueCell{font-weight:1000;}
+
+.simRow--primaryValue{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(13,35,31,.06);
+  margin-top:6px;
+  grid-template-columns:minmax(0,1fr) auto;
+}
+.simRow--primaryValue .l{color:var(--ink); font-size:15px;}
+.simRow--primaryValue .r{font-size:22px;}
+
+.simSummaryMeta{display:grid; gap:6px;}
+.simSummaryMeta .simRow{border-bottom:0; padding:6px 0;}
+
+.compDetails{row-gap:10px;}
+.simGrid--wide{grid-template-columns: repeat(auto-fit,minmax(240px,1fr));}
+.compDetails .simRow{align-items:center;}
+
+.heroGet{margin:12px 0 0; border:1px solid var(--line); border-radius:var(--radius2); background:rgba(255,255,255,.85); padding:12px 14px; box-shadow:0 10px 24px rgba(13,35,31,.06);}
+.heroGet .small{margin:0 0 6px; color:rgba(13,35,31,.62); font-weight:900;}
+.heroGet .bullets{margin:6px 0 0;}
+.heroGet .bullets li{margin:4px 0;}
+
+.tip--plain{text-decoration:none;}
 
 .simBox .btn--ghost{margin-top:14px;}
 

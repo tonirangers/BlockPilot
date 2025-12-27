@@ -215,13 +215,15 @@ img{max-width:100%; display:block}
 
 .chartBox{
   height:260px;
+  width:100%;
   border:1px solid var(--line);
   border-radius:var(--radius2);
   background:linear-gradient(180deg, rgba(238,247,245,.26), rgba(255,255,255,.88));
   overflow:hidden;
   position:relative;
+  padding:8px 10px 26px;
 }
-.chartSvg{position:absolute; inset:6px; display:block;}
+.chartSvg{position:absolute; inset:8px 10px 26px; display:block; width:calc(100% - 20px); height:calc(100% - 34px);}
 
 .chartAxis{display:none;}
 .chartAxis .axisTick{position:relative; transform:translateX(-50%);}
@@ -237,8 +239,8 @@ img{max-width:100%; display:block}
 }
 .chartHover{
   position:absolute;
-  right:8px;
-  top:8px;
+  right:10px;
+  top:10px;
   background:rgba(255,255,255,.92);
   border:1px solid var(--line);
   border-radius:12px;
@@ -295,14 +297,17 @@ img{max-width:100%; display:block}
 .simGrid--wide{grid-template-columns: 1.1fr 0.9fr;}
 .simGrid--stack{grid-template-columns: 1fr;}
 .simRow{
-  display:flex; align-items:baseline; justify-content:space-between;
+  display:grid;
+  grid-template-columns: 1fr auto;
+  align-items:baseline;
+  column-gap:12px;
   border-bottom:1px dashed rgba(13,35,31,.14);
   padding:8px 0;
   font-weight:850;
 }
 .simRow:last-child{border-bottom:0}
-.simRow .l{color:rgba(13,35,31,.62); font-weight:900}
-.simRow .r{font-size:18px; font-weight:1000}
+.simRow .l{color:rgba(13,35,31,.62); font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:0;}
+.simRow .r{font-size:18px; font-weight:1000; text-align:right;}
 .compDetails{display:none; margin-top:14px;}
 .compDetails.is-open{display:grid;}
 
@@ -399,4 +404,14 @@ img{max-width:100%; display:block}
   .formRow{grid-template-columns:1fr}
   .simGrid{grid-template-columns:1fr}
   #stableScenarioNote{margin-left:0}
+}
+@media (max-width: 390px){
+  .container{padding:0 14px}
+  .brand__logo{width:58px; height:58px; padding:6px}
+  .nav{gap:10px}
+  .nav__links{gap:14px}
+  .pill{padding:8px 12px; font-size:15px}
+  .tabBtn,.scenarioChips .chip{padding:8px 12px}
+  .ctaRow{flex-direction:column; align-items:stretch}
+  .btn{width:100%}
 }

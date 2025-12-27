@@ -102,8 +102,39 @@
             <div class="chartHover" id="marketHover"></div>
           </div>
 
-          <div class="adoptionBox" style="display:none;"></div>
-          <div class="small" id="adoptionNotice" style="margin-top:10px;">Adoption: coming soon.</div>
+          <div class="adoptionBox" style="margin-top:18px;">
+            <div class="adoptionHeader">
+              <div class="cardTitle">Market cap</div>
+            </div>
+            <div class="kpiRow kpiRow--clickable" id="capPeriods">
+              <button class="kpi" type="button" data-cap-card="365"><div class="k">1y</div><div class="v" id="cap1y">—</div></button>
+              <button class="kpi" type="button" data-cap-card="1095"><div class="k">3y</div><div class="v" id="cap3y">—</div></button>
+              <button class="kpi" type="button" data-cap-card="1825"><div class="k">5y</div><div class="v" id="cap5y">—</div></button>
+            </div>
+            <div class="chartBox" id="capChart">
+              <div class="chartEmpty" id="capEmpty">Loading…</div>
+              <svg class="chartSvg" id="capSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="chartHover" id="capHover"></div>
+            </div>
+            <div class="small" id="capNotice" style="display:none; margin-top:10px;"></div>
+          </div>
+
+          <div class="adoptionBox" style="margin-top:18px;">
+            <div class="adoptionHeader">
+              <div class="cardTitle">Adoption</div>
+            </div>
+            <div class="kpiRow kpiRow--clickable" id="adoptionPeriods">
+              <button class="kpi" type="button" data-adoption-card="365"><div class="k">1y</div><div class="v" id="adopt1y">—</div></button>
+              <button class="kpi" type="button" data-adoption-card="1095"><div class="k">3y</div><div class="v" id="adopt3y">—</div></button>
+              <button class="kpi" type="button" data-adoption-card="1825"><div class="k">5y</div><div class="v" id="adopt5y">—</div></button>
+            </div>
+            <div class="chartBox" id="adoptionChart">
+              <div class="chartEmpty" id="adoptionEmpty">Loading…</div>
+              <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="chartHover" id="adoptionHover"></div>
+            </div>
+          </div>
+          <div class="small" id="adoptionNotice" style="display:none; margin-top:10px;"></div>
 
         </div>
 

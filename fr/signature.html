@@ -3,14 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlockPilot — Signature</title>
+  <title>BlockPilot — Signature & Vérification</title>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    /* On ajuste la hauteur pour que l'outil de signature soit confortable */
+    .signature-container {
+      min-height: 850px;
+      background: var(--bp-surface);
+      border: 1px solid var(--bp-border);
+      border-radius: var(--bp-radius-card);
+      overflow: hidden;
+      box-shadow: var(--bp-shadow-card);
+    }
+    iframe {
+      width: 100%;
+      height: 850px;
+      border: none;
+    }
+  </style>
 </head>
 <body data-lang="fr">
   <header class="header">
     <div class="container">
       <nav class="nav">
-        <a class="brand" href="../fr/#overview" aria-label="BlockPilot">
+        <a class="brand" href="../fr/#overview">
           <img class="brand__logo" src="../logo.png" alt="BlockPilot" />
         </a>
 
@@ -19,16 +35,16 @@
           <kbd>⌘K</kbd>
         </div>
 
-        <button class="navToggle" id="navToggle" type="button" aria-expanded="false">Menu</button>
+        <button class="navToggle" id="navToggle" type="button">Menu</button>
 
-        <div class="nav__links" aria-label="Navigation">
+        <div class="nav__links">
           <a href="../fr/#performance">Performance</a>
           <a href="../fr/#security">Sécurité</a>
-          <a id="navDocs" href="#docs" style="opacity:0.5; cursor:not-allowed;" title="Bientôt disponible">Docs</a>
+          <a id="navDocs" href="#docs" style="opacity:0.5;">Docs</a>
           <a id="navSignature" href="./signature.html" class="active">Signature</a>
         </div>
 
-        <div class="lang" aria-label="Language" style="display:flex; gap:8px;">
+        <div class="lang">
           <a class="pill is-active" href="../fr/signature.html">FR</a>
           <a class="pill" href="../en/signature.html">EN</a>
         </div>
@@ -36,21 +52,20 @@
     </div>
   </header>
 
-  <main class="section section--tight" id="signature">
+  <main class="section">
     <div class="container">
-      <div style="margin-bottom:32px;">
-        <h1 class="h1">Signature</h1>
-        <p class="p">Signer ou vérifier les conditions BlockPilot directement ici.</p>
-        
-        <div class="scenarios">
-          <button class="chip active" type="button" data-signature-view="sign">Signer</button>
-          <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
+      <div style="margin-bottom: 32px;">
+        <h1 class="h1">Signature & Vérification</h1>
+        <p class="p">Approuvez vos transactions ou vérifiez l'intégrité d'un document BPC.</p>
+
+        <div class="scenarioChips" style="display: flex; gap: 8px;">
+          <button class="chip active" id="btnSign">Signer</button>
+          <button class="chip" id="btnVerify">Vérifier</button>
         </div>
       </div>
 
-      <div class="signatureFrames">
-        <iframe id="signatureSign" src="../sign.html?embed=1&lang=fr" title="Signer" loading="lazy"></iframe>
-        <iframe id="signatureVerify" src="../verify.html?embed=1&lang=fr" title="Vérifier" loading="lazy" style="display:none;"></iframe>
+      <div class="signature-container">
+        <iframe id="sigFrame" src="../sign.html?embed=1&lang=fr"></iframe>
       </div>
     </div>
   </main>
@@ -58,11 +73,27 @@
   <footer class="footer">
     <div class="container">
       <span>© BlockPilot 2025</span>
-      <span style="margin:0 8px;">·</span>
-      <a href="https://t.me/tonirangers" target="_blank" rel="noopener">Telegram</a>
+      <a href="https://t.me/tonirangers" target="_blank" style="margin-left: 16px;">Telegram</a>
     </div>
   </footer>
 
-  <script src="../assets/main.js" defer></script>
+  <script>
+    // Logique ultra simple de switch
+    const frame = document.getElementById('sigFrame');
+    const btnSign = document.getElementById('btnSign');
+    const btnVerify = document.getElementById('btnVerify');
+
+    btnSign.onclick = () => {
+      frame.src = "../sign.html?embed=1&lang=fr";
+      btnSign.classList.add('active');
+      btnVerify.classList.remove('active');
+    };
+
+    btnVerify.onclick = () => {
+      frame.src = "../verify.html?embed=1&lang=fr";
+      btnVerify.classList.add('active');
+      btnSign.classList.remove('active');
+    };
+  </script>
 </body>
 </html>

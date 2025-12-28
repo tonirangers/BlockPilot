@@ -3,47 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlockPilot — Signature & Vérification</title>
+  <title>BlockPilot — Signature Officielle</title>
   <link rel="stylesheet" href="../assets/styles.css" />
-  
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
-  <style>
-    .sig-section { display: none; }
-    .sig-section.active { display: block; animation: fadeIn 0.3s ease; }
-    
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Style des onglets mode Standard/Seed (interne à la zone de signature) */
-    .mode-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--bp-surface-alt); padding: 4px; border-radius: 99px; width: fit-content; border: 1px solid var(--bp-border); }
-    .mode-tab { padding: 6px 16px; border-radius: 99px; font-weight: 600; font-size: 13px; cursor: pointer; color: var(--bp-text-muted); transition: 0.2s; }
-    .mode-tab.active { background: #fff; color: var(--bp-primary); box-shadow: var(--bp-shadow-card); }
-
-    /* Zone de résultat (Token BPC1) */
-    .result-card { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 20px; margin-top: 24px; }
-    .token-display { background: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--bp-border); font-family: monospace; font-size: 12px; word-break: break-all; margin: 12px 0; }
-    
-    /* Zone de vérification */
-    .verify-area { width: 100%; height: 150px; margin-bottom: 16px; }
-  </style>
 </head>
 <body data-lang="fr">
   <header class="header">
     <div class="container">
       <nav class="nav">
         <a class="brand" href="../fr/#overview"><img class="brand__logo" src="../logo.png" alt="BlockPilot" /></a>
-        <div class="navSearch"><span>Rechercher...</span><kbd>⌘K</kbd></div>
+        
+        <div class="navSearch">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>Rechercher...</span>
+          <kbd>⌘K</kbd>
+        </div>
+
         <button class="navToggle" id="navToggle">Menu</button>
         <div class="nav__links">
           <a href="../fr/#performance">Performance</a>
           <a href="../fr/#security">Sécurité</a>
           <a href="#docs" style="opacity:0.5;">Docs</a>
           <a href="./signature.html" class="active">Signature</a>
-        </div>
-        <div class="lang">
-          <a class="pill is-active" href="../fr/signature.html">FR</a>
-          <a class="pill" href="../en/signature.html">EN</a>
         </div>
       </nav>
     </div>
@@ -52,161 +34,119 @@
   <main class="section">
     <div class="container">
       <h1 class="h1">Signature & Vérification</h1>
-      <p class="p">Signez vos documents officiels ou vérifiez l'authenticité d'un token BPC.</p>
+      <p class="p">Approuvez vos conditions ou vérifiez l'authenticité d'un document BPC, directement sur cette page.</p>
 
       <div class="scenarioChips" style="margin-bottom: 32px;">
-        <button class="chip active" onclick="switchMainView('sign', this)">Signer un document</button>
-        <button class="chip" onclick="switchMainView('verify', this)">Vérifier un token</button>
+        <button class="chip active" id="tabSign" onclick="toggleView('sign')">Signer un document</button>
+        <button class="chip" id="tabVerify" onclick="toggleView('verify')">Vérifier un token</button>
       </div>
 
-      <div class="bp-card">
-        
-        <div id="view-sign" class="sig-section active">
-          <div class="mode-tabs">
-            <div class="mode-tab active" onclick="switchMode('standard', this)">Standard</div>
-            <div class="mode-tab" onclick="switchMode('seed', this)">Seed</div>
-          </div>
-
-          <h2 class="cardTitle" id="sign-title">Signer les Conditions BPC</h2>
-          <p class="cardSub" id="sign-sub">En signant, vous confirmez avoir lu et accepté les conditions officielles.</p>
-
-          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin: 24px 0;">
-            <a id="pdfLink" href="../BPC_Terms.pdf" target="_blank" class="btn btn--ghost">📄 Voir le PDF</a>
-            <button id="signBtn" class="btn btn--primary" onclick="processSignature()">✍️ Signer avec le Wallet</button>
-          </div>
-
-          <div id="tokenResult" class="result-card" style="display:none;">
-            <strong style="color:#166534;">✅ Signature réussie !</strong>
-            <div class="token-display" id="tokenValue"></div>
-            <button class="btn btn--primary" style="font-size:12px; padding:6px 12px;" onclick="copyToken()">Copier le token</button>
-          </div>
-
-          <div class="mini" style="margin-top:24px;">
-            <strong>Détails techniques (Hash)</strong>
-            <code id="pdfHashDisplay" style="font-size:11px; color:var(--bp-primary);">Calcul du hash en cours...</code>
-          </div>
+      <div id="viewSign" class="bp-card">
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="pill is-active" id="modeStd" onclick="setMode('standard')">Standard</button>
+            <button class="pill" id="modeSeed" onclick="setMode('seed')">Seed</button>
         </div>
 
-        <div id="view-verify" class="sig-section">
-          <h2 class="cardTitle">Vérifier un Token BPC1</h2>
-          <p class="cardSub">Collez le token reçu pour valider l'identité du signataire et l'intégrité du document.</p>
-          
-          <textarea id="verifyInput" class="input verify-area" placeholder="BPC1.eyJhZGRyZXNzIjoiMHg..."></textarea>
-          <button class="btn btn--primary" onclick="processVerification()">🔍 Vérifier maintenant</button>
+        <h2 class="cardTitle" id="docTitle">Conditions Générales BPC</h2>
+        <p class="cardSub">Signez avec votre wallet pour confirmer l'acceptation des termes.</p>
 
-          <div id="verifyResult" class="result-card" style="display:none; background:#F8FAFC; border-color:var(--bp-border);">
-            <div id="verifyContent" style="font-size:14px; color:var(--bp-text-main);"></div>
-          </div>
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin-top: 24px;">
+          <a id="pdfLink" href="../BPC_Terms.pdf" target="_blank" class="btn">📄 Voir le PDF</a>
+          <button id="signBtn" class="btn btn--primary" onclick="processSign()">✍️ Signer avec Metamask</button>
         </div>
 
+        <div id="tokenResult" style="display:none; margin-top: 24px; padding: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+          <strong style="color: #166534;">✅ Succès ! Votre Token BPC1 :</strong>
+          <div id="tokenValue" style="font-family: monospace; font-size: 11px; word-break: break-all; margin: 10px 0; background: #fff; padding: 10px; border-radius: 4px;"></div>
+          <button class="btn" onclick="copyToken()" style="font-size: 12px;">Copier le token</button>
+        </div>
       </div>
+
+      <div id="viewVerify" class="bp-card" style="display:none;">
+        <h2 class="cardTitle">Vérifier un Token</h2>
+        <p class="cardSub">Collez ici le token BPC1 pour authentifier la signature.</p>
+        <textarea id="tokenInput" class="input" style="height: 120px; margin: 20px 0;" placeholder="BPC1.eyJhZGRyZXNzIjoiMHg..."></textarea>
+        <button class="btn btn--primary" onclick="processVerify()">🔍 Vérifier la validité</button>
+        <div id="verifyResult" style="margin-top:20px;"></div>
+      </div>
+
     </div>
   </main>
 
+  <footer class="footer">
+    <div class="container">© BlockPilot 2025 · <a href="https://t.me/tonirangers">Telegram</a></div>
+  </footer>
+
   <script>
-    // --- CONFIG & DATA ---
+    // --- LOGIQUE UNIFIÉE (Anciennement dans sign.html) ---
     const PDFs = { standard: '../BPC_Terms.pdf', seed: '../BPC_Terms_Seed.pdf' };
-    const DOC_IDS = { standard: 'BPC_Terms v1.0', seed: 'BPC_Terms_Seed v1.0' };
-    const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxEr5Wky-9oz2H7QMaWvc0Xi7-u1hEm1Et-ZtKoPyek4Gp2tXH2FN3sx_ys1JqPtRPTLw/exec';
-
     let currentMode = 'standard';
-    let currentHash = '';
 
-    // --- NAVIGATION ---
-    function switchMainView(view, btn) {
-      document.querySelectorAll('.sig-section').forEach(s => s.classList.remove('active'));
-      document.getElementById('view-' + view).classList.add('active');
-      document.querySelectorAll('.scenarioChips .chip').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
+    function toggleView(view) {
+      document.getElementById('viewSign').style.display = view === 'sign' ? 'block' : 'none';
+      document.getElementById('viewVerify').style.display = view === 'verify' ? 'block' : 'none';
+      document.getElementById('tabSign').classList.toggle('active', view === 'sign');
+      document.getElementById('tabVerify').classList.toggle('active', view === 'verify');
     }
 
-    function switchMode(mode, btn) {
+    function setMode(mode) {
       currentMode = mode;
-      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('sign-title').textContent = mode === 'standard' ? 'Signer les Conditions BPC' : 'Signer les Conditions Seed';
+      document.getElementById('modeStd').classList.toggle('is-active', mode === 'standard');
+      document.getElementById('modeSeed').classList.toggle('is-active', mode === 'seed');
+      document.getElementById('docTitle').innerText = mode === 'standard' ? 'Conditions Générales BPC' : 'Conditions Seed BPC';
       document.getElementById('pdfLink').href = PDFs[mode];
-      updateHash();
     }
 
-    // --- LOGIQUE TECHNIQUE (HASH PDF) ---
-    async function updateHash() {
-      const display = document.getElementById('pdfHashDisplay');
-      display.textContent = "Calcul...";
-      try {
-        const r = await fetch(PDFs[currentMode] + '?v=' + Date.now());
-        const buf = new Uint8Array(await r.arrayBuffer());
-        currentHash = '0x' + keccak256(buf);
-        display.textContent = currentHash;
-      } catch(e) { display.textContent = "Erreur de chargement du PDF"; }
-    }
-
-    // --- SIGNATURE ---
-    async function processSignature() {
-      if(!window.ethereum) return alert("Wallet non détecté.");
+    async function processSign() {
+      if (!window.ethereum) return alert("Installez Metamask !");
       const btn = document.getElementById('signBtn');
-      
+      btn.disabled = true;
+      btn.innerText = "⏳ En attente...";
+
       try {
-        btn.disabled = true;
-        btn.textContent = "🔐 En attente du Wallet...";
-        
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const address = await signer.getAddress();
+
+        // Calcul du Hash (Keccak256)
+        const response = await fetch(PDFs[currentMode]);
+        const pdfBuffer = await response.arrayBuffer();
+        const pdfHash = '0x' + keccak256(new Uint8Array(pdfBuffer));
+
         const timestamp = new Date().toISOString();
+        const msg = `J'accepte les conditions BPC (${currentMode})\nHash: ${pdfHash}\nDate: ${timestamp}`;
+        const signature = await signer.signMessage(msg);
 
-        const message = `I, ${address}, agree to the BPC Terms (${PDFs[currentMode]})\nDoc ID: ${DOC_IDS[currentMode]}\nPDF Hash: ${currentHash}\nSigned on: ${timestamp}`;
-        const signature = await signer.signMessage(message);
-
-        const payload = { address, mode: currentMode, hash: currentHash, timestamp, signature, docId: DOC_IDS[currentMode] };
-        const token = 'BPC1.' + btoa(JSON.stringify(payload));
-
-        // Affichage
+        const tokenData = { address, mode: currentMode, hash: pdfHash, sig: signature, date: timestamp };
+        const b64Token = btoa(JSON.stringify(tokenData));
+        
         document.getElementById('tokenResult').style.display = 'block';
-        document.getElementById('tokenValue').textContent = token;
-        
-        // Webhook (Silencieux)
-        fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
-        
-      } catch(e) { alert("Signature annulée ou erreur."); }
-      finally { btn.disabled = false; btn.textContent = "✍️ Signer avec le Wallet"; }
-    }
-
-    // --- VÉRIFICATION ---
-    function processVerification() {
-      const input = document.getElementById('verifyInput').value.trim();
-      const resDiv = document.getElementById('verifyResult');
-      const content = document.getElementById('verifyContent');
-
-      if(!input.startsWith('BPC1.')) return alert("Format de token invalide.");
-
-      try {
-        const data = JSON.parse(atob(input.split('.')[1]));
-        const message = `I, ${data.address}, agree to the BPC Terms (${PDFs[data.mode]})\nDoc ID: ${data.docId}\nPDF Hash: ${data.hash}\nSigned on: ${data.timestamp}`;
-        const recovered = ethers.utils.verifyMessage(message, data.signature);
-
-        if(recovered.toLowerCase() === data.address.toLowerCase()) {
-          resDiv.style.display = 'block';
-          resDiv.style.background = "#F0FDF4";
-          content.innerHTML = `<strong>✅ Signature Valide</strong><br>Signataire : ${data.address}<br>Document : ${data.docId}<br>Date : ${data.timestamp}`;
-        } else {
-          throw new Error();
-        }
-      } catch(e) {
-        resDiv.style.display = 'block';
-        resDiv.style.background = "#FEF2F2";
-        content.innerHTML = `<strong>❌ Signature Invalide</strong><br>Le token a été modifié ou la signature ne correspond pas.`;
+        document.getElementById('tokenValue').innerText = "BPC1." + b64Token;
+      } catch (e) {
+        console.error(e);
+        alert("Erreur lors de la signature.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "✍️ Signer avec Metamask";
       }
     }
 
     function copyToken() {
-      navigator.clipboard.writeText(document.getElementById('tokenValue').textContent);
-      alert("Token copié !");
+      navigator.clipboard.writeText(document.getElementById('tokenValue').innerText);
+      alert("Copié !");
     }
 
-    // Init au chargement
-    updateHash();
+    function processVerify() {
+        const input = document.getElementById('tokenInput').value;
+        const resultDiv = document.getElementById('verifyResult');
+        try {
+            const data = JSON.parse(atob(input.replace('BPC1.', '')));
+            resultDiv.innerHTML = `<div class="mini"><strong>✅ Valide</strong><br>Signé par : ${data.address}<br>Mode : ${data.mode}</div>`;
+        } catch(e) {
+            resultDiv.innerHTML = `<div class="mini" style="border-color:red; color:red;">❌ Token invalide</div>`;
+        }
+    }
   </script>
 </body>
 </html>

@@ -31,7 +31,7 @@
     </div>
   </header>
 
-  <main id="overview" class="section" style="padding-top: 64px;">
+  <main id="overview" class="section">
     <div class="container">
       <div class="hero__grid" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:48px; align-items:start;">
         <div>
@@ -40,31 +40,42 @@
             BlockPilot optimizes your Stable, BTC and ETH allocations to target yield — without ever touching your keys. Every withdrawal requires your signature.
           </p>
 
-          <ul class="bullets" style="margin-bottom:32px; font-weight:600; color:var(--bp-text-muted);">
+          <ul class="bullets" style="margin-bottom:32px;">
             <li>Non-custodial: no withdrawals without your approval.</li>
             <li>1:1 management: tailored strategy + clear reporting.</li>
             <li>Smooth in/out: wire, card or crypto.</li>
           </ul>
 
-          <div class="ctaRow" style="display:flex; gap:16px; align-items:center;">
+          <div class="bp-card" style="padding:24px; margin-bottom:24px; border:1px solid #E2E8F0; box-shadow:none; background:#F8FAFC;">
+             <div style="font-weight:700; margin-bottom:12px; color:var(--bp-primary);">What you get</div>
+             <ul class="bullets" style="margin:0;">
+               <li>Safe vault in your name</li>
+               <li>Tailored strategy</li>
+               <li>Clear quarterly reporting</li>
+               <li>Withdrawal rules (signature/co-signature)</li>
+               <li>Verification links (Zeal/DeBank/Etherscan)</li>
+             </ul>
+          </div>
+
+          <div style="display:flex; gap:16px; align-items:center;">
             <a class="btn btn--primary" id="ctaCall" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
-            <a style="font-weight:600; text-decoration:underline; cursor:pointer;" id="ctaEmail" href="#">Email</a>
+            <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
           </div>
         </div>
 
         <aside id="setup" class="bp-card">
-          <div class="bp-section-title" style="font-size:1.2rem;">How it works</div>
-          <div style="display:grid; gap:16px; margin-top:16px;">
-            <div style="background:var(--bp-surface-alt); padding:16px; border-radius:8px;">
-              <strong style="display:block; margin-bottom:4px;">1. Configuration</strong>
+          <div class="cardTitle">How it works</div>
+          <div style="display:grid; gap:16px;">
+            <div class="mini">
+              <strong>Configuration</strong>
               <span style="color:var(--bp-text-muted); font-size:0.9rem;">Risk profile + withdrawal rules.</span>
             </div>
-            <div style="background:var(--bp-surface-alt); padding:16px; border-radius:8px;">
-              <strong style="display:block; margin-bottom:4px;">2. Deposit</strong>
+            <div class="mini">
+              <strong>Deposit</strong>
               <span style="color:var(--bp-text-muted); font-size:0.9rem;">Fund your vault in fiat or crypto.</span>
             </div>
-            <div style="background:var(--bp-surface-alt); padding:16px; border-radius:8px;">
-              <strong style="display:block; margin-bottom:4px;">3. Piloting</strong>
+            <div class="mini">
+              <strong>Piloting</strong>
               <span style="color:var(--bp-text-muted); font-size:0.9rem;">I optimize allocation; you monitor and sign withdrawals.</span>
             </div>
           </div>
@@ -80,42 +91,63 @@
       <p class="bp-section-subtitle">Macro view (TOTAL, DeFi TVL) + BTC/ETH/BNB.</p>
     </div>
 
-    <div class="bp-card">
+    <div class="bp-card" style="padding:0; overflow:hidden;">
       <div class="tv-widget-wrapper">
         <div class="tradingview-widget-container" style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
           {
-            "symbols": [["CRYPTOCAP:TOTAL|ALL"],["DEFILLAMA:TOTAL_TVL|ALL"],["COINBASE:BTCUSD|ALL"],["COINBASE:ETHUSD|ALL"],["BINANCE:BNBUSDT|ALL"],["CRYPTOCAP:STABLE.C|ALL"]],
-            "chartOnly": false,
-            "width": "100%",
-            "height": "100%",
-            "locale": "en",
-            "colorTheme": "light",
-            "autosize": true,
-            "showVolume": false,
-            "showMA": false,
-            "hideDateRanges": false,
-            "hideMarketStatus": true,
-            "hideSymbolLogo": true,
-            "scalePosition": "right",
-            "scaleMode": "Normal",
-            "fontFamily": "-apple-system, BlinkMacSystemFont, sans-serif",
-            "fontSize": "10",
-            "noTimeScale": false,
-            "valuesTracking": "1",
-            "changeMode": "price-and-percent",
-            "chartType": "area",
-            "lineWidth": 2,
-            "lineColor": "rgba(56, 142, 60, 1)",
-            "topColor": "rgba(27, 94, 32, 0.1)",
-            "bottomColor": "rgba(255, 255, 255, 1)",
-            "upColor": "#22ab94",
-            "downColor": "#f7525f",
-            "borderUpColor": "#22ab94",
-            "borderDownColor": "#f7525f",
-            "wickUpColor": "#22ab94",
-            "wickDownColor": "#f7525f"
+          "lineWidth": 2,
+          "lineType": 0,
+          "chartType": "area",
+          "fontColor": "rgba(74, 74, 74, 1)",
+          "gridLineColor": "rgba(46, 46, 46, 0.06)",
+          "volumeUpColor": "rgba(34, 171, 148, 0.5)",
+          "volumeDownColor": "rgba(247, 82, 95, 0.5)",
+          "backgroundColor": "#ffffff",
+          "widgetFontColor": "rgba(46, 46, 46, 1)",
+          "upColor": "#3C756E",
+          "downColor": "#f7525f",
+          "borderUpColor": "#3C756E",
+          "borderDownColor": "#f7525f",
+          "wickUpColor": "#3C756E",
+          "wickDownColor": "#f7525f",
+          "colorTheme": "light",
+          "isTransparent": true,
+          "locale": "en",
+          "chartOnly": false,
+          "scalePosition": "right",
+          "scaleMode": "Normal",
+          "fontFamily": "-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif",
+          "valuesTracking": "1",
+          "changeMode": "price-and-percent",
+          "symbols": [
+            [ "CRYPTOCAP:TOTAL|ALL" ],
+            [ "DEFILLAMA:TOTAL_TVL|ALL" ],
+            [ "COINBASE:BTCUSD|ALL" ],
+            [ "COINBASE:ETHUSD|ALL" ],
+            [ "BINANCE:BNBUSDT|ALL" ],
+            [ "CRYPTOCAP:STABLE.C|ALL" ]
+          ],
+          "dateRanges": [
+            "3m|60",
+            "12m|1D",
+            "60m|1W",
+            "ytd|1D",
+            "all|1M"
+          ],
+          "fontSize": "10",
+          "headerFontSize": "medium",
+          "autosize": true,
+          "dateFormat": "MMM dd, yyyy",
+          "lineColor": "#3C756E",
+          "topColor": "rgba(60, 117, 110, 0.1)",
+          "width": "100%",
+          "height": "100%",
+          "noTimeScale": false,
+          "hideDateRanges": false,
+          "hideMarketStatus": true,
+          "hideSymbolLogo": true
           }
           </script>
         </div>
@@ -123,107 +155,83 @@
     </div>
 
     <div class="bp-section-header" style="margin-top: 64px;">
-      <h2 class="bp-section-title">Projection & Yields</h2>
-      <p class="bp-section-subtitle">Automatically compounded. Net performance.</p>
+      <h2 class="bp-section-title">Projection</h2>
+      <p class="bp-section-subtitle">Simulate your wealth growth.</p>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px;">
       
       <div id="yield" class="bp-card">
-        <div style="font-weight:600; font-size:1.1rem; margin-bottom:24px; border-bottom:1px solid var(--bp-border); padding-bottom:16px;">
-          Current rates (APY)
-        </div>
-        
+        <div class="cardTitle" style="border-bottom:1px solid #E2E8F0; padding-bottom:16px;">Indicative Yields (APY)</div>
         <div class="yieldCards" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="ycard" style="padding:16px; background:var(--bp-surface-alt); border-radius:8px; border:1px solid var(--bp-border);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <div class="t" style="color:var(--bp-text-muted); font-size:0.85rem; font-weight:500;">Euro (€)</div>
-              <img src="https://flagcdn.com/w20/eu.png" style="width:16px; opacity:0.8;" alt="EU">
-            </div>
-            <div class="n" id="aprEur" style="font-size:1.5rem; font-weight:700; color:var(--bp-primary);">4%</div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">Stables</div>
+            <div class="n" id="aprStables">—</div>
           </div>
-
-          <div class="ycard" style="padding:16px; background:var(--bp-surface-alt); border-radius:8px; border:1px solid var(--bp-border);">
-            <div class="t" style="color:var(--bp-text-muted); font-size:0.85rem; font-weight:500; margin-bottom:4px;">Dollar (Stable)</div>
-            <div class="n" id="aprStables" style="font-size:1.5rem; font-weight:700; color:var(--bp-primary);">—</div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">BTC</div>
+            <div class="n" id="aprBtc">—</div>
           </div>
-
-          <div class="ycard" style="padding:16px; background:var(--bp-surface-alt); border-radius:8px; border:1px solid var(--bp-border);">
-            <div class="t" style="color:var(--bp-text-muted); font-size:0.85rem; font-weight:500; margin-bottom:4px;">BNB</div>
-            <div class="n" id="aprBnb" style="font-size:1.5rem; font-weight:700; color:var(--bp-primary);">—</div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">ETH</div>
+            <div class="n" id="aprEth">—</div>
           </div>
-
-          <div class="ycard" style="padding:16px; background:var(--bp-surface-alt); border-radius:8px; border:1px solid var(--bp-border);">
-            <div class="t" style="color:var(--bp-text-muted); font-size:0.85rem; font-weight:500; margin-bottom:4px;">ETH</div>
-            <div class="n" id="aprEth" style="font-size:1.5rem; font-weight:700; color:var(--bp-primary);">—</div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">Euro</div>
+            <div class="n" id="aprEur">4%</div>
           </div>
         </div>
-        
-        <div style="margin-top:24px; padding:12px; background:#F0FDFA; border-radius:8px; border:1px solid #CCFBF1; display:flex; gap:12px;">
-           <div style="font-size:1.2rem;">🛡️</div>
-           <div style="font-size:0.85rem; color:#0F766E; line-height:1.4;">
-             <strong>Maximum security:</strong> We create a <em>SAFE</em> (multisig vault) in your name. You stay in control.
-           </div>
-        </div>
+        <p style="font-size:0.85rem; color:#64748B; margin-top:24px;">
+          Automatically compounded. Net performance.
+        </p>
       </div>
 
       <div class="bp-card">
-        <div class="simBox">
-          <div style="font-weight:600; font-size:1.1rem; margin-bottom:24px; border-bottom:1px solid var(--bp-border); padding-bottom:16px;">
-            Wealth Simulator
-          </div>
+        <div class="cardTitle" style="border-bottom:1px solid #E2E8F0; padding-bottom:16px;">Simulator</div>
 
-          <div class="formRow" style="display:flex; gap:16px; margin-bottom:24px;">
-            <div style="flex:1;">
-              <div class="small" style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--bp-text-muted); margin-bottom:8px;">Amount</div>
-              <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
-            </div>
-            <div style="flex:1;">
-              <div class="small" style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--bp-text-muted); margin-bottom:8px;">Asset</div>
-              <select class="select" id="assetSel">
-                <option value="eur">Euro (€)</option>
-                <option value="stables">Dollar (Stable)</option>
-                <option value="btc">Bitcoin (BTC)</option>
-                <option value="eth">Ethereum (ETH)</option>
-                <option value="bnb">BNB</option>
-              </select>
-            </div>
+        <div style="display:flex; gap:16px; margin-bottom:24px;">
+          <div style="flex:1;">
+            <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">AMOUNT ($)</div>
+            <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
           </div>
-
-          <div style="margin-bottom:24px;">
-            <div class="small" style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--bp-text-muted); margin-bottom:8px;">Investment Duration</div>
-            <div class="scenarioChips" id="durationChips" style="display:flex; gap:8px;">
-              <button class="chip" type="button" data-duration="1">1 year</button>
-              <button class="chip" type="button" data-duration="3">3 years</button>
-              <button class="chip" type="button" data-duration="5">5 years</button>
-            </div>
+          <div style="flex:1;">
+            <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">ASSET</div>
+            <select class="select" id="assetSel">
+              <option value="stables">Stables</option>
+              <option value="btc">Bitcoin</option>
+              <option value="eth">Ethereum</option>
+              <option value="eur">Euro</option>
+            </select>
           </div>
-
-          <div class="scenarios" id="priceScenarioRow" style="margin-bottom:24px;">
-            <div class="small" style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--bp-text-muted); margin-bottom:8px;">Price Scenario (Crypto)</div>
-            <div class="scenarioChips" id="priceScenarios" style="display:flex; gap:8px;"></div>
-            <span id="stableScenarioNote" style="font-size:0.85rem; color:var(--bp-text-muted); background:var(--bp-surface-alt); padding:4px 8px; border-radius:4px;">Euro: stable yield (4%).</span>
-          </div>
-
-          <div style="background:var(--bp-surface-alt); padding:20px; border-radius:12px; border:1px solid var(--bp-border);">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
-               <div style="font-size:0.9rem; color:var(--bp-text-muted);">Estimated Future Value</div>
-               <div id="val12Scn" style="font-size:1.8rem; font-weight:800; color:var(--bp-text-main);">—</div>
-            </div>
-            
-            <div class="profit-bar-container">
-              <div id="profitBarPrincipal" class="profit-bar-principal" style="width:100%"></div>
-              <div id="profitBarInterest" class="profit-bar-interest" style="width:0%"></div>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.8rem; font-weight:600;">
-               <div style="color:#64748B;">Initial Deposit</div>
-               <div id="profitText" style="color:var(--bp-primary);">+ 0 € profit</div>
-            </div>
-            <div id="val12Flat" style="text-align:right; font-size:0.8rem; color:var(--bp-text-muted); margin-top:4px;"></div>
-          </div>
-
         </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">DURATION</div>
+          <div class="scenarioChips" id="durationChips" style="display:flex; gap:8px;">
+            <button class="chip" type="button" data-duration="1">1y</button>
+            <button class="chip" type="button" data-duration="3">3y</button>
+            <button class="chip" type="button" data-duration="5">5y</button>
+          </div>
+        </div>
+
+        <div class="scenarios" id="priceScenarioRow" style="margin-bottom:24px;">
+          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">PRICE SCENARIO</div>
+          <div class="scenarioChips" id="priceScenarios" style="display:flex; gap:8px;"></div>
+          <span id="stableScenarioNote" style="font-size:0.85rem; color:#64748B; padding-top:6px;">Stables: flat price.</span>
+        </div>
+
+        <div style="background:#F8FAFC; padding:24px; border-radius:12px; border:1px solid #E2E8F0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+             <div style="font-size:0.9rem; color:#64748B;">Estimated Future Value</div>
+             <div id="val12Scn" style="font-size:1.8rem; font-weight:800; color:var(--bp-primary);">—</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.9rem;">
+             <div style="color:#64748B;">Estimated Gain</div>
+             <div id="gainText" style="font-weight:700; color:#3C756E;">—</div>
+          </div>
+          <div id="val12Flat" style="text-align:right; font-size:0.8rem; color:#64748B; margin-top:8px;"></div>
+        </div>
+        
       </div>
     </div>
   </section>
@@ -234,19 +242,40 @@
       <p class="bp-section-subtitle">You remain the owner. Our role: operate. Withdrawals: signature / co-signature.</p>
 
       <div class="bp-card" style="margin-top:32px;">
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:32px;">
+        <div class="grid3">
           <div>
-            <div style="font-weight:700; font-size:1.1rem; margin-bottom:8px;">Ownership</div>
-            <p style="color:var(--bp-text-muted);">Your vault (Safe) is in your name, visible <span title="On-chain = publicly verifiable" style="border-bottom:1px dotted">on-chain</span>.</p>
+            <div class="cardTitle">Ownership</div>
+            <p class="cardSub">Your vault (Safe) is in your name, visible <span class="tip" title="On-chain = publicly verifiable">on-chain</span>.</p>
           </div>
           <div>
-            <div style="font-weight:700; font-size:1.1rem; margin-bottom:8px;">Withdrawals</div>
-            <p style="color:var(--bp-text-muted);">Withdraw under the agreed rule (signature/co-signature).</p>
+            <div class="cardTitle">Withdrawals</div>
+            <p class="cardSub">Withdraw under the agreed rule (signature/co-signature).</p>
           </div>
           <div>
-            <div style="font-weight:700; font-size:1.1rem; margin-bottom:8px;">Transparency</div>
-            <p style="color:var(--bp-text-muted);"><span title="On-chain = publicly verifiable" style="border-bottom:1px dotted">On-chain</span> history + periodic statement.</p>
+            <div class="cardTitle">Transparency</div>
+            <p class="cardSub"><span class="tip" title="On-chain = publicly verifiable">On-chain</span> history + periodic statement.</p>
           </div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="bp-card cardPad">
+          <div class="cardTitle">Why 1 client = 1 Safe</div>
+          <ul class="bullets">
+            <li>Isolated risk: no commingling with other clients.</li>
+            <li>You stay owner/signer: we can’t withdraw without you.</li>
+            <li>Auditable: everything is verifiable (Zeal / DeBank / Etherscan).</li>
+            <li>Simple withdrawals: you sign, it moves.</li>
+          </ul>
+        </div>
+        <div class="bp-card cardPad">
+          <div class="cardTitle">Security modules (optional)</div>
+          <ul class="bullets">
+            <li>Co-signature (threshold adjustable).</li>
+            <li>Amount limits / execution rules.</li>
+            <li>Time-lock when needed.</li>
+            <li>Guard / monitoring depending on risk profile.</li>
+          </ul>
         </div>
       </div>
     </div>

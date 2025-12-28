@@ -1,52 +1,68 @@
-<div class="bp-card">
-        <div style="font-weight:600; font-size:1.1rem; margin-bottom:24px; border-bottom:1px solid #E2E8F0; padding-bottom:16px;">
-          Simulateur
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlockPilot — Gestion privée d’actifs numériques</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body data-lang="fr">
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="#overview" aria-label="BlockPilot">
+          <img class="brand__logo" src="../logo.png" alt="BlockPilot" />
+        </a>
+
+        <button class="navToggle" id="navToggle" type="button" aria-expanded="false">Menu</button>
+
+        <div class="nav__links" aria-label="Navigation">
+          <a href="#performance">Performance</a>
+          <a href="#security">Sécurité</a>
+          <a id="navDocs" href="#docs">Docs</a>
+          <a id="navSignature" href="../signature.html">Signature</a>
         </div>
 
-        <div style="display:flex; gap:16px; margin-bottom:24px;">
-          <div style="flex:1;">
-            <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">MONTANT ($)</div>
-            <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
+        <div class="lang" aria-label="Language">
+          <a class="pill is-active" href="../fr/">FR</a>
+          <a class="pill" href="../en/">EN</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="overview" class="section">
+    <div class="container">
+      <div class="hero__grid" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:48px; align-items:start;">
+        <div>
+          <h1 class="h1">L’expertise d’une banque privée, la performance de la DeFi.</h1>
+          <p class="lead">
+            BlockPilot optimise vos allocations Stables, BTC et ETH pour viser du rendement — sans jamais toucher à vos clés. Toute sortie exige votre signature.
+          </p>
+
+          <ul class="bullets" style="margin-bottom:32px;">
+            <li>Non-custodial : retraits impossibles sans votre accord.</li>
+            <li>Gestion 1:1 : stratégie sur-mesure + reporting clair.</li>
+            <li>Entrées/sorties simples : virement, carte ou crypto.</li>
+          </ul>
+
+          <div class="bp-card" style="padding:24px; margin-bottom:24px; border:1px solid #E2E8F0; box-shadow:none; background:#F8FAFC;">
+             <div style="font-weight:700; margin-bottom:12px; color:var(--bp-primary);">Ce que vous obtenez</div>
+             <ul class="bullets" style="margin:0;">
+               <li>Coffre Safe à votre nom</li>
+               <li>Stratégie personnalisée</li>
+               <li>Relevé trimestriel clair</li>
+               <li>Règles de retrait (signature/cosignature)</li>
+               <li>Liens de vérification (Zeal/DeBank/Etherscan)</li>
+             </ul>
           </div>
-          <div style="flex:1;">
-            <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">ACTIF</div>
-            <select class="select" id="assetSel">
-              <option value="stables">Stables ($)</option>
-              <option value="btc">Bitcoin</option>
-              <option value="eth">Ethereum</option>
-              <option value="eur">Euro (€)</option>
-            </select>
+
+          <div style="display:flex; gap:16px; align-items:center;">
+            <a class="btn btn--primary" id="ctaCall" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Réserver un appel</a>
+            <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
           </div>
         </div>
 
-        <div style="margin-bottom:24px;">
-          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">DURÉE</div>
-          <div class="scenarioChips" id="durationChips" style="display:flex; gap:8px;">
-            <button class="chip" type="button" data-duration="1">1 an</button>
-            <button class="chip" type="button" data-duration="3">3 ans</button>
-            <button class="chip" type="button" data-duration="5">5 ans</button>
-          </div>
-        </div>
-
-        <div id="priceScenarioRow" style="margin-bottom:24px;">
-          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:8px;">SCÉNARIO PRIX (Crypto)</div>
-          <div class="scenarioChips" id="priceScenarios" style="display:flex; gap:8px;"></div>
-          <div id="stableScenarioNote" style="font-size:0.85rem; color:#64748B; padding-top:8px;">Stables : prix fixe.</div>
-        </div>
-
-        <div style="background:#F8FAFC; padding:24px; border-radius:12px; border:1px solid #E2E8F0;">
-          <div style="display:flex; justify-content:space-between; align-items:baseline;">
-             <div style="font-size:0.9rem; color:#64748B;">Valeur future</div>
-             <div id="val12Scn" style="font-size:1.8rem; font-weight:800; color:var(--bp-primary);">—</div>
-          </div>
-          
-          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.9rem;">
-             <div style="color:#64748B;">Gain estimé</div>
-             <div id="gainText" style="font-weight:700; color:#3C756E;">—</div>
-          </div>
-          
-          <div id="val12Flat" style="text-align:right; font-size:0.8rem; color:#64748B; margin-top:8px;"></div>
-        </div>
-        
-        <div id="priceMeta" style="margin-top:12px; font-size:0.75rem; color:#A0AEC0;"></div>
-      </div>
+        <aside id="setup" class="bp-card">
+          <div class="cardTitle">Comment ça marche</div>
+          <div

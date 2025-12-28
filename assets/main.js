@@ -1,4 +1,4 @@
-/* assets/main.js - Version Finale Stable */
+/* assets/main.js - Final Stable Version */
 (async () => {
   const $ = (s, el=document) => el.querySelector(s);
   const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
@@ -9,11 +9,11 @@
   const I18N = {
     fr: {
       menu: "Menu", close: "Fermer", contactLabel: "Email",
-      priceHint: (px, unit, scn) => `Prix utilisé : ~${px} $/${unit}. Scénario : ${scn ? "+" + (scn*100).toFixed(0) + "%" : "prix constant"}.`
+      priceHint: (px, unit, scn) => `Prix : ~${px} $/${unit}. Scénario : ${scn ? "+" + (scn*100).toFixed(0) + "%" : "stable"}.`
     },
     en: {
       menu: "Menu", close: "Close", contactLabel: "Email",
-      priceHint: (px, unit, scn) => `Price used: ~$${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "flat price"}.`
+      priceHint: (px, unit, scn) => `Price: ~$${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "stable"}.`
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -39,20 +39,22 @@
     return yields;
   }
 
-  async function loadPricesUSD(cfg) {
-    // Fallback prices
+  async function loadPricesUSD() {
+    // Valeurs par défaut solides (si l'API plante)
     const prices={ btc:96000, eth:3300, bnb:610, stables:1, eur:1.05 };
     try {
-      const res = await fetchJSON("https://api.binance.com/api/v3/ticker/price?symbols=[\"BTCUSDT\",\"ETHUSDT\",\"BNBUSDT\",\"EURUSDT\"]");
-      if (res) {
-          res.forEach(t => {
-              if(t.symbol==="BTCUSDT") prices.btc = Number(t.price);
-              if(t.symbol==="ETHUSDT") prices.eth = Number(t.price);
-              if(t.symbol==="BNBUSDT") prices.bnb = Number(t.price);
-              if(t.symbol==="EURUSDT") prices.eur = Number(t.price);
-          });
+      // On tente de charger les prix live, mais on ne bloque pas si ça échoue
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+      if(res.ok) {
+        const data = await res.json();
+        data.forEach(t => {
+            if(t.symbol==="BTCUSDT") prices.btc = Number(t.price);
+            if(t.symbol==="ETHUSDT") prices.eth = Number(t.price);
+            if(t.symbol==="BNBUSDT") prices.bnb = Number(t.price);
+            if(t.symbol==="EURUSDT") prices.eur = Number(t.price);
+        });
       }
-    } catch {}
+    } catch(e) { console.log("Price API failed, using defaults"); }
     return prices;
   }
 
@@ -67,7 +69,7 @@
     let scenario = 0.2;
     let durationYears = 1;
 
-    // Chips rendering
+    // Création des puces (chips)
     if (scenarioWrap) {
         scenarioWrap.innerHTML="";
         scenarios.forEach(v => {
@@ -79,17 +81,18 @@
     }
 
     function recalc() {
+      // Nettoyage de l'input (enlève espaces)
       const usdInput = Number((amount?.value ?? "").replace(/\s/g, "").replace(",", "."));
       const asset = assetSel?.value || "stables";
       const apr = Number(yields?.[asset] ?? 0);
       
       const isStable = asset==="stables" || asset==="eur";
-      // Si asset=Eur, on utilise son prix pour convertir en USD, sinon 1 pour stables, sinon prix crypto
+      // Si asset=Eur, le prix est pricesUSD.eur (ex: 1.05). Sinon 1 pour stables, sinon prix crypto.
       const px = isStable ? (asset==="eur" ? pricesUSD.eur : 1) : pricesUSD[asset];
 
       if (isStable && scenario !== 0) scenario = 0;
 
-      // Update UI Chips
+      // Mise à jour visuelle des boutons
       $$("#priceScenarios .chip").forEach(c => {
           c.disabled = isStable && c.dataset.scn!=="0";
           c.classList.toggle("active", Number(c.dataset.scn)===scenario);
@@ -105,18 +108,16 @@
         return; 
       }
 
-      // Calcul : Tout en dollars ($)
-      // Input est considéré comme $ (ou équivalent valeur)
+      // --- LE CALCUL ---
+      // 1. On convertit l'input ($) en Tokens
       const principalDollars = usdInput; 
-      
-      // On convertit en "tokens" (nb de BTC, ou nb de Stables, ou nb d'Euro)
       const tokenPrice = asset==="eur" ? pricesUSD.eur : (asset==="stables"?1:pricesUSD[asset]);
       const principalTokens = principalDollars / tokenPrice;
 
-      // Compound interest sur les tokens
+      // 2. Intérêts composés sur les tokens
       const finalTokens = computeTokens(principalTokens, apr, durationYears);
       
-      // Valeur finale en dollars (avec scénario de prix si crypto)
+      // 3. Valeur finale en dollars (avec scénario de prix si crypto)
       const priceGrowth = Math.pow(1+scenario, durationYears);
       const finalPrice = tokenPrice * priceGrowth;
       
@@ -124,7 +125,7 @@
       const flatDollars = finalTokens * tokenPrice;
       const gainDollars = finalDollars - principalDollars;
 
-      // Formatting
+      // --- AFFICHAGE ---
       const fmt = (v) => new Intl.NumberFormat(undefined, { style:"currency", currency: "USD", maximumFractionDigits:0 }).format(v);
 
       const set=(id,t)=>{ const el=$(id); if(el) el.textContent=t; };
@@ -132,18 +133,16 @@
       set("#val12Scn", fmt(finalDollars));
       set("#val12Flat", isStable ? "" : `(${fmt(flatDollars)} si prix stable)`);
       
-      // Effet Wahou : afficher le gain
+      // L'effet Wahou (Gain en vert)
       const gainEl = $("#gainText");
       if(gainEl) {
         gainEl.textContent = `+ ${fmt(gainDollars)} de gains`;
-        gainEl.style.color = "#3C756E"; // Vert sombre
-        gainEl.style.fontWeight = "700";
+        gainEl.style.color = "#3C756E"; // Ta couleur
       }
       
       let unit = asset.toUpperCase();
       if(asset==="stables") unit="USDT";
       
-      // Affichage du dépôt
       set("#depTok", `${fmtNum(principalTokens, asset==="btc"||asset==="eth"?6:2)} ${unit}`);
       
       if(priceMeta) priceMeta.textContent = isStable ? "" : T.priceHint(fmtNum(tokenPrice,0), unit, scenario);
@@ -159,7 +158,7 @@
     recalc();
   }
 
-  // --- MENU & LINKS ---
+  // --- MENU MOBILE ---
   function initMobileMenu() {
     const t=$("#navToggle");
     if(t) t.onclick = () => {
@@ -169,7 +168,7 @@
     $$(".nav__links a").forEach(a => a.onclick = () => { document.body.classList.remove("menu-open"); t.textContent=T.menu; });
   }
 
-  // --- SIGNATURE (Fix CSS Display) ---
+  // --- SIGNATURE (Iframes) ---
   function initSignature() {
     const btns=$$('[data-signature-view]');
     const frames={ sign: $("#signatureSign"), verify: $("#signatureVerify") };
@@ -180,6 +179,7 @@
         if(frames.sign) frames.sign.style.display = v==="sign" ? "block" : "none";
         if(frames.verify) frames.verify.style.display = v==="verify" ? "block" : "none";
         
+        // Chargement différé pour perf
         const lang = (localStorage.getItem("bp_lang")||"fr").includes("en") ? "en" : "fr";
         const f = frames[v];
         if(f && !f.getAttribute("src")) {
@@ -190,12 +190,13 @@
     setView("sign");
   }
 
+  // --- INITIALISATION ---
   async function init() {
     initMobileMenu();
     initSignature();
     const cfg = await fetchJSON("../data/blockpilot.json") || {};
     const yields = fillApr(cfg);
-    const prices = await loadPricesUSD(cfg);
+    const prices = await loadPricesUSD(); // Appel sans paramètre, valeurs par défaut incluses
     initCalc(cfg, prices, yields);
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();

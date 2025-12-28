@@ -65,4 +65,233 @@
 
         <aside id="setup" class="bp-card">
           <div class="cardTitle">Comment ça marche</div>
-          <div
+          <div style="display:grid; gap:16px;">
+            <div class="mini">
+              <strong>Configuration</strong>
+              <span style="color:var(--bp-text-muted); font-size:0.9rem;">Profil de risque + règles de retrait.</span>
+            </div>
+            <div class="mini">
+              <strong>Dépôt</strong>
+              <span style="color:var(--bp-text-muted); font-size:0.9rem;">Alimentez votre coffre en fiat ou crypto.</span>
+            </div>
+            <div class="mini">
+              <strong>Pilotage</strong>
+              <span style="color:var(--bp-text-muted); font-size:0.9rem;">J’optimise l’allocation, vous suivez et signez les sorties.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <section id="performance" class="container-premium" style="margin-top: 48px; margin-bottom: 64px;">
+    
+    <div class="bp-section-header">
+      <h2 class="bp-section-title">Contexte marché</h2>
+      <p class="bp-section-subtitle">Vue macro (TOTAL, TVL DeFi) + BTC/ETH/BNB.</p>
+    </div>
+
+    <div class="bp-card" style="padding:0; overflow:hidden;">
+      <div class="tv-widget-wrapper">
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
+          {
+          "lineWidth": 2,
+          "lineType": 0,
+          "chartType": "area",
+          "fontColor": "rgba(74, 74, 74, 1)",
+          "gridLineColor": "rgba(46, 46, 46, 0.06)",
+          "volumeUpColor": "rgba(34, 171, 148, 0.5)",
+          "volumeDownColor": "rgba(247, 82, 95, 0.5)",
+          "backgroundColor": "#ffffff",
+          "widgetFontColor": "rgba(46, 46, 46, 1)",
+          "upColor": "#3C756E",
+          "downColor": "#f7525f",
+          "borderUpColor": "#3C756E",
+          "borderDownColor": "#f7525f",
+          "wickUpColor": "#3C756E",
+          "wickDownColor": "#f7525f",
+          "colorTheme": "light",
+          "isTransparent": true,
+          "locale": "fr",
+          "chartOnly": false,
+          "scalePosition": "right",
+          "scaleMode": "Normal",
+          "fontFamily": "-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif",
+          "valuesTracking": "1",
+          "changeMode": "price-and-percent",
+          "symbols": [
+            [ "CRYPTOCAP:TOTAL|ALL" ],
+            [ "DEFILLAMA:TOTAL_TVL|ALL" ],
+            [ "COINBASE:BTCUSD|ALL" ],
+            [ "COINBASE:ETHUSD|ALL" ],
+            [ "BINANCE:BNBUSDT|ALL" ],
+            [ "CRYPTOCAP:STABLE.C|ALL" ]
+          ],
+          "dateRanges": [
+            "3m|60",
+            "12m|1D",
+            "60m|1W",
+            "ytd|1D",
+            "all|1M"
+          ],
+          "fontSize": "10",
+          "headerFontSize": "medium",
+          "autosize": true,
+          "dateFormat": "MMM dd, yyyy",
+          "lineColor": "#3C756E",
+          "topColor": "rgba(60, 117, 110, 0.1)",
+          "width": "100%",
+          "height": "100%",
+          "noTimeScale": false,
+          "hideDateRanges": false,
+          "hideMarketStatus": true,
+          "hideSymbolLogo": true
+          }
+          </script>
+        </div>
+      </div>
+    </div>
+
+    <div class="bp-section-header" style="margin-top: 64px;">
+      <h2 class="bp-section-title">Projection & Rendements</h2>
+      <p class="bp-section-subtitle">Intérêts composés automatiquement. Performance nette.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px;">
+      
+      <div id="yield" class="bp-card">
+        <div class="cardTitle" style="border-bottom:1px solid #E2E8F0; padding-bottom:16px;">Taux indicatifs (APY)</div>
+        <div class="yieldCards" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">Stables</div>
+            <div class="n" id="aprStables">—</div>
+          </div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">BTC</div>
+            <div class="n" id="aprBtc">—</div>
+          </div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">ETH</div>
+            <div class="n" id="aprEth">—</div>
+          </div>
+          <div class="ycard" style="border-color:#CBD5E1;">
+            <div style="font-size:0.85rem; color:#64748B;">Euro</div>
+            <div class="n" id="aprEur">4%</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:#64748B; margin-top:24px; line-height:1.5;">
+          <strong>L'effet "Wahou" :</strong> Les intérêts sont réinvestis automatiquement (Compound). Vos gains génèrent eux-mêmes des gains, créant une courbe exponentielle sur la durée.
+        </p>
+      </div>
+
+      <div class="bp-card">
+        <div style="font-weight:600; font-size:1.1rem; margin-bottom:24px; border-bottom:1px solid #E2E8F0; padding-bottom:16px;">
+          Simulateur
+        </div>
+
+        <div style="display:flex; gap:16px; margin-bottom:24px;">
+          <div style="flex:1;">
+            <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">MONTANT ($)</div>
+            <input class="input" id="amountUSD" inputmode="decimal" placeholder="10000" />
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">ACTIF</div>
+            <select class="select" id="assetSel">
+              <option value="stables">Stables ($)</option>
+              <option value="btc">Bitcoin</option>
+              <option value="eth">Ethereum</option>
+              <option value="eur">Euro (€)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:6px;">DURÉE</div>
+          <div class="scenarioChips" id="durationChips" style="display:flex; gap:8px;">
+            <button class="chip" type="button" data-duration="1">1 an</button>
+            <button class="chip" type="button" data-duration="3">3 ans</button>
+            <button class="chip" type="button" data-duration="5">5 ans</button>
+          </div>
+        </div>
+
+        <div id="priceScenarioRow" style="margin-bottom:24px;">
+          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:8px;">SCÉNARIO PRIX (Crypto)</div>
+          <div class="scenarioChips" id="priceScenarios" style="display:flex; gap:8px;"></div>
+          <div id="stableScenarioNote" style="font-size:0.85rem; color:#64748B; padding-top:8px;">Stables : prix fixe.</div>
+        </div>
+
+        <div style="background:#F8FAFC; padding:24px; border-radius:12px; border:1px solid #E2E8F0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+             <div style="font-size:0.9rem; color:#64748B;">Valeur future</div>
+             <div id="val12Scn" style="font-size:1.8rem; font-weight:800; color:var(--bp-primary);">—</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.9rem;">
+             <div style="color:#64748B;">Gain estimé</div>
+             <div id="gainText" style="font-weight:700; color:#3C756E;">—</div>
+          </div>
+          <div id="val12Flat" style="text-align:right; font-size:0.8rem; color:#64748B; margin-top:8px;"></div>
+        </div>
+        
+        <div id="priceMeta" style="margin-top:12px; font-size:0.75rem; color:#A0AEC0;"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="security" class="section section--tight">
+    <div class="container-premium">
+      <h2 class="bp-section-title">Sécurité & contrôle</h2>
+      <p class="bp-section-subtitle">Vous restez propriétaire. Notre rôle : opérer. Vos retraits : par signature / co-signature.</p>
+
+      <div class="bp-card" style="margin-top:32px;">
+        <div class="grid3">
+          <div>
+            <div class="cardTitle">Propriété</div>
+            <p class="cardSub">Le coffre (Safe) est à votre nom, visible <span class="tip" title="On-chain = vérifiable publiquement">on-chain</span>.</p>
+          </div>
+          <div>
+            <div class="cardTitle">Retrait</div>
+            <p class="cardSub">Retrait possible selon la règle convenue (signature/cosignature).</p>
+          </div>
+          <div>
+            <div class="cardTitle">Transparence</div>
+            <p class="cardSub">Historique <span class="tip" title="On-chain = vérifiable publiquement">on-chain</span> + relevé périodique.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="bp-card cardPad">
+          <div class="cardTitle">Pourquoi 1 client = 1 Safe</div>
+          <ul class="bullets">
+            <li>Risque isolé : pas de mélange avec d’autres clients.</li>
+            <li>Vous restez owner/signer : nous ne pouvons pas retirer sans votre accord.</li>
+            <li>Auditabilité : tout est vérifiable (Zeal / DeBank / Etherscan).</li>
+            <li>Retraits simples : vous signez, ça sort (pas de “ticket support”).</li>
+          </ul>
+        </div>
+        <div class="bp-card cardPad">
+          <div class="cardTitle">Modules de sécurité (adaptables)</div>
+          <ul class="bullets">
+            <li>Co-signature possible (seuil ajustable).</li>
+            <li>Limites de montant / règles d’exécution.</li>
+            <li>Time-lock / délai anti-panique si besoin.</li>
+            <li>Guard / monitoring selon profil de risque.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container-premium">
+      <span>© BlockPilot 2025</span>
+      <span style="margin:0 8px;">·</span>
+      <a href="https://t.me/tonirangers" target="_blank" rel="noopener">Telegram</a>
+    </div>
+  </footer>
+
+  <script src="../assets/main.js" defer></script>
+</body>
+</html>

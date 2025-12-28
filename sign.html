@@ -1,107 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BPC — Sign (Standard & Seed)</title>
-  <link rel="stylesheet" href="./assets/styles.css" />
+  <title>BlockPilot - Sign</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  
   <script>const EMBED = new URLSearchParams(location.search).get('embed')==='1'; if (EMBED) document.documentElement.classList.add('embed');</script>
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  
-  <style>
-    *{box-sizing:border-box}
-    body{background:var(--bg);color:var(--ink);margin:0;min-height:100vh;display:flex;flex-direction:column;}
-    .embed body{background:transparent;}
-    .sign-shell{flex:1;display:flex;flex-direction:column;gap:20px;align-items:center;padding:30px 18px 50px;}
-    .embed .sign-shell{padding:0;}
-    .embed .header{display:none;}
-    .embed .sign-logo{display:none;}
-    .sign-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;max-width:760px;width:100%;}
-    .embed .sign-card{border:0;box-shadow:none;background:transparent;padding:10px 0 0;}
-    .sign-card h1{font-size:26px;margin:0 0 10px;}
-    .sign-card p{font-size:16px;margin-bottom:12px;}
-    .sign-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px;}
-    .sign-tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(11,111,102,.08);color:var(--brand);font-weight:800;cursor:pointer;}
-    .sign-tab.active{background:var(--brand);color:#fff;border-color:rgba(11,111,102,.55);}
-    .sign-row{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;}
-    .sign-btn{display:flex;align-items:center;justify-content:center;flex:1 1 220px;padding:14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid rgba(13,35,31,.14);background:rgba(255,255,255,.9);cursor:pointer;}
-    .sign-btn.primary{background:var(--brand);color:#fff;border-color:rgba(11,111,102,.55);}
-    .sign-btn.ghost{background:rgba(11,111,102,.08);color:var(--brand);}
-    .hash-line{font-size:14px;color:var(--muted);margin:18px 0;word-break:break-word}
-    .output-box{background:rgba(238,247,245,.35);padding:16px;border-radius:12px;margin-top:14px;text-align:left;overflow-wrap:anywhere;border:1px solid var(--line)}
-    .copy-btn{background:var(--brand);color:#fff;padding:10px 14px;border:0;border-radius:10px;font-size:14px;margin:6px 6px 0 0;cursor:pointer;display:inline-block}
-    .copy-btn:hover{background:var(--brand2)}
-    .copy-btn.ghost{background:rgba(11,111,102,.08);color:var(--brand);border:1px solid rgba(13,35,31,.14);}
-    .small{font-size:13px;color:var(--muted);margin-top:8px}
-    .muted{color:var(--muted)}
-    .actions{margin-top:8px}
-    .doc-row{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px;gap:12px;font-weight:800;}
-    .doc-label{font-size:15px;}
-    .doc-details{display:none;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(238,247,245,.45);font-size:14px;gap:6px;flex-direction:column;}
-    .doc-details.show{display:flex;}
-    .token-box{background:rgba(11,111,102,.08);border:1px solid var(--line);padding:12px;border-radius:12px;margin-top:8px;font-size:14px;word-break:break-word;}
-    .token-box code{background:rgba(255,255,255,.8);padding:6px;border-radius:8px;display:block;margin:6px 0;}
-    .sign-note{font-size:14px;color:var(--muted);margin:6px 0 10px;font-weight:750;}
-  </style>
 
+  <style>
+    /* Reset & Base adaptée pour iframe */
+    body { background: #fff; margin: 0; padding: 24px; font-family: 'Inter', sans-serif; color: #0F172A; }
+    .embed body { background: transparent; padding: 0; }
+    
+    .sign-container { max-width: 600px; margin: 0 auto; }
+    .embed .sign-container { max-width: 100%; margin: 0; }
+
+    /* Header interne (caché en embed) */
+    .header-internal { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #E2E8F0; }
+    .embed .header-internal { display: none; }
+
+    /* Titres */
+    h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 8px; color: #3C756E; }
+    p.subtitle { color: #64748B; margin: 0 0 24px; font-size: 0.95rem; }
+
+    /* Tabs (Standard / Seed) */
+    .sign-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .sign-tab {
+      padding: 8px 16px; border-radius: 99px; border: 1px solid #E2E8F0;
+      background: #fff; color: #64748B; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .sign-tab.active { background: rgba(60, 117, 110, 0.1); color: #3C756E; border-color: transparent; }
+
+    /* Boutons & Actions */
+    .action-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin-bottom: 24px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; width: 100%;
+      padding: 12px; border-radius: 99px; font-weight: 600; cursor: pointer; border: none; font-size: 1rem;
+    }
+    .btn-primary { background: #3C756E; color: white; }
+    .btn-primary:hover { background: #2E5C56; }
+    .btn-ghost { background: #F8FAFC; color: #3C756E; border: 1px solid #E2E8F0; }
+    .btn:disabled { opacity: 0.6; cursor: wait; }
+
+    /* Details Techniques */
+    .tech-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; font-size: 0.85rem; margin-top: 24px; }
+    .tech-header { display: flex; justify-content: space-between; cursor: pointer; font-weight: 600; color: #64748B; }
+    .tech-content { display: none; margin-top: 12px; word-break: break-all; }
+    .tech-content.show { display: block; }
+    
+    /* Output Signature */
+    .output-box { background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 16px; margin-top: 24px; }
+    .output-box pre { white-space: pre-wrap; word-break: break-all; font-family: monospace; font-size: 0.85rem; color: #064E3B; }
+
+    /* Token Box */
+    .token-box { background: rgba(60, 117, 110, 0.05); border: 1px solid #E2E8F0; padding: 16px; border-radius: 12px; margin-top: 16px; display: none; }
+    .token-code { background: #fff; padding: 8px; border-radius: 6px; font-family: monospace; word-break: break-all; margin: 8px 0; border: 1px solid #E2E8F0; }
+    
+    .copy-btn { background: #3C756E; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 8px; margin-top: 8px; }
+
+    /* Responsive */
+    @media (max-width: 500px) { .action-row { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-  <header class="header">
-    <div class="container">
-      <nav class="nav">
-        <a class="brand" href="./fr/" aria-label="BlockPilot">
-          <img class="brand__logo" src="logo.png" alt="BlockPilot" />
-        </a>
-        <div class="nav__links" aria-label="Navigation">
-          <a href="./fr/">FR</a>
-          <a href="./en/">EN</a>
-          <a href="./verify.html">Verify</a>
-        </div>
-      </nav>
-    </div>
-  </header>
 
-  <div class="sign-shell">
-    <div class="sign-card">
-      <div style="text-align:center;">
-        <img class="sign-logo" src="logo.png" alt="BPC" style="height:72px;width:72px;border-radius:14px;border:1px solid var(--line);box-shadow:0 10px 24px rgba(13,35,31,.08);margin:0 auto 12px;" onerror="this.style.display='none'">
-      </div>
-
-      <div class="sign-tabs" role="tablist">
-        <span class="sign-tab" id="tab-standard">Standard</span>
-        <span class="sign-tab" id="tab-seed">Seed</span>
-      </div>
-
-      <h1 id="title">Sign Terms &amp; Conditions</h1>
-      <p id="subtitle" class="muted">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
-      <p class="sign-note" id="signNote"></p>
-
-      <div class="sign-row">
-        <a id="viewPdfBtn" class="sign-btn ghost" href="./BPC_Terms.pdf" target="_blank" rel="noopener">📄 View PDF Terms</a>
-        <button id="signBtn" class="sign-btn primary" disabled>⏳ Preparing…</button>
-      </div>
-
-      <div class="doc-row">
-        <div class="doc-label" id="docLabel">Document : Conditions BPC (PDF)</div>
-        <button class="copy-btn ghost" type="button" id="toggleTech">Détails techniques</button>
-      </div>
-      <div class="doc-details" id="techDetails" aria-hidden="true">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between;">
-          <div id="hashLabel">Empreinte du document (hash)</div>
-          <button class="copy-btn ghost" type="button" id="copyHash">Copier</button>
-        </div>
-        <div style="word-break:break-word;"><span id="pdfHash">…</span></div>
-        <div><strong>PDF:</strong> <span id="pdfName">BPC_Terms.pdf</span></div>
-      </div>
-
-      <div class="token-box" id="tokenBox" style="display:none;"></div>
-
-      <div id="signatureOutput"></div>
-    </div>
+  <div class="header-internal">
+    <img src="logo.png" alt="BPC" height="40">
+    <nav style="display:flex; gap:12px; font-size:14px; font-weight:600;">
+      <a href="?lang=fr" style="text-decoration:none; color:#3C756E;">FR</a>
+      <a href="?lang=en" style="text-decoration:none; color:#64748B;">EN</a>
+    </nav>
   </div>
+
+  <div class="sign-container">
+    
+    <div class="sign-tabs">
+      <div id="tab-standard" class="sign-tab active">Standard</div>
+      <div id="tab-seed" class="sign-tab">Seed</div>
+    </div>
+
+    <h1 id="title">Sign Terms & Conditions</h1>
+    <p id="subtitle" class="subtitle">By signing, you confirm you’ve read and agree to the official BPC Terms.</p>
+
+    <div class="action-row">
+      <a id="viewPdfBtn" class="btn btn-ghost" href="./BPC_Terms.pdf" target="_blank">📄 PDF</a>
+      <button id="signBtn" class="btn btn-primary" disabled>⏳ Preparing...</button>
+    </div>
+    
+    <p id="signNote" style="font-size:0.8rem; color:#64748B; text-align:center;">
+      Off-chain signature (0 gas). No transaction sent.
+    </p>
+
+    <div class="tech-box">
+      <div class="tech-header" id="toggleTech">
+        <span id="docLabel">Document Info</span>
+        <span>▼</span>
+      </div>
+      <div class="tech-content" id="techDetails">
+        <div style="margin-bottom:8px;"><strong>PDF Hash (Keccak256):</strong></div>
+        <div id="pdfHash" style="font-family:monospace; color:#3C756E;">...</div>
+        <div style="margin-top:8px;"><strong>File:</strong> <span id="pdfName">BPC_Terms.pdf</span></div>
+      </div>
+    </div>
+
+    <div id="tokenBox" class="token-box"></div>
+    <div id="signatureOutput"></div>
+
+  </div>
+
 <script>
-  // ---- Config
+  // CONFIG & LIENS
   const PDFs = { standard: './BPC_Terms.pdf', seed: './BPC_Terms_Seed.pdf' };
   const TERMS_META = {
     standard: { docId: 'BPC_Terms v1.0 (2025-11-07)' },
@@ -109,197 +120,98 @@
   };
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxEr5Wky-9oz2H7QMaWvc0Xi7-u1hEm1Et-ZtKoPyek4Gp2tXH2FN3sx_ys1JqPtRPTLw/exec';
 
+  // TRADUCTIONS
   const STR = {
     en: {
-      tabStandard:'Standard', tabSeed:'Seed',
-      titleStandard:'Sign Terms & Conditions', titleSeed:'Sign Terms & Conditions (Seed)',
-      subtitleStandard:'By signing, you confirm you’ve read and agree to the official BPC Terms.',
-      subtitleSeed:'By signing, you confirm you’ve read and agree to the official BPC Seed Terms.',
-      offchainNote:'Off-chain signature (0 gas) — no transaction is sent. This signature proves acceptance of the Terms.',
-      viewPdf:'📄 View PDF Terms',
-      docLabel:'Document: BPC Terms (PDF)',
-      techDetails:'Technical details',
-      fingerprint:'Document fingerprint (hash)',
-      preparing:'⏳ Preparing…', signWallet:'✍️ Sign with Wallet', waiting:'🔐 Waiting wallet…', signAgain:'✍️ Sign again', hashError:'⚠️ PDF hash error',
-      tokenTitle:'Verification token', tokenHint:'Use this token on Verify to confirm your signature.', copyToken:'Copy token',
-      signedAs:'Signed as', timestamp:'Timestamp', docId:'Doc ID', origin:'Origin', pdf:'PDF', pdfHash:'PDF Hash', signature:'Signature',
-      copyBlock:'Copy block', copyTokenAction:'Copy token', downloadJson:'Download JSON', openVerify:'Open verify', copyHash:'Copy hash',
-      shareLink:'Share link', shareToken:'Share token', shareJson:'Share JSON', copyMsg:'Copied!',
-      alertMissingWallet:'Wallet not detected (Rabby/MetaMask/Zeal)', signFailed:'Signing cancelled or failed.'
+      titleStd: 'Sign Terms', titleSeed: 'Sign Seed Terms',
+      subStd: 'Confirm you agree to the official BPC Terms.', subSeed: 'Confirm you agree to the BPC Seed Terms.',
+      viewPdf: '📄 View PDF', signBtn: '✍️ Sign with Wallet', preparing: '⏳ Preparing...',
+      docLabel: 'Technical Details (Hash)', tokenTitle: 'Verification Token',
+      signed: '✅ Signed Successfully!', copyToken: 'Copy Token', download: 'Download JSON'
     },
     fr: {
-      tabStandard:'Standard', tabSeed:'Seed',
-      titleStandard:'Signer les Conditions', titleSeed:'Signer les Conditions (Seed)',
-      subtitleStandard:'En signant, vous confirmez avoir lu et accepté les Conditions BPC.',
-      subtitleSeed:'En signant, vous confirmez avoir lu et accepté les Conditions BPC Seed.',
-      offchainNote:'Signature off-chain (0 gas) — aucune transaction n’est envoyée. Cette signature sert de preuve d’acceptation des Conditions.',
-      viewPdf:'📄 Voir le PDF',
-      docLabel:'Document : Conditions BPC (PDF)',
-      techDetails:'Détails techniques',
-      fingerprint:'Empreinte du document (hash)',
-      preparing:'⏳ Préparation…', signWallet:'✍️ Signer avec le wallet', waiting:'🔐 En attente du wallet…', signAgain:'✍️ Signer à nouveau', hashError:'⚠️ Erreur de hash PDF',
-      tokenTitle:'Token de vérification', tokenHint:'Collez ce token dans Vérifier pour valider votre signature.', copyToken:'Copier le token',
-      signedAs:'Signé en tant que', timestamp:'Horodatage', docId:'Doc ID', origin:'Origine', pdf:'PDF', pdfHash:'Hash PDF', signature:'Signature',
-      copyBlock:'Copier le bloc', copyTokenAction:'Copier le token', downloadJson:'Télécharger le JSON', openVerify:'Ouvrir Vérifier', copyHash:'Copier le hash',
-      shareLink:'Partager le lien', shareToken:'Partager le token', shareJson:'Partager le JSON', copyMsg:'Copié !',
-      alertMissingWallet:'Wallet non détecté (Rabby/MetaMask/Zeal)', signFailed:'Signature annulée ou échouée.'
+      titleStd: 'Signer les Conditions', titleSeed: 'Signer Conditions Seed',
+      subStd: 'Confirmez votre accord avec les Conditions BPC.', subSeed: 'Confirmez votre accord avec les Conditions Seed.',
+      viewPdf: '📄 Voir PDF', signBtn: '✍️ Signer avec Wallet', preparing: '⏳ Préparation...',
+      docLabel: 'Détails Techniques (Hash)', tokenTitle: 'Token de Vérification',
+      signed: '✅ Signature Réussie !', copyToken: 'Copier Token', download: 'Télécharger JSON'
     }
   };
+
+  // LANGUE
   const getLang = () => {
     const qs = new URLSearchParams(location.search).get('lang');
-    const base = (qs || localStorage.getItem('bp_lang') || 'fr').toLowerCase();
-    return base.startsWith('en') ? 'en' : 'fr';
+    return (qs || localStorage.getItem('bp_lang') || 'fr').startsWith('en') ? 'en' : 'fr';
   };
   let lang = getLang();
-  const t = (k) => STR[lang]?.[k] || STR.en[k] || k;
+  const t = (k) => STR[lang][k] || STR.en[k];
 
-  // ---- State
+  // ETAT
   let mode = 'standard';
   let pdfPath = PDFs[mode];
   let pdfHash = '';
   let signing = false;
 
-  function setButtonLabel(state){
-    const btn=document.getElementById('signBtn');
-    if (!btn) return;
-    const labelMap={
-      preparing:t('preparing'), ready:t('signWallet'), waiting:t('waiting'), again:t('signAgain'), error:t('hashError')
-    };
-    btn.textContent = labelMap[state] || t('signWallet');
-  }
-
-  function renderCopy(){
-    document.documentElement.lang = lang;
-    const tabStd=document.getElementById('tab-standard');
-    const tabSeed=document.getElementById('tab-seed');
-    if (tabStd) tabStd.textContent=t('tabStandard');
-    if (tabSeed) tabSeed.textContent=t('tabSeed');
-    document.getElementById('viewPdfBtn').textContent = t('viewPdf');
-    const docLabel=document.getElementById('docLabel');
-    if (docLabel) docLabel.textContent = t('docLabel');
-    const techBtn=document.getElementById('toggleTech');
-    if (techBtn) techBtn.textContent = t('techDetails');
-    const hashLabel=document.getElementById('hashLabel');
-    if (hashLabel) hashLabel.textContent = t('fingerprint');
-    const copyHashBtn=document.getElementById('copyHash');
-    if (copyHashBtn) copyHashBtn.textContent = t('copyHash');
-    const signNote=document.getElementById('signNote');
-    if (signNote) signNote.textContent = t('offchainNote');
-    const tokenBox=document.getElementById('tokenBox');
-    if (tokenBox && tokenBox.dataset.token){
-      tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${tokenBox.dataset.token}</code><button class="copy-btn" type="button" onclick="copyText('${tokenBox.dataset.token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;
-    }
-    const btn=document.getElementById('signBtn');
-    if (btn && btn.disabled) setButtonLabel(signing ? 'waiting' : 'preparing');
-  }
-
-  function updateHeadings(){
-    document.getElementById('title').textContent = mode==='standard' ? t('titleStandard') : t('titleSeed');
-    document.getElementById('subtitle').textContent = mode==='standard' ? t('subtitleStandard') : t('subtitleSeed');
-  }
-
-  // ---- Init
-  document.addEventListener('DOMContentLoaded', () => {
-    lang = getLang();
-    renderCopy();
-    const params = getHashParams();
-    if (params.mode === 'seed') mode = 'seed';
-    updateHeadings();
-    applyMode();
-    const techBtn=document.getElementById('toggleTech');
-    const techDetails=document.getElementById('techDetails');
-    if (techBtn && techDetails) techBtn.addEventListener('click', ()=>{
-      const show=!techDetails.classList.contains('show');
-      techDetails.classList.toggle('show', show);
-      techDetails.setAttribute('aria-hidden', show ? 'false' : 'true');
-    });
-  });
-
-  window.addEventListener('storage', (e)=>{
-    if (e.key === 'bp_lang') {
-      lang = getLang();
-      renderCopy();
-      updateHeadings();
-    }
-  });
-
-  document.getElementById('tab-standard').addEventListener('click', () => { mode='standard'; updateHeadings(); applyMode(true); });
-  document.getElementById('tab-seed').addEventListener('click', () => { mode='seed'; updateHeadings(); applyMode(true); });
-  document.getElementById('signBtn').addEventListener('click', signTerms);
-  const copyHashBtn=document.getElementById('copyHash');
-  if (copyHashBtn) copyHashBtn.addEventListener('click', () => copyText(pdfHash || document.getElementById('pdfHash')?.textContent || ''));
-
-  function getHashParams() {
-    const h = (location.hash||'').replace(/^#/,'');
-    const o = {};
-    h.split('&').forEach(kv => {
-      const [k,v] = kv.split('=');
-      if (k) o[decodeURIComponent(k)] = v ? decodeURIComponent(v) : '';
-    });
-    return o;
-  }
-
-  async function applyMode(pushHash=false) {
-    pdfPath = PDFs[mode];
-    // tabs
+  // UI UPDATE
+  function updateUI() {
     document.getElementById('tab-standard').classList.toggle('active', mode==='standard');
     document.getElementById('tab-seed').classList.toggle('active', mode==='seed');
-    // titles
-    updateHeadings();
-    // links
+    
+    document.getElementById('title').textContent = mode==='standard' ? t('titleStd') : t('titleSeed');
+    document.getElementById('subtitle').textContent = mode==='standard' ? t('subStd') : t('subSeed');
+    document.getElementById('viewPdfBtn').textContent = t('viewPdf');
     document.getElementById('viewPdfBtn').href = pdfPath;
     document.getElementById('pdfName').textContent = pdfPath;
-    const tokenBox=document.getElementById('tokenBox');
-    if (tokenBox){ tokenBox.style.display='none'; tokenBox.dataset.token=''; tokenBox.innerHTML=''; }
-
-    // clear previous receipt
-    document.getElementById('signatureOutput').innerHTML = '';
-
-    // disable button while hashing
+    document.getElementById('docLabel').textContent = t('docLabel');
+    
     const btn = document.getElementById('signBtn');
-    signing = false;
-    btn.disabled = true; setButtonLabel('preparing');
+    if(!signing && pdfHash) btn.textContent = t('signBtn');
+  }
 
-    // compute hash
-    pdfHash = '';
-    document.getElementById('pdfHash').textContent = '…';
+  // LOGIQUE HASH & SIGN
+  async function loadMode(m) {
+    mode = m; pdfPath = PDFs[mode];
+    updateUI();
+    
+    const btn = document.getElementById('signBtn');
+    btn.disabled = true; btn.textContent = t('preparing');
+    document.getElementById('pdfHash').textContent = '...';
+    
     try {
-      const r = await fetch(pdfPath + '?v=' + Date.now(), { cache: 'no-store' });
-      if (!r.ok) throw new Error('Fetch PDF failed: ' + r.status);
+      const r = await fetch(pdfPath + '?v=' + Date.now());
+      if(!r.ok) throw new Error('PDF Error');
       const buf = new Uint8Array(await r.arrayBuffer());
       pdfHash = '0x' + keccak256(buf);
       document.getElementById('pdfHash').textContent = pdfHash;
-      btn.disabled = false; setButtonLabel('ready');
-    } catch(e){
-      console.error('PDF hash error:', e);
-      btn.disabled = true; setButtonLabel('error');
+      btn.disabled = false;
+      updateUI();
+    } catch(e) {
+      console.error(e);
+      btn.textContent = "⚠️ Error loading PDF";
     }
-
-    if (pushHash) location.hash = `mode=${mode}`;
-    renderCopy();
   }
 
-  async function signTerms() {
-    if (signing) return;
+  async function sign() {
+    if(signing) return;
     const btn = document.getElementById('signBtn');
+    
     try {
-      if (!window.ethereum) { alert(t('alertMissingWallet')); return; }
-      signing = true; btn.disabled = true; setButtonLabel('waiting');
-
+      if(!window.ethereum) return alert("Wallet not detected (MetaMask/Rabby).");
+      
+      signing = true; btn.disabled = true; btn.textContent = "🔐 Connect Wallet...";
+      
       await window.ethereum.request({ method: 'eth_requestAccounts' });
-
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const address = await signer.getAddress();
-
-      for (let i=0;i<50 && !pdfHash;i++) await new Promise(r=>setTimeout(r,100));
-      if (!pdfHash) { alert('PDF hash not ready yet. Please retry in 1s.'); signing = false; btn.disabled=false; btn.textContent='✍️ Sign with Wallet'; return; }
-
+      
+      btn.textContent = "✍️ Check Wallet...";
+      
       const timestamp = new Date().toISOString();
       const origin = location.origin;
       const docId = TERMS_META[mode].docId;
 
-      const message =
+      const message = 
 `I, ${address}, agree to the BPC Terms (${pdfPath})
 Doc ID: ${docId}
 Origin: ${origin}
@@ -309,110 +221,59 @@ Signed on: ${timestamp}`;
       let signature;
       try { signature = await signer.signMessage(message); }
       catch {
+        // Fallback personal_sign
         const hex = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message));
         signature = await window.ethereum.request({ method: 'personal_sign', params: [hex, address] });
       }
 
-      const block =
-`Signed as: ${address}
-Doc ID: ${docId}
-Origin: ${origin}
-PDF: ${pdfPath}
-PDF Hash: ${pdfHash}
-Timestamp: ${timestamp}
-Signature:
-${signature}`;
-
-      const payload = { mode, address, pdf: pdfPath, pdfHash, timestamp, signature, origin, docId, userAgent: navigator.userAgent };
-      const token   = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      const verifyUrl = new URL('verify.html', location.href);
-      verifyUrl.searchParams.set('lang', lang);
-      const verifyLink = `${verifyUrl.toString()}#mode=${mode}&token=${encodeURIComponent(token)}`;
-
+      // Generation du Token
+      const payload = { mode, address, pdf: pdfPath, pdfHash, timestamp, signature, origin, docId };
+      const token = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
       const json = JSON.stringify(payload, null, 2);
       const blob = new Blob([json], { type:'application/json' });
       const jsonUrl = URL.createObjectURL(blob);
 
-      // Log to Google Sheets (best-effort)
-      if (WEBHOOK_URL) {
-        try {
-          await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-        } catch (e) { /* silencieux */ }
-      }
+      // Webhook (Fire & Forget)
+      fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(()=>{});
 
-      // Render receipt
-      const tokenBox=document.getElementById('tokenBox');
-      if (tokenBox){
-        tokenBox.dataset.token = token;
-        tokenBox.style.display='block';
-        tokenBox.innerHTML = `<strong>${t('tokenTitle')}</strong><code>${token}</code><button class="copy-btn" type="button" onclick="copyText('${token}')">${t('copyToken')}</button><div class="small">${t('tokenHint')}</div>`;
-      }
-
-      document.getElementById('signatureOutput').innerHTML = `
-        <div class="output-box">
-          ✅ <b>${t('signedAs')}:</b> ${address} <span class="muted">[${mode}]</span><br>
-          🕒 <b>${t('timestamp')}:</b> ${timestamp}<br>
-          📄 <b>${t('docId')}:</b> ${docId}<br>
-          🌐 <b>${t('origin')}:</b> ${origin}<br>
-          📘 <b>${t('pdf')}:</b> ${pdfPath}<br>
-          🧮 <b>${t('pdfHash')}:</b> ${pdfHash}<br>
-          ✍️ <b>${t('signature')}:</b><br>${signature}<br><br>
-
-          <div class="actions">
-            <button class="copy-btn" onclick='copyText(\`${block.replace(/`/g,"\\`")}\`)' title="${t('copyBlock')}">📋 ${t('copyBlock')}</button>
-            <button class="copy-btn" onclick='copyText(\`${token}\`)' title="${t('copyTokenAction')}">🔑 ${t('copyTokenAction')}</button>
-            <a class="copy-btn" href="${jsonUrl}" download="bpc-signature-${address}.json" title="${t('downloadJson')}">⬇️ ${t('downloadJson')}</a>
-            <a class="copy-btn" href="${verifyLink}" target="_blank" rel="noopener" title="${t('openVerify')}">🔗 ${t('openVerify')}</a>
-          </div>
-
-          <div class="actions">
-            <button class="copy-btn" onclick='shareLink("${verifyLink}")'>📤 ${t('shareLink')}</button>
-            <button class="copy-btn" onclick='shareToken("${token}")'>🔑 ${t('shareToken')}</button>
-            <button class="copy-btn" onclick='shareJsonFile("bpc-signature-${address}.json", \`${json.replace(/`/g,"\\`")}\`)'>🧾 ${t('shareJson')}</button>
-          </div>
-        </div>
+      // Affichage Résultat
+      const box = document.getElementById('tokenBox');
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="font-weight:700; color:#3C756E; margin-bottom:8px;">${t('signed')}</div>
+        <div class="token-code">${token}</div>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('${token}');alert('Copied!')">${t('copyToken')}</button>
+        <a class="copy-btn" href="${jsonUrl}" download="bpc-sig-${address}.json" style="text-decoration:none;">${t('download')}</a>
       `;
 
-      // reset button
-      signing = false; btn.disabled = false; setButtonLabel('again');
-    } catch (err) {
-      console.error(err);
-      signing = false;
-      btn.disabled = false; setButtonLabel('ready');
-      alert(t('signFailed'));
+      btn.textContent = t('signBtn');
+      signing = false; btn.disabled = false;
+
+    } catch(e) {
+      console.error(e);
+      alert("Sign failed or cancelled.");
+      signing = false; btn.disabled = false; updateUI();
     }
   }
 
-  function copyText(s){ navigator.clipboard.writeText(s||''); alert(t('copyMsg')); }
+  // INIT
+  document.addEventListener('DOMContentLoaded', () => {
+    // Gestion Tabs
+    document.getElementById('tab-standard').onclick = () => loadMode('standard');
+    document.getElementById('tab-seed').onclick = () => loadMode('seed');
+    
+    // Toggle Tech Details
+    document.getElementById('toggleTech').onclick = () => {
+      document.getElementById('techDetails').classList.toggle('show');
+    };
 
-  // --- Share helpers (Web Share API + fallbacks)
-  async function shareLink(url){
-    try{
-      if(navigator.share){ await navigator.share({title:'BPC — Verify',text:'Vérifier ma signature BPC :',url}); }
-      else { await navigator.clipboard.writeText(url); alert('Link copied!'); }
-    }catch(_){}
-  }
-  async function shareToken(token){
-    const text = `BPC verify token:\n${token}`;
-    try{
-      if(navigator.share){ await navigator.share({title:'BPC — Token',text}); }
-      else { await navigator.clipboard.writeText(text); alert('Token copied!'); }
-    }catch(_){}
-  }
-  async function shareJsonFile(filename, jsonStr){
-    try{
-      const file = new File([jsonStr], filename, {type:'application/json'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({ title:'BPC — JSON Receipt', files:[file] });
-      }else{
-        // fallback: téléchargement direct
-        const blob = new Blob([jsonStr], {type:'application/json'});
-        const url  = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement('a'), {href:url, download:filename});
-        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      }
-    }catch(_){}
-  }
+    // Bouton Signer
+    document.getElementById('signBtn').onclick = sign;
+
+    // Load initial
+    loadMode('standard');
+  });
+
 </script>
 </body>
 </html>

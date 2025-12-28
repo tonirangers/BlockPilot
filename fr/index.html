@@ -218,8 +218,31 @@
 
       <div class="card cardPad performanceCard performanceCard--adoption" id="adoptionCard" hidden aria-hidden="true" style="margin-top:16px;">
         <div class="cardTitle">Adoption on-chain</div>
-        <p class="cardSub">Mesures macro (ex: stablecoins, TVL, transactions) pour visualiser l’adoption.</p>
+        <p class="cardSub">Indice agrégé (stablecoins en circulation, TVL DeFi, transactions L1/L2). Base 100 = jan. 2023.</p>
         <div class="cardHint" id="adoptionMeta"></div>
+
+        <div class="adoptionTopline">
+          <span class="pill adoptionBadge">Adoption on-chain ↗︎</span>
+
+          <div class="adoptionLevels" aria-label="Niveau d’adoption">
+            <div class="adoptionLevel">
+              <div class="small">Niveau actuel</div>
+              <div class="adoptionLevel__value" id="adoptionNow">—</div>
+              <div class="adoptionLevel__hint">Indice synthétique</div>
+            </div>
+            <div class="adoptionLevel is-muted">
+              <div class="small">Point de départ</div>
+              <div class="adoptionLevel__value" id="adoptionBase">—</div>
+              <div class="adoptionLevel__hint">Base 100 (jan. 2023)</div>
+            </div>
+          </div>
+        </div>
+
+        <ul class="adoptionBullets" aria-label="Ce que mesure l’indice">
+          <li>Stablecoins en circulation (usage quotidien).</li>
+          <li>TVL DeFi (capital verrouillé on-chain).</li>
+          <li>Transactions L1/L2 (activité réelle des utilisateurs).</li>
+        </ul>
 
         <div class="kpiRow" id="adoptionKpis" style="margin-top:10px;">
           <div class="kpi"><div class="k">Croissance 1 an</div><div class="v" id="adoption1y">—</div></div>

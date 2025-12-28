@@ -14,18 +14,23 @@
           <img class="brand__logo" src="../logo.png" alt="BlockPilot" />
         </a>
 
+        <div class="navSearch">
+          <span>Rechercher...</span>
+          <kbd>⌘K</kbd>
+        </div>
+
         <button class="navToggle" id="navToggle" type="button" aria-expanded="false">Menu</button>
 
         <div class="nav__links" aria-label="Navigation">
           <a href="../fr/#performance">Performance</a>
           <a href="../fr/#security">Sécurité</a>
-          <a id="navDocs" href="#docs">Docs</a>
-          <a id="navSignature" href="./signature.html">Signature</a>
+          <a id="navDocs" href="#docs" style="opacity:0.5; cursor:not-allowed;" title="Bientôt disponible">Docs</a>
+          <a id="navSignature" href="./signature.html" class="active">Signature</a>
         </div>
 
-        <div class="lang" aria-label="Language">
-          <a class="pill is-active" href="../fr/">FR</a>
-          <a class="pill" href="../en/">EN</a>
+        <div class="lang" aria-label="Language" style="display:flex; gap:8px;">
+          <a class="pill is-active" href="../fr/signature.html">FR</a>
+          <a class="pill" href="../en/signature.html">EN</a>
         </div>
       </nav>
     </div>
@@ -33,17 +38,19 @@
 
   <main class="section section--tight" id="signature">
     <div class="container">
-      <h1 class="h1">Signature</h1>
-      <p class="p">Signer ou vérifier les conditions BlockPilot directement sur cette page.</p>
-
-      <div class="scenarios" style="margin-top:14px;">
-        <button class="chip" type="button" data-signature-view="sign">Signer</button>
-        <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
+      <div style="margin-bottom:32px;">
+        <h1 class="h1">Signature</h1>
+        <p class="p">Signer ou vérifier les conditions BlockPilot directement ici.</p>
+        
+        <div class="scenarios">
+          <button class="chip active" type="button" data-signature-view="sign">Signer</button>
+          <button class="chip" type="button" data-signature-view="verify">Vérifier</button>
+        </div>
       </div>
 
       <div class="signatureFrames">
-        <iframe id="signatureSign" title="Signer" loading="lazy"></iframe>
-        <iframe id="signatureVerify" title="Vérifier" loading="lazy"></iframe>
+        <iframe id="signatureSign" src="../sign.html?embed=1&lang=fr" title="Signer" loading="lazy"></iframe>
+        <iframe id="signatureVerify" src="../verify.html?embed=1&lang=fr" title="Vérifier" loading="lazy" style="display:none;"></iframe>
       </div>
     </div>
   </main>
@@ -51,6 +58,7 @@
   <footer class="footer">
     <div class="container">
       <span>© BlockPilot 2025</span>
+      <span style="margin:0 8px;">·</span>
       <a href="https://t.me/tonirangers" target="_blank" rel="noopener">Telegram</a>
     </div>
   </footer>

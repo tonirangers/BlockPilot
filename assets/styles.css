@@ -1,30 +1,36 @@
-/* --- BLOCKPILOT ULTIMATE DESIGN (GitBook Style) --- */
+/* --- BLOCKPILOT DESIGN SYSTEM (Clean & Robust) --- */
 :root {
-  /* Nouvelle Palette "GitBook" */
+  /* Palette Custom (Vert Sombre Validé) */
   --bp-bg: #FFFFFF;
   --bp-surface: #FFFFFF;
-  --bp-surface-alt: #F8FAFC; 
-  --bp-border: #E2E8F0;      
-  --bp-text-main: #0F172A;   
-  --bp-text-muted: #64748B;  
-  --bp-primary: #00Bfa5;     
-  --bp-primary-soft: rgba(0, 191, 165, 0.1);
-  --bp-radius-card: 12px;    
+  --bp-surface-alt: #F8FAFC;
+  --bp-border: #E2E8F0;
+  
+  --bp-text-main: #0F172A;
+  --bp-text-muted: #64748B;
+  
+  /* Vert Sombre */
+  --bp-primary: #3C756E; 
+  --bp-primary-hover: #2E5C56;
+  --bp-primary-soft: rgba(60, 117, 110, 0.1);
+  
+  --bp-radius-card: 12px;
   --bp-radius-pill: 999px;
+  
   --bp-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --bp-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
 
-  /* Mapping pour garder la compatibilité avec ton ancien HTML (astuce) */
+  /* --- MAPPING COMPATIBILITÉ (Pour ne pas casser Signature.html) --- */
   --bg: var(--bp-surface-alt);
   --card: var(--bp-surface);
   --ink: var(--bp-text-main);
   --muted: var(--bp-text-muted);
   --line: var(--bp-border);
   --brand: var(--bp-primary);
-  --brand2: #008f7a; /* Teinte un peu plus foncée pour le hover */
+  --brand2: var(--bp-primary-hover);
   --shadow: var(--bp-shadow-card);
   --radius: var(--bp-radius-card);
-  --radius2: 8px; /* Radius interne plus petit */
+  --radius2: 8px;
   --max: 1080px;
 }
 
@@ -34,7 +40,7 @@ html, body { height: 100%; }
 body {
   margin: 0;
   background-color: var(--bp-surface-alt);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--bp-text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -47,9 +53,9 @@ body {
   padding: 0 24px;
 }
 .section { padding: 64px 0; }
-.section--tight { padding: 40px 0; }
+.section--tight { padding: 40px 0; } /* Utilisé dans Signature */
 
-/* --- HEADER & NAV --- */
+/* --- HEADER --- */
 .header {
   position: sticky; top: 0; z-index: 50;
   background: rgba(255, 255, 255, 0.9);
@@ -79,14 +85,15 @@ body {
   background: #fff; border-radius: 8px; padding: 8px 12px; cursor: pointer;
 }
 
-/* --- HERO & TYPO --- */
+/* --- TYPO HERO & PAGE SIGNATURE --- */
 .h1 {
   font-size: 56px; letter-spacing: -0.03em;
   line-height: 1.1; margin: 0 0 24px; color: var(--bp-text-main); font-weight: 800;
 }
-.lead { font-size: 20px; color: var(--bp-text-muted); margin: 0 0 32px; font-weight: 400; }
+.lead, .p { font-size: 20px; color: var(--bp-text-muted); margin: 0 0 32px; font-weight: 400; }
+.p { font-size: 18px; } /* Ajustement pour textes standards */
 
-/* --- CARDS (Style Unifié) --- */
+/* --- CARDS --- */
 .card, .bp-card {
   background: var(--bp-surface);
   border: 1px solid var(--bp-border);
@@ -94,60 +101,87 @@ body {
   box-shadow: var(--bp-shadow-card);
   padding: 32px;
   margin-bottom: 32px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 .card:hover, .bp-card:hover {
   box-shadow: var(--bp-shadow-hover);
   transform: translateY(-2px);
-  border-color: #CBD5E1;
 }
+.cardPad { padding: 32px; }
+.cardTitle { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; color: var(--bp-text-main); }
+.cardSub { color: var(--bp-text-muted); font-size: 0.95rem; margin: 0; }
+.tip { border-bottom: 1px dotted var(--bp-text-muted); cursor: help; }
 
-/* --- TRADINGVIEW & WIDGETS --- */
+/* --- WIDGET & TRADINGVIEW --- */
 .bp-section-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 8px; color: var(--bp-text-main); }
 .bp-section-subtitle { font-size: 1rem; color: var(--bp-text-muted); font-weight: 400; line-height: 1.6; }
 .tv-widget-wrapper { width: 100%; height: 520px; position: relative; }
 
-/* --- SIMULATEUR & BARRE DE PROFIT (Nouveau) --- */
-.profit-bar-container {
-  display: flex; height: 24px; border-radius: 6px;
-  overflow: hidden; margin-top: 12px; background: #F1F5F9;
-}
-.profit-bar-principal { background: #CBD5E1; height: 100%; transition: width 0.5s ease; }
-.profit-bar-interest { background: var(--bp-primary); height: 100%; transition: width 0.5s ease; }
-
-/* --- BOUTONS & CHIPS --- */
+/* --- BOUTONS, CHIPS & INPUTS --- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 24px; border-radius: 99px; /* Pill shape */
-  font-weight: 600; text-decoration: none; transition: all 0.2s;
-  border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main);
+  padding: 12px 24px; border-radius: 99px; font-weight: 600; text-decoration: none;
+  border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main); transition: all 0.2s;
 }
 .btn--primary {
   background: var(--bp-primary); border-color: var(--bp-primary); color: #fff;
 }
-.btn--primary:hover { background: var(--brand2); border-color: var(--brand2); }
+.btn--primary:hover { background: var(--bp-primary-hover); border-color: var(--bp-primary-hover); }
+.btn--text { border:none; background:none; color:var(--bp-text-muted); text-decoration:underline; box-shadow:none; padding:0; }
 
-.scenarioChips .chip {
+.input, .select {
+  width: 100%; padding: 12px 16px; border-radius: 8px;
+  border: 1px solid var(--bp-border); background: #fff;
+  font-size: 16px; outline: none; transition: border-color 0.2s;
+}
+.input:focus, .select:focus { border-color: var(--bp-primary); box-shadow: 0 0 0 3px var(--bp-primary-soft); }
+
+/* --- SCENARIOS & CHIPS (Utilisé par Simulator + Signature) --- */
+.scenarios { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip {
   border: 1px solid var(--bp-border); background: #fff;
   border-radius: 99px; padding: 8px 16px; font-weight: 500;
   cursor: pointer; color: var(--bp-text-muted); transition: all 0.2s;
 }
-.scenarioChips .chip.active {
-  background: var(--bp-primary-soft); color: #0d8a76; border-color: transparent; font-weight: 600;
+.chip.active, .pill.is-active {
+  background: var(--bp-primary-soft); color: var(--bp-primary); border-color: transparent; font-weight: 600;
+}
+.pill {
+  text-decoration: none; color: var(--bp-text-muted); padding: 6px 12px; border-radius: 99px; font-weight: 600;
 }
 
-/* --- INPUTS --- */
-.input, .select {
-  width: 100%; padding: 12px 16px; border-radius: 8px;
-  border: 1px solid var(--bp-border); background: #fff;
-  font-size: 16px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+/* --- YIELD CARDS --- */
+.ycard {
+  border: 1px solid var(--bp-border); border-radius: 8px;
+  background: var(--bp-surface-alt); padding: 16px;
 }
-.input:focus, .select:focus {
-  border-color: var(--bp-primary);
-  box-shadow: 0 0 0 3px var(--bp-primary-soft);
-}
+.ycard .n { font-size: 1.5rem; font-weight: 700; color: var(--bp-primary); margin-top: 4px; }
 
-/* --- MOBILE RESPONSIVE --- */
+/* --- LISTES (Bullets) --- */
+.bullets { padding-left: 20px; margin: 12px 0; color: var(--bp-text-muted); }
+.bullets li { margin-bottom: 8px; }
+
+/* --- PAGE SIGNATURE FIX --- */
+.signatureFrames {
+  display: flex; flex-direction: column; gap: 24px;
+  width: 100%; margin-top: 24px;
+}
+.signatureFrames iframe {
+  width: 100%; border: 0;
+  min-height: 700px; /* Hauteur forcée pour éviter le scroll interne */
+  background: #fff; border-radius: 12px;
+  border: 1px solid var(--bp-border); box-shadow: var(--bp-shadow-card);
+}
+iframe[style*="display: none"] { display: none !important; }
+
+/* --- GRILLES (Grid) --- */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.miniGrid { display: grid; gap: 12px; }
+.mini { border: 1px solid var(--bp-border); padding: 12px; border-radius: 8px; background: var(--bp-surface-alt); }
+.mini strong { display: block; margin-bottom: 4px; color: var(--bp-text-main); }
+
+/* --- MOBILE --- */
 @media (max-width: 860px) {
   .navToggle { display: inline-flex; }
   .nav__links {
@@ -157,9 +191,9 @@ body {
   }
   body.menu-open .nav__links { display: flex; }
   .tv-widget-wrapper { height: 400px; }
-  .card, .bp-card { padding: 20px; }
+  .hero__grid, .grid2, .grid3 { display: block; }
+  .grid2 > div, .grid3 > div { margin-bottom: 24px; }
   .h1 { font-size: 40px; }
-  .grid2, .grid3, .formRow { grid-template-columns: 1fr; }
 }
 
 /* --- FOOTER --- */
@@ -168,4 +202,3 @@ body {
   color: var(--bp-text-muted); font-size: 14px;
 }
 .footer a { color: var(--bp-text-main); text-decoration: none; }
-.footer a:hover { text-decoration: underline; }

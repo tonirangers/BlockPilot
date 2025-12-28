@@ -1,3 +1,47 @@
+/* --- BLOCKPILOT NEW PREMIUM DESIGN (GitBook Style) --- */
+:root {
+  /* Nouvelle Palette Premium */
+  --bp-bg: #FFFFFF;
+  --bp-surface: #FFFFFF;
+  --bp-surface-alt: #F5F7FA;
+  --bp-border: #E1E4E8;
+  --bp-text-main: #1A202C;
+  --bp-text-muted: #718096;
+  --bp-primary: #22ab94;
+  --bp-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --bp-radius-card: 16px;
+}
+
+/* Application du style */
+body {
+  background-color: var(--bp-surface-alt);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.container-premium {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.bp-card {
+  background: var(--bp-surface);
+  border: 1px solid var(--bp-border);
+  border-radius: var(--bp-radius-card);
+  box-shadow: var(--bp-shadow-card);
+  padding: 24px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+.bp-section-header { margin-bottom: 24px; }
+.bp-section-title { font-size: 1.5rem; font-weight: 700; color: var(--bp-text-main); margin: 0 0 8px 0; }
+.bp-section-subtitle { font-size: 0.95rem; color: var(--bp-text-muted); }
+.tv-widget-wrapper { width: 100%; height: 520px; position: relative; }
+
+@media (max-width: 768px) {
+  .tv-widget-wrapper { height: 400px; }
+  .bp-card { padding: 12px; }
+  .container-premium { padding: 0 16px; }
+}
+/* --- FIN DU DESIGN PREMIUM --- */
 /* assets/styles.css */
 :root{
   --bg:#eef7f5;

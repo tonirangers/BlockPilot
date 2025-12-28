@@ -77,7 +77,10 @@
 
   <section id="performance" class="section section--tight">
     <div class="container">
-      <h2 class="h2">Performance</h2>
+      <div class="sectionHeader">
+        <h2 class="h2">Performance</h2>
+        <button class="tabBtn featureToggle" type="button" id="adoptionToggle" aria-pressed="false">Show adoption</button>
+      </div>
 
       <div class="grid2" style="margin-top:18px;">
         <div class="card cardPad">
@@ -196,7 +199,25 @@
             </div>
           </div>
 
-          </div>
+        </div>
+      </div>
+
+      <div class="card cardPad performanceCard performanceCard--adoption" id="adoptionCard" hidden aria-hidden="true" style="margin-top:16px;">
+        <div class="cardTitle">On-chain adoption</div>
+        <p class="cardSub">Macro metrics (e.g., stablecoins, TVL, transactions) to visualize adoption.</p>
+        <div class="cardHint" id="adoptionMeta"></div>
+
+        <div class="kpiRow" id="adoptionKpis" style="margin-top:10px;">
+          <div class="kpi"><div class="k">1Y growth</div><div class="v" id="adoption1y">—</div></div>
+          <div class="kpi"><div class="k">5Y growth</div><div class="v" id="adoption5y">—</div></div>
+        </div>
+
+        <div class="chartBox" id="adoptionChart">
+          <div class="chartEmpty" id="adoptionEmpty">Loading…</div>
+          <div class="chartAxis" id="adoptionAxis"></div>
+          <svg class="chartSvg" id="adoptionSvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="chartHover" id="adoptionHover"></div>
+        </div>
       </div>
     </div>
   </section>

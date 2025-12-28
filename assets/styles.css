@@ -23,12 +23,17 @@ body{
   line-height:1.35;
 }
 
+p{overflow-wrap:anywhere;}
+
 a{color:inherit}
 img{max-width:100%; display:block}
 
 .container{max-width:var(--max); margin:0 auto; padding:0 18px}
 .section{padding:58px 0}
 .section--tight{padding:40px 0}
+.sectionHeader{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.sectionHeader .h2{margin:0 0 10px;}
+.featureToggle{white-space:nowrap;}
 
 .header{
   position:sticky; top:0; z-index:50;
@@ -180,7 +185,8 @@ img{max-width:100%; display:block}
 .mini span{color:rgba(13,35,31,.70); font-weight:650}
 
 .grid2{display:grid; grid-template-columns: 1.1fr .9fr; gap:18px}
-.grid3{display:grid; grid-template-columns: repeat(3,1fr); gap:16px}
+.grid2 > *, .grid3 > *{min-width:0;}
+.grid3{display:grid; grid-template-columns: repeat(auto-fit,minmax(0,1fr)); gap:16px}
 .performanceLayout{display:grid; gap:18px}
 .performanceCard--simulation .simBox{margin-top:0}
 
@@ -413,6 +419,7 @@ img{max-width:100%; display:block}
   .hero__grid{grid-template-columns:1fr}
   .h1{font-size:46px}
   .grid2{grid-template-columns:1fr}
+  .grid3{grid-template-columns: repeat(2,minmax(0,1fr));}
 }
 @media (max-width: 860px){
   .navToggle{display:inline-flex}
@@ -442,6 +449,7 @@ img{max-width:100%; display:block}
   .simGrid{grid-template-columns:1fr}
   .simDetailHeader,.simDetailRow{grid-template-columns:minmax(82px,1fr) minmax(0,1fr) minmax(0,1fr); column-gap:8px;}
   #stableScenarioNote{margin-left:0}
+  .grid3{grid-template-columns:1fr;}
 }
 @media (max-width: 390px){
   .container{padding:0 14px}

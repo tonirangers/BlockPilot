@@ -326,6 +326,17 @@
     }
   }
 
+  async function loadAdoptionSeries() {
+    const cacheBust=`?t=${Date.now()}`;
+    const adoption = await firstJSON(
+      [fromRoot(`data/adoption.json${cacheBust}`), `../data/adoption.json${cacheBust}`, `./data/adoption.json${cacheBust}`],
+      null
+    );
+    const meta = adoption?.meta || {};
+    const series = normalizeSeriesDaily((adoption?.series||[]).map(p=>[Number(p?.[0]), Number(p?.[1])]).filter(p=>isFinite(p[0]) && isFinite(p[1])));
+    return { series, meta };
+  }
+
   function computeTotalEqualWeighted(btc, eth, bnb) {
     const b=normalizeSeriesDaily(btc||[]);
     const e=normalizeSeriesDaily(eth||[]);
@@ -507,6 +518,46 @@
 
       installHover("#marketChart", "#marketHover", sampled, (v)=>isIndex?fmtNum(v,0):fmtUsd(v,0), isIndex);
 
+  }
+
+  function setAdoptionUI(series, meta) {
+    const empty=$("#adoptionEmpty");
+    const svg=$("#adoptionSvg");
+    const axis=$("#adoptionAxis");
+    const k1=$("#adoption1y");
+    const k5=$("#adoption5y");
+    const hint=$("#adoptionMeta");
+
+    const cleanSeries = normalizeSeriesDaily((series||[]).map(p=>[Number(p?.[0]), Number(p?.[1])]).filter(p=>isFinite(p[0]) && isFinite(p[1])));
+
+    if (!cleanSeries.length) {
+      if (empty) { empty.style.display="flex"; empty.textContent=T.calibrating; }
+      if (svg) svg.innerHTML="";
+      if (axis) { axis.innerHTML=""; axis.style.display="none"; }
+      [k1,k5].forEach(el=>{ if (el) el.textContent="—"; });
+      if (hint) hint.textContent="";
+      return;
+    }
+
+    if (empty) empty.style.display="none";
+
+    const r1=computeReturn(cleanSeries,365);
+    const r5=computeReturn(cleanSeries,1825);
+    if (k1) k1.textContent=fmtPct(r1);
+    if (k5) k5.textContent=fmtPct(r5);
+
+    if (hint) {
+      const parts=[];
+      const upd=Date.parse(meta?.last_updated);
+      if (isFinite(upd)) parts.push(`${T.lastUpdated}: ${fmtDate(upd)}`);
+      if (meta?.source) parts.push(meta.source);
+      hint.textContent = parts.join(" · ");
+    }
+
+    const sampled = sampleSeries(cleanSeries);
+    drawSvgLine(svg, sampled);
+    if (axis) setAxisLabels(axis, sampled, Math.max(365, Math.round((cleanSeries[cleanSeries.length-1][0]-cleanSeries[0][0])/DAY)));
+    installHover("#adoptionChart", "#adoptionHover", sampled, (v)=>fmtNum(v,2), true);
   }
 
   function computeTokens(principalTokens, apr, years) {
@@ -959,6 +1010,50 @@
     }));
 
     await refresh(active);
+
+    const adoptionToggle=$("#adoptionToggle");
+    const adoptionCard=$("#adoptionCard");
+    let adoptionLoaded=false;
+    let adoptionSeries=[];
+    let adoptionMeta={};
+
+    const setAdoptionVisible=(show)=>{
+      if (!adoptionCard) return;
+      adoptionCard.hidden = !show;
+      adoptionCard.setAttribute("aria-hidden", show ? "false" : "true");
+    };
+
+    const setAdoptionToggleUI=(show)=>{
+      if (!adoptionToggle) return;
+      adoptionToggle.classList.toggle("active", !!show);
+      adoptionToggle.setAttribute("aria-pressed", show ? "true" : "false");
+    };
+
+    const ensureAdoption=async()=>{
+      if (adoptionLoaded) return { series: adoptionSeries, meta: adoptionMeta };
+      const res = await loadAdoptionSeries();
+      adoptionSeries = res.series || [];
+      adoptionMeta = res.meta || {};
+      setAdoptionUI(adoptionSeries, adoptionMeta);
+      adoptionLoaded=true;
+      return res;
+    };
+
+    if (adoptionToggle && adoptionCard) {
+      let pref=false;
+      try { pref = localStorage.getItem("bp_show_adoption") === "1"; } catch {}
+      setAdoptionToggleUI(pref);
+      setAdoptionVisible(pref);
+      if (pref) await ensureAdoption();
+
+      adoptionToggle.addEventListener("click", async () => {
+        pref = !pref;
+        try { localStorage.setItem("bp_show_adoption", pref ? "1" : "0"); } catch {}
+        setAdoptionToggleUI(pref);
+        setAdoptionVisible(pref);
+        if (pref && !adoptionLoaded) await ensureAdoption();
+      });
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

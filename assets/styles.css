@@ -1,97 +1,69 @@
-/* --- BLOCKPILOT DESIGN SYSTEM (Clean & Robust) --- */
+/* --- BLOCKPILOT DESIGN SYSTEM (GitBook Style & Pro Green) --- */
 :root {
-  /* Palette Custom (Vert Sombre Validé) */
   --bp-bg: #FFFFFF;
   --bp-surface: #FFFFFF;
-  --bp-surface-alt: #F8FAFC;
-  --bp-border: #E2E8F0;
+  --bp-surface-alt: #F8FAFC; /* Gris très clair GitBook */
+  --bp-border: #E2E8F0;      /* Bordure subtile */
   
-  --bp-text-main: #0F172A;
-  --bp-text-muted: #64748B;
+  --bp-text-main: #0F172A;   /* Bleu nuit très foncé */
+  --bp-text-muted: #64748B;  /* Gris text */
   
-  /* Vert Sombre */
+  /* Ton Vert Sombre Pro */
   --bp-primary: #3C756E; 
   --bp-primary-hover: #2E5C56;
-  --bp-primary-soft: rgba(60, 117, 110, 0.1);
+  --bp-primary-soft: rgba(60, 117, 110, 0.08);
   
   --bp-radius-card: 12px;
   --bp-radius-pill: 999px;
   
-  --bp-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --bp-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Ombre légère GitBook */
   --bp-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
 
-  /* --- MAPPING COMPATIBILITÉ (Pour ne pas casser Signature.html) --- */
-  --bg: var(--bp-surface-alt);
-  --card: var(--bp-surface);
-  --ink: var(--bp-text-main);
-  --muted: var(--bp-text-muted);
-  --line: var(--bp-border);
-  --brand: var(--bp-primary);
-  --brand2: var(--bp-primary-hover);
-  --shadow: var(--bp-shadow-card);
-  --radius: var(--bp-radius-card);
-  --radius2: 8px;
-  --max: 1080px;
+  /* Mapping Compatibilité */
+  --bg: var(--bp-surface-alt); --card: var(--bp-surface);
+  --ink: var(--bp-text-main); --muted: var(--bp-text-muted);
+  --line: var(--bp-border); --brand: var(--bp-primary);
+  --brand2: var(--bp-primary-hover); --shadow: var(--bp-shadow-card);
+  --radius: var(--bp-radius-card); --max: 1080px;
 }
 
 * { box-sizing: border-box; }
-html, body { height: 100%; }
-
-body {
-  margin: 0;
-  background-color: var(--bp-surface-alt);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: var(--bp-text-main);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
+html { height: 100%; scroll-behavior: smooth; /* SCROLL FLUIDE ICI */ }
+body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--bp-text-main); line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
 /* --- STRUCTURE --- */
-.container, .container-premium {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 24px;
-}
+.container, .container-premium { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section { padding: 64px 0; }
-.section--tight { padding: 40px 0; } /* Utilisé dans Signature */
+.section--tight { padding: 40px 0; }
 
-/* --- HEADER --- */
+/* --- HEADER (Style GitBook) --- */
 .header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bp-border);
+  height: 72px; display: flex; align-items: center;
 }
-.nav {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; padding: 16px 0;
-}
+.nav { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+
 .brand__logo {
-  width: 64px; height: 64px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid var(--bp-border);
-  box-shadow: var(--bp-shadow-card);
-  padding: 8px;
-}
-.nav__links { display: flex; align-items: center; gap: 24px; }
-.nav__links a {
-  text-decoration: none; color: var(--bp-text-muted);
-  font-weight: 500; font-size: 15px; transition: color 0.2s;
-}
-.nav__links a:hover { color: var(--bp-text-main); }
-.navToggle {
-  display: none; border: 1px solid var(--bp-border);
-  background: #fff; border-radius: 8px; padding: 8px 12px; cursor: pointer;
+  width: 42px; height: 42px; /* Logo un peu plus discret pro */
+  border-radius: 8px;
+  background: #fff; border: 1px solid var(--bp-border);
 }
 
-/* --- TYPO HERO & PAGE SIGNATURE --- */
-.h1 {
-  font-size: 56px; letter-spacing: -0.03em;
-  line-height: 1.1; margin: 0 0 24px; color: var(--bp-text-main); font-weight: 800;
+.nav__links { display: flex; align-items: center; gap: 32px; }
+.nav__links a {
+  text-decoration: none; color: var(--bp-text-muted);
+  font-weight: 500; font-size: 14px; transition: color 0.2s;
 }
-.lead, .p { font-size: 20px; color: var(--bp-text-muted); margin: 0 0 32px; font-weight: 400; }
-.p { font-size: 18px; } /* Ajustement pour textes standards */
+.nav__links a:hover { color: var(--bp-text-main); }
+/* Optionnel : petite barre active au survol comme GitBook */
+.navToggle { display: none; border: 1px solid var(--bp-border); background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; color: var(--bp-text-muted); }
+
+/* --- TYPO --- */
+.h1 { font-size: 48px; letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 24px; color: var(--bp-text-main); font-weight: 800; }
+.lead, .p { font-size: 18px; color: var(--bp-text-muted); margin: 0 0 32px; font-weight: 400; line-height: 1.6; }
 
 /* --- CARDS --- */
 .card, .bp-card {
@@ -99,56 +71,53 @@ body {
   border: 1px solid var(--bp-border);
   border-radius: var(--bp-radius-card);
   box-shadow: var(--bp-shadow-card);
-  padding: 32px;
-  margin-bottom: 32px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 32px; margin-bottom: 32px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 .card:hover, .bp-card:hover {
   box-shadow: var(--bp-shadow-hover);
+  border-color: #CBD5E1;
   transform: translateY(-2px);
 }
 .cardPad { padding: 32px; }
-.cardTitle { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; color: var(--bp-text-main); }
+.cardTitle { font-weight: 600; font-size: 1.1rem; margin-bottom: 12px; color: var(--bp-text-main); }
 .cardSub { color: var(--bp-text-muted); font-size: 0.95rem; margin: 0; }
 .tip { border-bottom: 1px dotted var(--bp-text-muted); cursor: help; }
 
-/* --- WIDGET & TRADINGVIEW --- */
+/* --- WIDGETS --- */
 .bp-section-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 8px; color: var(--bp-text-main); }
 .bp-section-subtitle { font-size: 1rem; color: var(--bp-text-muted); font-weight: 400; line-height: 1.6; }
 .tv-widget-wrapper { width: 100%; height: 520px; position: relative; }
 
-/* --- BOUTONS, CHIPS & INPUTS --- */
+/* --- BOUTONS & INPUTS --- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 24px; border-radius: 99px; font-weight: 600; text-decoration: none;
+  padding: 10px 20px; border-radius: 99px; font-weight: 600; text-decoration: none; font-size: 14px;
   border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main); transition: all 0.2s;
 }
-.btn--primary {
-  background: var(--bp-primary); border-color: var(--bp-primary); color: #fff;
-}
+.btn--primary { background: var(--bp-primary); border-color: var(--bp-primary); color: #fff; }
 .btn--primary:hover { background: var(--bp-primary-hover); border-color: var(--bp-primary-hover); }
-.btn--text { border:none; background:none; color:var(--bp-text-muted); text-decoration:underline; box-shadow:none; padding:0; }
+.btn--text { border:none; background:none; color:var(--bp-text-muted); text-decoration:none; padding:0; }
+.btn--text:hover { color: var(--bp-primary); text-decoration: underline; }
 
-.input, .select {
-  width: 100%; padding: 12px 16px; border-radius: 8px;
-  border: 1px solid var(--bp-border); background: #fff;
-  font-size: 16px; outline: none; transition: border-color 0.2s;
+.input, .select, textarea {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main);
+  font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit;
 }
-.input:focus, .select:focus { border-color: var(--bp-primary); box-shadow: 0 0 0 3px var(--bp-primary-soft); }
+.input:focus, .select:focus, textarea:focus { border-color: var(--bp-primary); box-shadow: 0 0 0 3px var(--bp-primary-soft); }
 
-/* --- SCENARIOS & CHIPS (Utilisé par Simulator + Signature) --- */
-.scenarios { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-.chip {
+/* --- CHIPS --- */
+.scenarioChips .chip {
   border: 1px solid var(--bp-border); background: #fff;
-  border-radius: 99px; padding: 8px 16px; font-weight: 500;
+  border-radius: 6px; padding: 6px 12px; font-size: 13px; font-weight: 500;
   cursor: pointer; color: var(--bp-text-muted); transition: all 0.2s;
 }
-.chip.active, .pill.is-active {
-  background: var(--bp-primary-soft); color: var(--bp-primary); border-color: transparent; font-weight: 600;
+.scenarioChips .chip:hover { border-color: var(--bp-text-muted); }
+.scenarioChips .chip.active, .pill.is-active {
+  background: var(--bp-primary-soft); color: var(--bp-primary); border-color: var(--bp-primary); font-weight: 600;
 }
-.pill {
-  text-decoration: none; color: var(--bp-text-muted); padding: 6px 12px; border-radius: 99px; font-weight: 600;
-}
+.pill { text-decoration: none; color: var(--bp-text-muted); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; }
 
 /* --- YIELD CARDS --- */
 .ycard {
@@ -157,48 +126,39 @@ body {
 }
 .ycard .n { font-size: 1.5rem; font-weight: 700; color: var(--bp-primary); margin-top: 4px; }
 
-/* --- LISTES (Bullets) --- */
-.bullets { padding-left: 20px; margin: 12px 0; color: var(--bp-text-muted); }
+/* --- LISTES --- */
+.bullets { padding-left: 20px; margin: 12px 0; color: var(--bp-text-muted); font-size: 15px; }
 .bullets li { margin-bottom: 8px; }
+.mini { border: 1px solid var(--bp-border); padding: 12px; border-radius: 8px; background: var(--bp-surface-alt); }
+.mini strong { display: block; margin-bottom: 4px; color: var(--bp-text-main); font-size: 14px; }
 
-/* --- PAGE SIGNATURE FIX --- */
-.signatureFrames {
-  display: flex; flex-direction: column; gap: 24px;
-  width: 100%; margin-top: 24px;
-}
+/* --- SIGNATURE IFRAMES FIX --- */
+.signatureFrames { display: flex; flex-direction: column; gap: 24px; width: 100%; margin-top: 24px; }
 .signatureFrames iframe {
-  width: 100%; border: 0;
-  min-height: 700px; /* Hauteur forcée pour éviter le scroll interne */
+  width: 100%; border: 0; min-height: 750px; /* Assez grand pour éviter le scroll interne */
   background: #fff; border-radius: 12px;
   border: 1px solid var(--bp-border); box-shadow: var(--bp-shadow-card);
 }
 iframe[style*="display: none"] { display: none !important; }
 
-/* --- GRILLES (Grid) --- */
+/* --- GRIDS & MOBILE --- */
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
-.miniGrid { display: grid; gap: 12px; }
-.mini { border: 1px solid var(--bp-border); padding: 12px; border-radius: 8px; background: var(--bp-surface-alt); }
-.mini strong { display: block; margin-bottom: 4px; color: var(--bp-text-main); }
 
-/* --- MOBILE --- */
 @media (max-width: 860px) {
   .navToggle { display: inline-flex; }
   .nav__links {
-    display: none; position: absolute; left: 0; right: 0; top: 100%;
+    display: none; position: absolute; left: 0; right: 0; top: 72px;
     background: #fff; border-bottom: 1px solid var(--bp-border);
-    padding: 24px; flex-direction: column; align-items: flex-start;
+    padding: 24px; flex-direction: column; align-items: flex-start; gap: 16px;
   }
   body.menu-open .nav__links { display: flex; }
   .tv-widget-wrapper { height: 400px; }
   .hero__grid, .grid2, .grid3 { display: block; }
   .grid2 > div, .grid3 > div { margin-bottom: 24px; }
-  .h1 { font-size: 40px; }
+  .h1 { font-size: 36px; }
 }
 
 /* --- FOOTER --- */
-.footer {
-  padding: 48px 0; border-top: 1px solid var(--bp-border);
-  color: var(--bp-text-muted); font-size: 14px;
-}
+.footer { padding: 48px 0; border-top: 1px solid var(--bp-border); color: var(--bp-text-muted); font-size: 14px; }
 .footer a { color: var(--bp-text-main); text-decoration: none; }

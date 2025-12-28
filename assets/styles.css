@@ -222,6 +222,16 @@ img{max-width:100%; display:block}
 .kpiRow--clickable .kpi{cursor:pointer; text-align:left; transition:background .15s, border-color .15s; width:100%; display:block}
 .kpiRow--clickable .kpi.active{background:rgba(11,111,102,.12); border-color:rgba(11,111,102,.38)}
 
+.adoptionTopline{display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin:10px 0 2px;}
+.adoptionBadge{background:rgba(11,111,102,.14); border-color:rgba(11,111,102,.32); color:var(--brand2);}
+.adoptionLevels{display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:12px; width:100%;}
+.adoptionLevel{border:1px solid var(--line); background:rgba(238,247,245,.26); border-radius:var(--radius2); padding:12px;}
+.adoptionLevel.is-muted{background:#fff;}
+.adoptionLevel__value{font-size:30px; font-weight:950; margin:6px 0 2px;}
+.adoptionLevel__hint{font-size:13px; color:rgba(13,35,31,.60); font-weight:750;}
+.adoptionBullets{margin:10px 0 6px; padding-left:18px; color:rgba(13,35,31,.72); font-weight:750;}
+.adoptionBullets li{margin:4px 0;}
+
 .chartBox{
   --chart-pad:16px;
   height:260px;

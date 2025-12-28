@@ -527,6 +527,8 @@
     const k1=$("#adoption1y");
     const k5=$("#adoption5y");
     const hint=$("#adoptionMeta");
+    const nowEl=$("#adoptionNow");
+    const baseEl=$("#adoptionBase");
 
     const cleanSeries = normalizeSeriesDaily((series||[]).map(p=>[Number(p?.[0]), Number(p?.[1])]).filter(p=>isFinite(p[0]) && isFinite(p[1])));
 
@@ -541,13 +543,23 @@
 
     if (empty) empty.style.display="none";
 
+    const start=cleanSeries[0];
+    const last=cleanSeries[cleanSeries.length-1];
+
     const r1=computeReturn(cleanSeries,365);
     const r5=computeReturn(cleanSeries,1825);
     if (k1) k1.textContent=fmtPct(r1);
     if (k5) k5.textContent=fmtPct(r5);
 
+    if (nowEl) nowEl.textContent=fmtNum(last?.[1],1);
+    if (baseEl) {
+      const baseDate = start?.[0];
+      baseEl.textContent = fmtNum(start?.[1],1) + (isFinite(baseDate) ? ` · ${fmtDate(baseDate)}` : "");
+    }
+
     if (hint) {
       const parts=[];
+      if (isFinite(start?.[0])) parts.push(`Base 100 : ${fmtDate(start[0])}`);
       const upd=Date.parse(meta?.last_updated);
       if (isFinite(upd)) parts.push(`${T.lastUpdated}: ${fmtDate(upd)}`);
       if (meta?.source) parts.push(meta.source);

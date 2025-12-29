@@ -51,12 +51,12 @@
 
       <article class="doc-content">
         <h1 id="intro">Documentation Client</h1>
-        <p class="lead">Guide complet pour comprendre, configurer et utiliser votre compte BlockPilot. Conçu pour les débutants.</p>
+        <p class="lead">Ce document est conçu pour être lu rapidement. Il explique comment utiliser votre compte BlockPilot si vous n'avez jamais utilisé de crypto.</p>
         
         <div class="callout">
           <h4>Liens Rapides</h4>
           <ul>
-            <li><a href="https://www.zeal.app/claim?r=yNI4%2Fwwr9cr4s%3Futm_channel%3Dsystem_share" target="_blank">Télécharger Zeal</a></li>
+            <li><a href="https://www.zeal.app/claim?r=yNI4%2Fwwr9cr4s%3Futm_channel%3Dsystem_share" target="_blank">Télécharger Zeal (Wallet)</a></li>
             <li><a href="https://forms.gle/QAmqwCXFMBHVJ7EHA" target="_blank">Formulaire Onboarding</a></li>
             <li><a href="./signature.html">Espace Signature</a></li>
           </ul>
@@ -65,7 +65,7 @@
         <h2 id="bases">1. Les bases (Comprendre le jargon)</h2>
         <p>Pas besoin d'être ingénieur. Voici les 3 concepts clés :</p>
         <ul>
-          <li><strong>Wallet (Portefeuille) :</strong> C’est votre “passeport” numérique (ex: Zeal, MetaMask). Il vous permet de vous connecter aux applications. Il ne stocke pas l'argent, il stocke la clé d'accès.</li>
+          <li><strong>Wallet (Portefeuille) :</strong> C’est votre “passeport” numérique (ex: Zeal). Il vous permet de vous connecter aux applications. Il ne stocke pas l'argent, il stocke la clé d'accès.</li>
           <li><strong>Phrase secrète (Seed) :</strong> Les 12 mots magiques. C’est la clé du coffre-fort. ⚠️ <strong>Ne la donnez jamais à personne, même pas à moi.</strong> Si vous la perdez, l'argent est perdu.</li>
           <li><strong>Safe (Coffre multisig) :</strong> C’est le produit BlockPilot. Un coffre intelligent où l'argent est stocké. Il est sécurisé car il faut une signature pour bouger les fonds.</li>
         </ul>
@@ -83,18 +83,21 @@
 
         <h2 id="zeal">3. Tutoriel Zeal (Recommandé)</h2>
         <p>Zeal est le wallet le plus sécurisé et simple pour les débutants. Il inclut un "Check de sécurité" avant chaque transaction.</p>
+        
         <h3>Étape A : Installation</h3>
-        <p>Allez sur <a href="https://zeal.app" target="_blank">zeal.app</a> et téléchargez l'extension Chrome ou l'app mobile. Créez un nouveau wallet. Notez les 12 mots sur du papier (pas de photo, pas de cloud).</p>
+        <p>Allez sur <a href="https://zeal.app" target="_blank">zeal.app</a> et téléchargez l'extension Chrome ou l'app mobile. Créez un nouveau wallet ("Create new").</p>
+        <p><strong>IMPORTANT :</strong> Notez les 12 mots sur du papier. C'est votre sauvegarde unique.</p>
+
         <h3>Étape B : Alimenter par Carte/Virement</h3>
-        <p>Dans Zeal, cliquez sur "Add Funds" > "Card/Bank Transfer". C'est le moyen le plus simple pour les montants < 10k€. Pour les gros montants, passez par MEXC ou un virement OTC (me demander).</p>
+        <p>Dans Zeal, cliquez sur "Add Funds" > "Card/Bank Transfer". C'est le moyen le plus simple pour les montants &lt; 10k€. Pour les gros montants, passez par MEXC ou un virement OTC (me demander).</p>
 
         <h2 id="mexc">4. Tutoriel MEXC (Gros montants)</h2>
-        <p>Si vous avez besoin de convertir de gros volumes d'Euros en Crypto à frais réduits.</p>
+        <p>Optionnel. Si vous avez besoin de convertir de gros volumes d'Euros en Crypto à frais réduits.</p>
         <ul>
-          <li>Créez un compte sur MEXC.com (KYC requis : passeport).</li>
+          <li>Créez un compte sur <a href="https://promote.mexc.com/r/YC3fPAkx" target="_blank">MEXC</a> (KYC requis : passeport).</li>
           <li>Allez dans "Acheter des cryptos" > "Virement Bancaire (SEPA)".</li>
           <li>Envoyez vos Euros. Une fois reçus, convertissez-les en USDT ou ETH.</li>
-          <li>Retrait : Cliquez sur "Retrait", collez l'adresse de votre <strong>Wallet Zeal</strong> (pas celle du Safe directement pour le premier envoi, par sécurité).</li>
+          <li><strong>Retrait :</strong> Cliquez sur "Retrait", collez l'adresse de votre Wallet Zeal (pas celle du Safe directement pour le premier envoi, par sécurité).</li>
         </ul>
 
         <h2 id="safe">5. Votre Coffre Safe</h2>
@@ -123,10 +126,10 @@
 
         <h2 id="faq">8. FAQ</h2>
         <p><strong>Puis-je tout perdre ?</strong><br>
-        Le risque zéro n'existe pas (faille technologique majeure d'une blockchain). Mais le risque "humain" (vol, erreur) est éliminé par notre setup.</p>
+        Le risque zéro n'existe pas. Cependant, le risque "humain" (vol, erreur de clic) est éliminé par notre setup de co-signature. Le risque restant est technologique (bug du protocole DeFi), que nous minimisons par une sélection drastique.</p>
         
         <p><strong>Comment je récupère mon argent si tu disparais ?</strong><br>
-        Vous êtes le propriétaire du Safe. Vous avez toujours le pouvoir ultime de déclencher un retrait forcé (Time-lock) ou d'utiliser votre clé pour signer seul après un délai de carence.</p>
+        Vous êtes le propriétaire du Safe. Vous avez toujours le pouvoir ultime de déclencher un retrait seul après un délai de carence, ou de remplacer le cosignataire.</p>
 
         <div style="margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--bp-border); text-align: center;">
           <a class="btn btn--primary" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Une question ? Réserver un appel</a>

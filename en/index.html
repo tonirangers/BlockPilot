@@ -249,6 +249,20 @@
         <div id="priceMeta" style="margin-top:12px; font-size:0.75rem; color:#A0AEC0;"></div>
       </div>
     </div>
+
+    <div class="bp-card" style="margin-top: 32px; padding: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div>
+          <div class="cardTitle">Growth Projection</div>
+          <p class="cardSub">Cumulative effect of Yield + Price.</p>
+        </div>
+      </div>
+      
+      <div style="position: relative; height: 300px; width: 100%;">
+        <canvas id="compoundChart"></canvas>
+      </div>
+    </div>
+
   </section>
 
   <section id="security" class="section section--tight">
@@ -303,7 +317,8 @@
       <a href="https://t.me/tonirangers" target="_blank" rel="noopener">Telegram</a>
     </div>
   </footer>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../assets/main.js" defer></script>
 </body>
 </html>

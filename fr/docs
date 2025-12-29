@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Documentation — BlockPilot</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+
+<body data-lang="fr">
+<header class="header">
+  <div class="container">
+    <nav class="nav">
+      <a class="brand" href="./index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+        <img class="brand__logo" src="../logo.png" alt="BlockPilot" style="width: 40px; height: 40px; border-radius: 8px;">
+        <span style="font-weight: 800; font-size: 20px; color: var(--bp-text-main); letter-spacing: -0.02em;">BlockPilot</span>
+      </a>
+      <button class="navToggle" id="navToggle" type="button">Menu</button>
+      <div class="nav__links">
+        <a href="./index.html#performance">Performance</a>
+        <a href="./index.html#security">Sécurité</a>
+        <a href="./docs.html" class="active">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+           Docs
+        </a>
+        <a href="./signature.html">Signature</a>
+      </div>
+      <div class="lang"><a class="pill is-active" href="#">FR</a></div>
+    </nav>
+  </div>
+</header>
+
+<main class="section" style="padding-top: 48px;">
+  <div class="container">
+    <div class="doc-layout">
+      
+      <aside class="doc-sidebar">
+        <span class="doc-nav-title">Sommaire</span>
+        <nav>
+          <a class="doc-nav-link" href="#intro">Bienvenue</a>
+          <a class="doc-nav-link" href="#bases">Les bases</a>
+          <a class="doc-nav-link" href="#parcours">Le Parcours</a>
+          <a class="doc-nav-link" href="#zeal">Tutoriel Zeal</a>
+          <a class="doc-nav-link" href="#mexc">Tutoriel MEXC</a>
+          <a class="doc-nav-link" href="#safe">Votre Coffre Safe</a>
+          <a class="doc-nav-link" href="#toni">Rôle de Toni</a>
+          <a class="doc-nav-link" href="#checklist">Checklist Finale</a>
+          <a class="doc-nav-link" href="#faq">FAQ</a>
+        </nav>
+      </aside>
+
+      <article class="doc-content">
+        <h1 id="intro">Documentation Client</h1>
+        <p class="lead">Guide complet pour comprendre, configurer et utiliser votre compte BlockPilot. Conçu pour les débutants.</p>
+        
+        <div class="callout">
+          <h4>Liens Rapides</h4>
+          <ul>
+            <li><a href="https://www.zeal.app/claim?r=yNI4%2Fwwr9cr4s%3Futm_channel%3Dsystem_share" target="_blank">Télécharger Zeal</a></li>
+            <li><a href="https://forms.gle/QAmqwCXFMBHVJ7EHA" target="_blank">Formulaire Onboarding</a></li>
+            <li><a href="./signature.html">Espace Signature</a></li>
+          </ul>
+        </div>
+
+        <h2 id="bases">1. Les bases (Comprendre le jargon)</h2>
+        <p>Pas besoin d'être ingénieur. Voici les 3 concepts clés :</p>
+        <ul>
+          <li><strong>Wallet (Portefeuille) :</strong> C’est votre “passeport” numérique (ex: Zeal, MetaMask). Il vous permet de vous connecter aux applications. Il ne stocke pas l'argent, il stocke la clé d'accès.</li>
+          <li><strong>Phrase secrète (Seed) :</strong> Les 12 mots magiques. C’est la clé du coffre-fort. ⚠️ <strong>Ne la donnez jamais à personne, même pas à moi.</strong> Si vous la perdez, l'argent est perdu.</li>
+          <li><strong>Safe (Coffre multisig) :</strong> C’est le produit BlockPilot. Un coffre intelligent où l'argent est stocké. Il est sécurisé car il faut une signature pour bouger les fonds.</li>
+        </ul>
+
+        <h2 id="parcours">2. Parcours BlockPilot</h2>
+        <p>Le chemin type pour devenir client :</p>
+        <ol>
+          <li><strong>Installation :</strong> Vous installez un wallet (Zeal) pour avoir une identité numérique.</li>
+          <li><strong>Onboarding :</strong> Vous remplissez le formulaire BlockPilot pour définir votre stratégie.</li>
+          <li><strong>Création du Safe :</strong> Je déploie votre coffre (Smart Contract) sur la Blockchain.</li>
+          <li><strong>Dépôt :</strong> Vous envoyez les fonds (Virement ou Crypto) vers votre Safe.</li>
+          <li><strong>Pilotage :</strong> Je travaille les rendements. Vous ne faites rien.</li>
+          <li><strong>Retrait :</strong> Vous signez une demande, je co-signe (sécurité), l'argent sort.</li>
+        </ol>
+
+        <h2 id="zeal">3. Tutoriel Zeal (Recommandé)</h2>
+        <p>Zeal est le wallet le plus sécurisé et simple pour les débutants. Il inclut un "Check de sécurité" avant chaque transaction.</p>
+        <h3>Étape A : Installation</h3>
+        <p>Allez sur <a href="https://zeal.app" target="_blank">zeal.app</a> et téléchargez l'extension Chrome ou l'app mobile. Créez un nouveau wallet. Notez les 12 mots sur du papier (pas de photo, pas de cloud).</p>
+        <h3>Étape B : Alimenter par Carte/Virement</h3>
+        <p>Dans Zeal, cliquez sur "Add Funds" > "Card/Bank Transfer". C'est le moyen le plus simple pour les montants < 10k€. Pour les gros montants, passez par MEXC ou un virement OTC (me demander).</p>
+
+        <h2 id="mexc">4. Tutoriel MEXC (Gros montants)</h2>
+        <p>Si vous avez besoin de convertir de gros volumes d'Euros en Crypto à frais réduits.</p>
+        <ul>
+          <li>Créez un compte sur MEXC.com (KYC requis : passeport).</li>
+          <li>Allez dans "Acheter des cryptos" > "Virement Bancaire (SEPA)".</li>
+          <li>Envoyez vos Euros. Une fois reçus, convertissez-les en USDT ou ETH.</li>
+          <li>Retrait : Cliquez sur "Retrait", collez l'adresse de votre <strong>Wallet Zeal</strong> (pas celle du Safe directement pour le premier envoi, par sécurité).</li>
+        </ul>
+
+        <h2 id="safe">5. Votre Coffre Safe</h2>
+        <p>C'est là que l'argent travaille. Contrairement à votre wallet personnel (Zeal) qui est comme votre "poche", le Safe est comme un "compte en banque d'entreprise" avec des règles.</p>
+        <ul>
+          <li><strong>Transparence :</strong> Vous voyez tout en temps réel via les liens que je vous envoie (DeBank).</li>
+          <li><strong>Sécurité :</strong> Impossible pour moi de partir avec la caisse. Mon rôle est "Opérateur", pas "Propriétaire".</li>
+        </ul>
+
+        <h2 id="toni">6. Ce que Toni fait (Mon rôle)</h2>
+        <p>Je suis votre pilote.</p>
+        <ul>
+          <li><strong>Veille & Stratégie :</strong> Je cherche les meilleurs rendements ajustés au risque (Aave, Curve, Pendle...).</li>
+          <li><strong>Exécution :</strong> Je prépare les transactions techniques.</li>
+          <li><strong>Sécurité :</strong> Je vérifie chaque contrat avant d'y mettre un centime.</li>
+          <li><strong>Reporting :</strong> Je vous dis combien on a gagné.</li>
+        </ul>
+
+        <h2 id="checklist">7. Checklist avant de démarrer</h2>
+        <ul>
+          <li>✅ J'ai installé Zeal.</li>
+          <li>✅ J'ai noté mes 12 mots sur papier et ils sont cachés.</li>
+          <li>✅ J'ai rempli le formulaire Onboarding BlockPilot.</li>
+          <li>✅ J'ai signé la transaction de "Bienvenue" (Setup du Safe).</li>
+        </ul>
+
+        <h2 id="faq">8. FAQ</h2>
+        <p><strong>Puis-je tout perdre ?</strong><br>
+        Le risque zéro n'existe pas (faille technologique majeure d'une blockchain). Mais le risque "humain" (vol, erreur) est éliminé par notre setup.</p>
+        
+        <p><strong>Comment je récupère mon argent si tu disparais ?</strong><br>
+        Vous êtes le propriétaire du Safe. Vous avez toujours le pouvoir ultime de déclencher un retrait forcé (Time-lock) ou d'utiliser votre clé pour signer seul après un délai de carence.</p>
+
+        <div style="margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--bp-border); text-align: center;">
+          <a class="btn btn--primary" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Une question ? Réserver un appel</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container-premium">
+    <span>© Copyright BlockPilot Capital ltd 2025</span>
+  </div>
+</footer>
+
+<script src="../assets/main.js"></script>
+</body>
+</html>

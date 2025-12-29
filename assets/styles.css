@@ -1,4 +1,4 @@
-/* --- BLOCKPILOT DESIGN SYSTEM (Final Fix) --- */
+/* --- BLOCKPILOT DESIGN SYSTEM (Mobile Fix & Final) --- */
 :root {
   --bp-bg: #FFFFFF;
   --bp-surface: #FFFFFF;
@@ -21,8 +21,10 @@
 }
 
 * { box-sizing: border-box; }
-html { height: 100%; scroll-behavior: smooth; }
-body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif; color: var(--bp-text-main); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+/* FIX MOBILE SCROLL */
+html, body { width: 100%; overflow-x: hidden; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif; color: var(--bp-text-main); line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
 /* LAYOUT */
 .container, .container-premium { max-width: var(--max); margin: 0 auto; padding: 0 24px; }

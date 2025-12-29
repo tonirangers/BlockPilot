@@ -1,4 +1,4 @@
-/* assets/main.js - BlockPilot Pro (Token Yield Logic) */
+/* assets/main.js - BlockPilot Pro (V2 w/ Chart) */
 (async () => {
   const $ = (s, el=document) => el.querySelector(s);
   const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
@@ -8,11 +8,15 @@
   const I18N = {
     fr: {
       menu: "Menu", close: "Fermer", 
-      priceHint: (px, unit, scn) => `Prix réf : ~${px} $/${unit}. Scénario : ${scn ? "+" + (scn*100).toFixed(0) + "%" : "stable"}.`
+      priceHint: (px, unit, scn) => `Prix réf : ~${px} $/${unit}. Scénario : ${scn ? "+" + (scn*100).toFixed(0) + "%" : "stable"}.`,
+      chartLabel: "Stratégie BlockPilot (Yield + Prix)",
+      chartHold: "Holding simple (Prix seul)"
     },
     en: {
       menu: "Menu", close: "Close",
-      priceHint: (px, unit, scn) => `Ref price: ~$${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "stable"}.`
+      priceHint: (px, unit, scn) => `Ref price: ~$${px}/${unit}. Scenario: ${scn ? "+" + (scn*100).toFixed(0) + "%" : "stable"}.`,
+      chartLabel: "BlockPilot Strategy (Yield + Price)",
+      chartHold: "Simple Holding (Price only)"
     }
   };
   const T = I18N[LANG] || I18N.fr;
@@ -23,12 +27,13 @@
 
   // --- CALC ---
   function computeTokens(principalTokens, apr, years) {
+    // Composition mensuelle pour être précis
     const n=12; const r=apr/n;
     return principalTokens*Math.pow(1+r, n*years);
   }
 
   function fillApr(cfg) {
-    const yields = { stables:0.10, btc:0.02, eth:0.04, bnb:0.13, eur:0.04, ...(cfg?.yields||{}) };
+    const yields = { stables:0.12, btc:0.04, eth:0.05, bnb:0.13, eur:0.04, ...(cfg?.yields||{}) };
     const set=(id, v)=>{ const el=$(id); if (el) el.textContent=(Number(v||0)*100).toFixed(0)+"%"; };
     set("#aprStables", yields.stables);
     set("#aprBtc", yields.btc);
@@ -55,6 +60,92 @@
     return prices;
   }
 
+  // --- CHART ENGINE ---
+  let growthChart = null;
+  
+  function initChart(ctx) {
+    if(!ctx) return null;
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: T.chartLabel,
+            data: [],
+            borderColor: '#3C756E', // Brand Primary
+            backgroundColor: 'rgba(60, 117, 110, 0.1)',
+            borderWidth: 3,
+            tension: 0.4, // Courbe lisse
+            fill: true,
+            pointRadius: 0, // Clean look
+            pointHitRadius: 10
+          },
+          {
+            label: T.chartHold,
+            data: [],
+            borderColor: '#CBD5E1', // Slate 300
+            borderWidth: 2,
+            borderDash: [5, 5], // Pointillés pour le benchmark
+            tension: 0.4,
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+          tooltip: { 
+            mode: 'index', intersect: false, 
+            callbacks: { label: (c) => ` ${c.dataset.label}: $${Math.round(c.raw).toLocaleString()}` }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } }, // Moins de bruit
+          y: { grid: { color: '#F1F5F9' }, ticks: { callback: (v)=> '$' + (v/1000).toFixed(0) + 'k' } }
+        },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+      }
+    });
+  }
+
+  function updateChartData(chart, principalUSD, apr, priceScenario, duration, asset, prices) {
+    if(!chart) return;
+    
+    const labels = [];
+    const dataBP = []; // BlockPilot
+    const dataHold = []; // Holding
+    
+    const startPrice = asset==="eur" ? prices.eur : (asset==="stables"?1:prices[asset]);
+    const tokenAmount = principalUSD / startPrice;
+
+    // Génération des points (Année 0 à Duration)
+    for(let y=0; y<=duration; y++) {
+      labels.push(LANG==="fr" ? `Année ${y}` : `Year ${y}`);
+      
+      // Prix de l'actif à l'année Y
+      const projectedPrice = startPrice * Math.pow(1 + priceScenario, y);
+      
+      // Option 1 : HOLD (Quantité fixe * Prix qui monte)
+      const valHold = tokenAmount * projectedPrice;
+      dataHold.push(valHold);
+      
+      // Option 2 : STRAT (Quantité qui monte * Prix qui monte)
+      // On utilise la même logique que computeTokens (composition mensuelle)
+      const tokensWithYield = computeTokens(tokenAmount, apr, y);
+      const valStrat = tokensWithYield * projectedPrice;
+      dataBP.push(valStrat);
+    }
+
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = dataBP;
+    chart.data.datasets[1].data = dataHold;
+    chart.update();
+  }
+
   function initCalc(cfg, pricesUSD, yields) {
     const amount=$("#amountUSD");
     const assetSel=$("#assetSel");
@@ -62,11 +153,13 @@
     const stableNote=$("#stableScenarioNote");
     const priceMeta=$("#priceMeta");
 
+    const chartCanvas = $("#compoundChart");
+    if(chartCanvas && window.Chart) growthChart = initChart(chartCanvas);
+
     const scenarios = [0, 0.2, 0.5];
     let scenario = 0.2;
-    let durationYears = 1;
+    let durationYears = 3; // Default 3y pour que le graphe soit joli par défaut
 
-    // Set Default Value if empty
     if(amount && !amount.value) amount.value = "10000";
 
     if (scenarioWrap) {
@@ -86,55 +179,53 @@
       const apr = Number(yields?.[asset] ?? 0);
       
       const isStable = asset==="stables" || asset==="eur";
-      const px = isStable ? (asset==="eur" ? pricesUSD.eur : 1) : pricesUSD[asset];
-
+      
+      // Force scenario 0 pour stables
       if (isStable && scenario !== 0) scenario = 0;
 
       $$("#priceScenarios .chip").forEach(c => {
           c.disabled = isStable && c.dataset.scn!=="0";
           c.classList.toggle("active", Number(c.dataset.scn)===scenario);
       });
-      $$("#durationChips .chip").forEach(c => c.classList.toggle("active", Number(c.dataset.duration)===durationYears));
+      // Update chips duration active state
+      $$("#durationChips .chip").forEach(c => {
+        const d = Number(c.dataset.duration);
+        c.classList.toggle("active", d===durationYears);
+      });
       
       if(stableNote) stableNote.style.display = isStable ? "block" : "none";
       if(scenarioWrap) scenarioWrap.style.display = isStable ? "none" : "flex";
 
       if (!usdInput) { 
         $$(".sim-val").forEach(e=>e.textContent="—"); 
-        ["#val12Scn", "#val12Flat", "#gainText", "#tokenGainText"].forEach(id=>{ const el=$(id); if(el) el.textContent=""; });
+        ["#val12Scn", "#gainText", "#tokenGainText"].forEach(id=>{ const el=$(id); if(el) el.textContent=""; });
         return; 
       }
 
-      // CALC
-      const principalDollars = usdInput; 
+      // CALC (Final numbers text)
       const tokenPrice = asset==="eur" ? pricesUSD.eur : (asset==="stables"?1:pricesUSD[asset]);
-      const principalTokens = principalDollars / tokenPrice;
-
+      const principalTokens = usdInput / tokenPrice;
       const finalTokens = computeTokens(principalTokens, apr, durationYears);
       const gainedTokens = finalTokens - principalTokens;
       
       const priceGrowth = Math.pow(1+scenario, durationYears);
       const finalPrice = tokenPrice * priceGrowth;
       const finalDollars = finalTokens * finalPrice;
-      const gainDollars = finalDollars - principalDollars;
+      const gainDollars = finalDollars - usdInput;
 
-      // AFFICHAGE
+      // TEXT UPDATE
       const fmtUSD = (v) => new Intl.NumberFormat(undefined, { style:"currency", currency: "USD", maximumFractionDigits:0 }).format(v);
       const fmtTok = (v) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(v);
-
       const set=(id,t)=>{ const el=$(id); if(el) el.textContent=t; };
       
       set("#val12Scn", fmtUSD(finalDollars));
       
-      // Gain en $
       const gainEl = $("#gainText");
       if(gainEl) {
-        gainEl.textContent = `+ ${fmtUSD(gainDollars)} de gains`; // FR/EN managed in HTML usually, or simplicity here
-        if(LANG==="en") gainEl.textContent = `+ ${fmtUSD(gainDollars)} profit`;
+        gainEl.textContent = LANG==="fr" ? `+ ${fmtUSD(gainDollars)} de gains` : `+ ${fmtUSD(gainDollars)} profit`;
         gainEl.style.color = "#3C756E"; 
       }
 
-      // Gain en Tokens (Le "plus" pour les crypto-natives)
       const tokenGainEl = $("#tokenGainText");
       let unit = asset.toUpperCase();
       if(asset==="stables") unit="USDT";
@@ -150,8 +241,12 @@
       }
       
       if(priceMeta) priceMeta.textContent = isStable ? "" : T.priceHint(fmtNum(tokenPrice,0), unit, scenario);
+
+      // CHART UPDATE
+      updateChartData(growthChart, usdInput, apr, scenario, durationYears, asset, pricesUSD);
     }
 
+    // Listeners
     $$(".chip").forEach(b => b.addEventListener("click", (e) => {
         if(b.parentElement.id==="priceScenarios") scenario=Number(b.dataset.scn);
         else durationYears=Number(b.dataset.duration);
@@ -159,7 +254,10 @@
     }));
     amount?.addEventListener("input", recalc);
     assetSel?.addEventListener("change", recalc);
-    recalc();
+    
+    // Initial call
+    // Petit delay pour être sûr que ChartJS est prêt si chargé en async
+    setTimeout(recalc, 100);
   }
 
   function initMobileMenu() {
@@ -180,12 +278,9 @@
         btns.forEach(b => b.classList.toggle("active", b.dataset.signatureView===v));
         if(frames.sign) frames.sign.style.display = v==="sign" ? "block" : "none";
         if(frames.verify) frames.verify.style.display = v==="verify" ? "block" : "none";
-        
         const lang = (localStorage.getItem("bp_lang")||"fr").includes("en") ? "en" : "fr";
         const f = frames[v];
-        if(f && !f.getAttribute("src")) {
-            f.src = `../${v==="verify"?"verify":"sign"}.html?embed=1&lang=${lang}`;
-        }
+        if(f && !f.getAttribute("src")) f.src = `../${v==="verify"?"verify":"sign"}.html?embed=1&lang=${lang}`;
     }
     btns.forEach(b => b.onclick=()=>setView(b.dataset.signatureView));
     setView("sign");

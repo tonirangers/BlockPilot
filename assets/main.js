@@ -1,4 +1,4 @@
-/* --- BLOCKPILOT DESIGN SYSTEM (Patch V3 + Docs) --- */
+/* --- BLOCKPILOT DESIGN SYSTEM (Patch V3) --- */
 :root {
   --bp-bg: #FFFFFF;
   --bp-surface: #FFFFFF;
@@ -157,24 +157,3 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 }
 
 .footer { padding: 48px 0; border-top: 1px solid var(--bp-border); color: var(--bp-text-muted); font-size: 14px; text-align: center; margin-top: auto; }
-
-/* --- DOCS LAYOUT --- */
-.doc-layout { display: grid; grid-template-columns: 260px 1fr; gap: 48px; align-items: start; min-height: 80vh; }
-.doc-sidebar { position: sticky; top: 100px; padding-right: 24px; border-right: 1px solid var(--bp-border); max-height: calc(100vh - 120px); overflow-y: auto; }
-.doc-nav-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bp-text-muted); margin-bottom: 16px; display: block; }
-.doc-nav-link { display: block; text-decoration: none; color: var(--bp-text-main); font-size: 14px; padding: 8px 0; border-left: 2px solid transparent; padding-left: 16px; margin-left: -1px; transition: all 0.2s; opacity: 0.8; }
-.doc-nav-link:hover { color: var(--bp-primary); opacity: 1; }
-.doc-nav-link.active { border-left-color: var(--bp-primary); color: var(--bp-primary); font-weight: 600; opacity: 1; }
-.doc-content { max-width: 720px; padding-bottom: 64px; }
-.doc-content h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--bp-border); }
-.doc-content h2 { font-size: 24px; font-weight: 700; margin-top: 48px; margin-bottom: 16px; color: var(--bp-text-main); scroll-margin-top: 100px; }
-.doc-content h3 { font-size: 18px; font-weight: 600; margin-top: 32px; margin-bottom: 12px; }
-.doc-content p { font-size: 16px; line-height: 1.7; margin-bottom: 24px; color: #334155; }
-.doc-content ul, .doc-content ol { padding-left: 20px; margin-bottom: 24px; }
-.doc-content li { margin-bottom: 8px; color: #334155; }
-.doc-content a { color: var(--bp-primary); text-decoration: underline; text-underline-offset: 3px; }
-.callout { background: var(--bp-surface-alt); border: 1px solid var(--bp-border); border-radius: 8px; padding: 24px; margin: 32px 0; }
-@media (max-width: 860px) {
-  .doc-layout { display: block; }
-  .doc-sidebar { position: relative; top: 0; width: 100%; border-right: none; border-bottom: 1px solid var(--bp-border); margin-bottom: 32px; padding-bottom: 24px; max-height: none; }
-}

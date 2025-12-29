@@ -28,6 +28,11 @@
           Security
         </a>
 
+        <a href="./docs.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Docs
+        </a>
+
         <a href="./signature.html">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
           Signature
@@ -70,7 +75,10 @@
 
           <div style="display:flex; gap:16px; align-items:center;">
             <a class="btn btn--primary" id="ctaCall" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">Book a call</a>
-            <a class="btn btn--text" id="ctaEmail" href="#">Email</a>
+            <a class="btn" id="ctaEmail" href="mailto:contact@blockpilot.io">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+               Email
+            </a>
           </div>
         </div>
 
@@ -226,7 +234,7 @@
         </div>
 
         <div id="priceScenarioRow" style="margin-bottom:24px;">
-          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:8px;">PRICE SCENARIO</div>
+          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:8px;">HISTORICAL TREND (5y Average)</div>
           <div class="scenarioChips" id="priceScenarios" style="display:flex; gap:8px;"></div>
           <div id="stableScenarioNote" style="font-size:0.85rem; color:#64748B; padding-top:8px;">Stables: flat price.</div>
         </div>
@@ -253,8 +261,8 @@
     <div class="bp-card" style="margin-top: 32px; padding: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
         <div>
-          <div class="cardTitle">Growth Projection</div>
-          <p class="cardSub">Cumulative effect of Yield + Price.</p>
+          <div class="cardTitle">Performance Comparison</div>
+          <p class="cardSub">Projection: BlockPilot Strategy (Green) vs Passive Holding (Grey).</p>
         </div>
       </div>
       

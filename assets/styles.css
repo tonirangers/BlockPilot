@@ -1,4 +1,4 @@
-/* --- BLOCKPILOT DESIGN SYSTEM (Patch V2) --- */
+/* --- BLOCKPILOT DESIGN SYSTEM (Patch V3) --- */
 :root {
   --bp-bg: #FFFFFF;
   --bp-surface: #FFFFFF;
@@ -24,12 +24,12 @@
 html { height: 100%; scroll-behavior: smooth; }
 body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif; color: var(--bp-text-main); line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
-/* LAYOUT & CONTAINERS */
+/* LAYOUT */
 .container, .container-premium { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section { padding: 64px 0; }
 .section--tight { padding: 32px 0; }
 
-/* --- HEADER & NAV --- */
+/* --- HEADER --- */
 .header {
   position: sticky; top: 0; z-index: 50;
   background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
@@ -38,8 +38,8 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .nav { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; position: relative; }
 
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--bp-text-main); font-weight: 800; }
-.nav__links { display: flex; align-items: center; gap: 8px; }
 
+.nav__links { display: flex; align-items: center; gap: 8px; }
 .nav__links a {
   display: flex; align-items: center; gap: 8px;
   text-decoration: none; color: var(--bp-text-muted); font-weight: 500; font-size: 14px;
@@ -51,10 +51,8 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .nav__links a:hover svg { transform: translateY(-1px); opacity: 1; }
 .nav__links a.active { color: var(--bp-primary); background: var(--bp-primary-soft); }
 
-/* Mobile Toggle */
 .navToggle { display: none; background: none; border: none; font-weight: 600; color: var(--bp-text-main); cursor: pointer; }
 
-/* Lang Switcher */
 .lang { display: flex; gap: 4px; align-items: center; }
 .pill { 
   font-size: 12px; font-weight: 700; color: var(--bp-text-muted); padding: 4px 8px; 
@@ -84,7 +82,14 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 }
 .bp-card:hover { box-shadow: var(--bp-shadow-hover); transform: translateY(-2px); }
 
-/* Typography & Content */
+/* --- WIDGET FIX (TradingView) --- */
+.tv-widget-wrapper {
+  height: 500px; /* Hauteur forcée pour empêcher l'écrasement */
+  width: 100%;
+  position: relative;
+}
+
+/* TYPOGRAPHY */
 .h1 { font-size: 48px; letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 24px; font-weight: 800; }
 .lead { font-size: 18px; color: var(--bp-text-muted); margin: 0 0 32px; }
 
@@ -98,7 +103,7 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .mini:last-child { border-bottom: none; }
 .mini strong { display: block; font-size: 14px; margin-bottom: 2px; }
 
-/* Bullets */
+/* BULLETS */
 .bullets { list-style: none; padding: 0; margin: 0 0 24px; }
 .bullets li { position: relative; padding-left: 24px; margin-bottom: 8px; color: var(--bp-text-muted); font-size: 15px; }
 .bullets li::before { 
@@ -106,12 +111,12 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 }
 .tip { border-bottom: 1px dotted var(--bp-text-muted); cursor: help; }
 
-/* --- GRIDS & UTILS --- */
+/* GRIDS */
 .hero__grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 48px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
 
-/* Forms & Simulator */
+/* FORMS */
 .input, .select, textarea {
   width: 100%; padding: 10px 14px; 
   border-radius: var(--bp-radius-ui); border: 1px solid var(--bp-border); 
@@ -129,9 +134,8 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .yieldCards .ycard { border: 1px solid var(--bp-border); border-radius: 8px; padding: 12px; text-align: center; }
 .yieldCards .n { font-weight: 700; font-size: 18px; color: var(--bp-primary); margin-top: 4px; }
 
-/* --- RESPONSIVE (CRITICAL FIXES) --- */
+/* RESPONSIVE */
 @media (max-width: 860px) {
-  /* Force stack despite inline styles */
   .hero__grid, .grid2, .grid3 { display: block !important; }
   .grid2 > div, .grid3 > div { margin-bottom: 24px; }
   
@@ -149,6 +153,7 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
   
   .h1 { font-size: 34px; }
   .bp-card { padding: 24px; }
+  .tv-widget-wrapper { height: 400px; } /* Ajustement mobile pour le widget */
 }
 
 .footer { padding: 48px 0; border-top: 1px solid var(--bp-border); color: var(--bp-text-muted); font-size: 14px; text-align: center; margin-top: auto; }

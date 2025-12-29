@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /data/*.json
+
+Sitemap: https://tonirangers.github.io/blockpilot/sitemap.xml

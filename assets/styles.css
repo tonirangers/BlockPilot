@@ -1,4 +1,4 @@
-/* --- BLOCKPILOT DESIGN SYSTEM (Final Polish & Unified) --- */
+/* --- BLOCKPILOT DESIGN SYSTEM (Final Polish) --- */
 :root {
   --bp-bg: #FFFFFF;
   --bp-surface: #FFFFFF;
@@ -8,7 +8,7 @@
   --bp-text-main: #0F172A;
   --bp-text-muted: #64748B;
   
-  /* Ton Vert Pro (#3C756E) - Identique au widget TradingView */
+  /* Ton Vert Pro (#3C756E) - Identique au widget */
   --bp-primary: #3C756E; 
   --bp-primary-hover: #2E5C56;
   --bp-primary-soft: rgba(60, 117, 110, 0.08);
@@ -19,7 +19,7 @@
   --bp-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --bp-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
 
-  /* Mapping Compatibilité */
+  /* Compatibilité */
   --bg: var(--bp-surface-alt); --card: var(--bp-surface);
   --ink: var(--bp-text-main); --muted: var(--bp-text-muted);
   --line: var(--bp-border); --brand: var(--bp-primary);
@@ -36,70 +36,45 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .section { padding: 64px 0; }
 .section--tight { padding: 40px 0; }
 
-/* --- HEADER STYLE GITBOOK --- */
+/* --- HEADER GITBOOK STYLE --- */
 .header {
   position: sticky; top: 0; z-index: 50;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bp-border);
-  height: 72px; display: flex; align-items: center;
+  height: 64px; display: flex; align-items: center;
 }
-.nav { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.nav { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 
 .brand__logo {
-  width: 42px; height: 42px;
+  width: 36px; height: 36px;
   border-radius: 8px;
   background: #fff; border: 1px solid var(--bp-border);
   display: block;
 }
 
-/* --- ANIMATION MENU NAV --- */
-.nav__links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+/* Barre de recherche (Style GitBook) */
+.navSearch {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bp-surface-alt); border: 1px solid var(--bp-border);
+  padding: 6px 12px; border-radius: 8px; color: var(--bp-text-muted);
+  font-size: 14px; cursor: default; transition: all 0.2s;
+  width: 240px; margin-right: auto; margin-left: 16px;
+}
+.navSearch:hover { border-color: #CBD5E1; color: var(--bp-text-main); }
+.navSearch kbd {
+  border: 1px solid var(--bp-border); border-radius: 4px; padding: 2px 4px;
+  font-size: 10px; font-family: inherit; background: #fff; margin-left: auto;
 }
 
+.nav__links { display: flex; align-items: center; gap: 8px; }
 .nav__links a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  color: var(--bp-text-muted);
-  font-weight: 500;
-  font-size: 14px;
-  text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none; color: var(--bp-text-muted);
+  font-weight: 500; font-size: 14px; padding: 8px 12px;
+  border-radius: 6px; transition: all 0.2s;
 }
-
-.nav__links a svg {
-  opacity: 0.7;
-  transition: transform 0.2s ease;
-}
-
-/* Effet Hover (Style GitBook) */
-.nav__links a:hover {
-  background-color: var(--bp-surface-alt);
-  color: var(--bp-text-main);
-}
-
-.nav__links a:hover svg {
-  opacity: 1;
-  transform: translateY(-1px);
-}
-
-/* État Actif */
-.nav__links a.active {
-  background-color: var(--bp-primary-soft);
-  color: var(--bp-primary);
-  font-weight: 600;
-}
-
-.nav__links a.active svg {
-  opacity: 1;
-  color: var(--bp-primary);
-}
+.nav__links a:hover { color: var(--bp-text-main); background: var(--bp-surface-alt); }
+.nav__links a.active { color: var(--bp-primary); background: var(--bp-primary-soft); }
 
 .navToggle { display: none; border: 1px solid var(--bp-border); background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; color: var(--bp-text-muted); }
 
@@ -124,6 +99,7 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .cardPad { padding: 32px; }
 .cardTitle { font-weight: 600; font-size: 1.1rem; margin-bottom: 12px; color: var(--bp-text-main); }
 .cardSub { color: var(--bp-text-muted); font-size: 0.95rem; margin: 0; }
+.tip { border-bottom: 1px dotted var(--bp-text-muted); cursor: help; }
 
 /* --- WIDGETS --- */
 .bp-section-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 8px; color: var(--bp-text-main); }
@@ -138,40 +114,60 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 }
 .btn--primary { background: var(--bp-primary); border-color: var(--bp-primary); color: #fff; }
 .btn--primary:hover { background: var(--bp-primary-hover); border-color: var(--bp-primary-hover); }
+.btn--text { border:none; background:none; color:var(--bp-text-muted); text-decoration:none; padding:0; }
+.btn--text:hover { color: var(--bp-primary); text-decoration: underline; }
 
 .input, .select, textarea {
-  width: 100%; padding: 10px 14px; border-radius: 12px;
+  width: 100%; padding: 10px 14px; border-radius: 8px;
   border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main);
-  font-size: 15px; outline: none; transition: border-color 0.2s; font-family: inherit;
+  font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit;
 }
-.input:focus { border-color: var(--bp-primary); }
+.input:focus, .select:focus, textarea:focus { border-color: var(--bp-primary); box-shadow: 0 0 0 3px var(--bp-primary-soft); }
 
-/* --- CHIPS & PILLS --- */
+/* --- CHIPS --- */
 .scenarioChips .chip {
   border: 1px solid var(--bp-border); background: #fff;
   border-radius: 6px; padding: 6px 12px; font-size: 13px; font-weight: 500;
   cursor: pointer; color: var(--bp-text-muted); transition: all 0.2s;
 }
+.scenarioChips .chip:hover { border-color: var(--bp-text-muted); }
 .scenarioChips .chip.active, .pill.is-active {
   background: var(--bp-primary-soft); color: var(--bp-primary); border-color: var(--bp-primary); font-weight: 600;
 }
 .pill { text-decoration: none; color: var(--bp-text-muted); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; }
 
+/* --- SIGNATURE IFRAMES FIX (Background blanc pour éviter le vide) --- */
+.signatureFrames { display: flex; flex-direction: column; gap: 24px; width: 100%; margin-top: 24px; }
+.signatureFrames iframe {
+  width: 100%; border: 0; min-height: 800px;
+  background: #fff; border-radius: 12px;
+  border: 1px solid var(--bp-border); box-shadow: var(--bp-shadow-card);
+}
+iframe[style*="display: none"] { display: none !important; }
+
 /* --- YIELD CARDS --- */
 .ycard { border: 1px solid var(--bp-border); border-radius: 8px; background: var(--bp-surface-alt); padding: 16px; }
 .ycard .n { font-size: 1.5rem; font-weight: 700; color: var(--bp-primary); margin-top: 4px; }
+.bullets { padding-left: 20px; margin: 12px 0; color: var(--bp-text-muted); font-size: 15px; }
+.mini { border: 1px solid var(--bp-border); padding: 12px; border-radius: 8px; background: var(--bp-surface-alt); }
+.mini strong { display: block; margin-bottom: 4px; color: var(--bp-text-main); font-size: 14px; }
 
-/* --- MOBILE --- */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+
 @media (max-width: 860px) {
   .navToggle { display: inline-flex; }
+  .navSearch { display: none; } /* On cache la recherche sur mobile pour simplifier */
   .nav__links {
-    display: none; position: absolute; left: 0; right: 0; top: 72px;
+    display: none; position: absolute; left: 0; right: 0; top: 64px;
     background: #fff; border-bottom: 1px solid var(--bp-border);
     padding: 24px; flex-direction: column; align-items: flex-start; gap: 8px;
   }
   body.menu-open .nav__links { display: flex; }
+  .tv-widget-wrapper { height: 400px; }
   .hero__grid, .grid2, .grid3 { display: block; }
-  .h1 { font-size: 32px; }
+  .grid2 > div, .grid3 > div { margin-bottom: 24px; }
+  .h1 { font-size: 36px; }
 }
 
 .footer { padding: 48px 0; border-top: 1px solid var(--bp-border); color: var(--bp-text-muted); font-size: 14px; }

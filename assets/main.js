@@ -1,159 +1,286 @@
-/* --- BLOCKPILOT DESIGN SYSTEM (Patch V3) --- */
-:root {
-  --bp-bg: #FFFFFF;
-  --bp-surface: #FFFFFF;
-  --bp-surface-alt: #F8FAFC;
-  --bp-border: #E2E8F0;
-  --bp-text-main: #0F172A;
-  --bp-text-muted: #64748B;
-  --bp-primary: #3C756E; 
-  --bp-primary-hover: #2E5C56;
-  --bp-primary-soft: rgba(60, 117, 110, 0.08);
+/* assets/main.js - BlockPilot Pro (Robust Instant Load) */
+(async () => {
+  const $ = (s, el=document) => el.querySelector(s);
+  const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+  const fmtNum = (v, max=2) => !isFinite(v) ? "—" : new Intl.NumberFormat(undefined, { maximumFractionDigits: max }).format(v);
   
-  --bp-radius-card: 12px;
-  --bp-radius-ui: 8px;
+  const LANG = document.body?.dataset?.lang || "fr";
+  const I18N = {
+    fr: {
+      menu: "Menu", close: "Fermer", 
+      priceHint: (px, unit, scn) => `Prix réf : ~${px} $/${unit}. Hypothèse : +${(scn*100).toFixed(0)}%/an (Moyenne historique).`,
+      chartLabel: "Stratégie BlockPilot (Yield + Prix)",
+      chartHold: "Holding Passif (Prix seul)"
+    },
+    en: {
+      menu: "Menu", close: "Close",
+      priceHint: (px, unit, scn) => `Ref price: ~$${px}/${unit}. Assumption: +${(scn*100).toFixed(0)}%/yr (Historical avg).`,
+      chartLabel: "BlockPilot Strategy (Yield + Price)",
+      chartHold: "Passive Holding (Price only)"
+    }
+  };
+  const T = I18N[LANG] || I18N.fr;
+
+  // --- DATA DEFAULTS (Hardcoded for instant render) ---
+  let CFG = { yields: { stables:0.12, btc:0.04, eth:0.05, bnb:0.13, eur:0.04 } };
+  let PRICES = { btc:96000, eth:3300, bnb:610, stables:1, eur:1.05 };
   
-  --bp-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --bp-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-  --bp-shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.05);
-  
-  --max: 1080px;
-}
+  const CAGR = { stables: 0, eur: 0, btc: 0.45, eth: 0.55, bnb: 0.40 };
 
-* { box-sizing: border-box; }
-html { height: 100%; scroll-behavior: smooth; }
-body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif; color: var(--bp-text-main); line-height: 1.5; -webkit-font-smoothing: antialiased; }
-
-/* LAYOUT */
-.container, .container-premium { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
-.section { padding: 64px 0; }
-.section--tight { padding: 32px 0; }
-
-/* --- HEADER --- */
-.header {
-  position: sticky; top: 0; z-index: 50;
-  background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--bp-border); height: 64px; display: flex; align-items: center;
-}
-.nav { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; position: relative; }
-
-.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--bp-text-main); font-weight: 800; }
-
-.nav__links { display: flex; align-items: center; gap: 8px; }
-.nav__links a {
-  display: flex; align-items: center; gap: 8px;
-  text-decoration: none; color: var(--bp-text-muted); font-weight: 500; font-size: 14px;
-  padding: 8px 12px; border-radius: var(--bp-radius-ui);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.nav__links a svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; transition: transform 0.2s; }
-.nav__links a:hover { color: var(--bp-text-main); background: var(--bp-surface-alt); }
-.nav__links a:hover svg { transform: translateY(-1px); opacity: 1; }
-.nav__links a.active { color: var(--bp-primary); background: var(--bp-primary-soft); }
-
-.navToggle { display: none; background: none; border: none; font-weight: 600; color: var(--bp-text-main); cursor: pointer; }
-
-.lang { display: flex; gap: 4px; align-items: center; }
-.pill { 
-  font-size: 12px; font-weight: 700; color: var(--bp-text-muted); padding: 4px 8px; 
-  text-decoration: none; border-radius: 6px; transition: all 0.2s; 
-}
-.pill:hover { color: var(--bp-text-main); background: var(--bp-surface-alt); }
-.pill.is-active { background: var(--bp-text-main); color: #fff; }
-
-/* --- UI COMPONENTS --- */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 24px; border-radius: var(--bp-radius-ui);
-  font-weight: 600; text-decoration: none; font-size: 14px;
-  border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main); 
-  box-shadow: var(--bp-shadow-btn); transition: all 0.2s; cursor: pointer;
-}
-.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-.btn--primary { background: var(--bp-primary); border-color: var(--bp-primary); color: #fff; }
-.btn--primary:hover { background: var(--bp-primary-hover); }
-.btn--text { border: none; background: transparent; shadow: none; padding: 0 16px; }
-.btn--text:hover { background: var(--bp-surface-alt); transform: none; box-shadow: none; }
-
-.bp-card {
-  background: var(--bp-surface); border: 1px solid var(--bp-border);
-  border-radius: var(--bp-radius-card); box-shadow: var(--bp-shadow-card);
-  padding: 32px; margin-bottom: 32px; transition: all 0.2s;
-}
-.bp-card:hover { box-shadow: var(--bp-shadow-hover); transform: translateY(-2px); }
-
-/* --- WIDGET FIX (TradingView) --- */
-.tv-widget-wrapper {
-  height: 500px; /* Hauteur forcée pour empêcher l'écrasement */
-  width: 100%;
-  position: relative;
-}
-
-/* TYPOGRAPHY */
-.h1 { font-size: 48px; letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 24px; font-weight: 800; }
-.lead { font-size: 18px; color: var(--bp-text-muted); margin: 0 0 32px; }
-
-.bp-section-header { text-align: center; margin-bottom: 48px; max-width: 600px; margin-left: auto; margin-right: auto; }
-.bp-section-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 12px; color: var(--bp-text-main); }
-.bp-section-subtitle { font-size: 16px; color: var(--bp-text-muted); }
-
-.cardTitle { font-weight: 700; font-size: 16px; margin-bottom: 8px; color: var(--bp-text-main); }
-.cardSub { font-size: 14px; color: var(--bp-text-muted); margin: 0; line-height: 1.5; }
-.mini { padding: 16px 0; border-bottom: 1px solid var(--bp-border); }
-.mini:last-child { border-bottom: none; }
-.mini strong { display: block; font-size: 14px; margin-bottom: 2px; }
-
-/* BULLETS */
-.bullets { list-style: none; padding: 0; margin: 0 0 24px; }
-.bullets li { position: relative; padding-left: 24px; margin-bottom: 8px; color: var(--bp-text-muted); font-size: 15px; }
-.bullets li::before { 
-  content: "•"; color: var(--bp-primary); position: absolute; left: 6px; font-weight: bold; font-size: 18px; line-height: 1.4; 
-}
-.tip { border-bottom: 1px dotted var(--bp-text-muted); cursor: help; }
-
-/* GRIDS */
-.hero__grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 48px; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
-
-/* FORMS */
-.input, .select, textarea {
-  width: 100%; padding: 10px 14px; 
-  border-radius: var(--bp-radius-ui); border: 1px solid var(--bp-border); 
-  background: #fff; color: var(--bp-text-main); font-size: 15px; outline: none;
-}
-.input:focus { border-color: var(--bp-primary); box-shadow: 0 0 0 3px var(--bp-primary-soft); }
-
-.scenarioChips .chip {
-  border: 1px solid var(--bp-border); background: #fff; border-radius: var(--bp-radius-ui);
-  padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer;
-}
-.scenarioChips .chip:hover { border-color: #CBD5E1; background: var(--bp-surface-alt); }
-.scenarioChips .chip.active { background: var(--bp-primary-soft); color: var(--bp-primary); border-color: var(--bp-primary); font-weight: 600; }
-
-.yieldCards .ycard { border: 1px solid var(--bp-border); border-radius: 8px; padding: 12px; text-align: center; }
-.yieldCards .n { font-weight: 700; font-size: 18px; color: var(--bp-primary); margin-top: 4px; }
-
-/* RESPONSIVE */
-@media (max-width: 860px) {
-  .hero__grid, .grid2, .grid3 { display: block !important; }
-  .grid2 > div, .grid3 > div { margin-bottom: 24px; }
-  
-  /* Mobile Menu */
-  .navToggle { display: block; }
-  .nav__links { 
-    display: none; position: absolute; top: 64px; left: 0; right: 0; 
-    background: rgba(255,255,255,0.98); backdrop-filter: blur(10px);
-    flex-direction: column; padding: 24px; border-bottom: 1px solid var(--bp-border);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05); align-items: stretch;
+  async function fetchJSON(url) {
+    try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; }
   }
-  .nav__links a { justify-content: flex-start; padding: 12px; font-size: 16px; }
-  
-  body.menu-open .nav__links { display: flex; }
-  
-  .h1 { font-size: 34px; }
-  .bp-card { padding: 24px; }
-  .tv-widget-wrapper { height: 400px; } /* Ajustement mobile pour le widget */
-}
 
-.footer { padding: 48px 0; border-top: 1px solid var(--bp-border); color: var(--bp-text-muted); font-size: 14px; text-align: center; margin-top: auto; }
+  // --- UI UPDATERS ---
+  function fillApr(yields) {
+    const set=(id, v)=>{ const el=$(id); if (el) el.textContent=(Number(v||0)*100).toFixed(0)+"%"; };
+    set("#aprStables", yields.stables);
+    set("#aprBtc", yields.btc);
+    set("#aprEth", yields.eth);
+    set("#aprBnb", yields.bnb);
+    set("#aprEur", yields.eur);
+  }
+
+  async function loadPricesUSD() {
+    try {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+      if(res.ok) {
+        const data = await res.json();
+        data.forEach(t => {
+            if(t.symbol==="BTCUSDT") PRICES.btc = Number(t.price);
+            if(t.symbol==="ETHUSDT") PRICES.eth = Number(t.price);
+            if(t.symbol==="BNBUSDT") PRICES.bnb = Number(t.price);
+            if(t.symbol==="EURUSDT") PRICES.eur = Number(t.price);
+        });
+      }
+    } catch(e) { console.log("Price fetch failed, using defaults"); }
+  }
+
+  // --- CHART ENGINE ---
+  let growthChart = null;
+  function computeTokens(principalTokens, apr, years) {
+    const n=12; const r=apr/n;
+    return principalTokens*Math.pow(1+r, n*years);
+  }
+
+  function initChart(ctx) {
+    if(!ctx) return null;
+    if(window.growthChartInstance) window.growthChartInstance.destroy(); // Safety cleanup
+    
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: T.chartLabel,
+            data: [],
+            borderColor: '#3C756E',
+            backgroundColor: 'rgba(60, 117, 110, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 0, 
+            pointHitRadius: 10
+          },
+          {
+            label: T.chartHold,
+            data: [],
+            borderColor: '#94A3B8',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            tension: 0.4,
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20, color: '#64748B' } },
+          tooltip: { 
+            mode: 'index', intersect: false, 
+            backgroundColor: '#0F172A', titleColor: '#94A3B8', bodyFont: { weight: 'bold' },
+            callbacks: { label: (c) => ` ${c.dataset.label}: $${Math.round(c.raw).toLocaleString()}` }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#94A3B8' } },
+          y: { grid: { color: '#F1F5F9' }, ticks: { callback: (v)=> '$' + (v/1000).toFixed(0) + 'k', color: '#64748B' } }
+        },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+      }
+    });
+  }
+
+  function updateChartData(chart, principalUSD, apr, priceScenario, duration, asset) {
+    if(!chart) return;
+    const labels = [];
+    const dataBP = [];
+    const dataHold = [];
+    const startPrice = asset==="eur" ? PRICES.eur : (asset==="stables"?1:PRICES[asset]);
+    const tokenAmount = principalUSD / startPrice;
+
+    for(let y=0; y<=duration; y++) {
+      labels.push(LANG==="fr" ? `Année ${y}` : `Year ${y}`);
+      const projectedPrice = startPrice * Math.pow(1 + priceScenario, y);
+      const valHold = tokenAmount * projectedPrice;
+      const tokensWithYield = computeTokens(tokenAmount, apr, y);
+      const valStrat = tokensWithYield * projectedPrice;
+      dataHold.push(valHold);
+      dataBP.push(valStrat);
+    }
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = dataBP;
+    chart.data.datasets[1].data = dataHold;
+    chart.update();
+  }
+
+  // --- MAIN LOGIC ---
+  let durationYears = 3;
+
+  function recalculateAll() {
+    const amount=$("#amountUSD");
+    const assetSel=$("#assetSel");
+    const scenarioWrap=$("#priceScenarios");
+    const stableNote=$("#stableScenarioNote");
+    const priceMeta=$("#priceMeta");
+
+    const rawVal = (amount?.value ?? "").replace(/\s/g, "").replace(",", ".");
+    const usdInput = rawVal ? Number(rawVal) : 0;
+    const asset = assetSel?.value || "eth"; 
+    const apr = Number(CFG.yields?.[asset] ?? 0);
+    
+    // Smart Scenario
+    const scenario = CAGR[asset] || 0;
+    const isStable = asset==="stables" || asset==="eur";
+
+    // UI State
+    $$("#durationChips .chip").forEach(c => c.classList.toggle("active", Number(c.dataset.duration)===durationYears));
+    
+    if(scenarioWrap) {
+        if(isStable) {
+            scenarioWrap.innerHTML = `<span class="chip active" style="cursor:default; opacity:0.8;">${LANG==="fr"?"Prix Fixe":"Fixed Price"}</span>`;
+            if(stableNote) stableNote.style.display="none";
+        } else {
+            const txt = `+${(scenario*100).toFixed(0)}%/an (Avg)`;
+            scenarioWrap.innerHTML = `<span class="chip active" style="cursor:default; border-color:var(--bp-primary); color:var(--bp-primary); background:var(--bp-primary-soft);">${txt}</span>`;
+            if(stableNote) stableNote.style.display="none";
+        }
+    }
+
+    if (!usdInput) { 
+        $$(".sim-val").forEach(e=>e.textContent="—"); 
+        ["#val12Scn", "#gainText", "#tokenGainText"].forEach(id=>{ const el=$(id); if(el) el.textContent=""; });
+        return; 
+    }
+
+    // Maths
+    const tokenPrice = asset==="eur" ? PRICES.eur : (asset==="stables"?1:PRICES[asset]);
+    const principalTokens = usdInput / tokenPrice;
+    const finalTokens = computeTokens(principalTokens, apr, durationYears);
+    const gainedTokens = finalTokens - principalTokens;
+    const priceGrowth = Math.pow(1+scenario, durationYears);
+    const finalPrice = tokenPrice * priceGrowth;
+    const finalDollars = finalTokens * finalPrice;
+    const gainDollars = finalDollars - usdInput;
+
+    // Text Updates
+    const fmtUSD = (v) => new Intl.NumberFormat(undefined, { style:"currency", currency: "USD", maximumFractionDigits:0 }).format(v);
+    const fmtTok = (v) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(v);
+    
+    const set=(id,t)=>{ const el=$(id); if(el) el.textContent=t; };
+    set("#val12Scn", fmtUSD(finalDollars));
+    
+    const gainEl = $("#gainText");
+    if(gainEl) {
+        const profitLabel = LANG==="fr" ? "de profit total" : "total profit";
+        gainEl.textContent = `+ ${fmtUSD(gainDollars)} ${profitLabel}`;
+        gainEl.style.color = "#3C756E"; 
+    }
+
+    const tokenGainEl = $("#tokenGainText");
+    let unit = asset.toUpperCase();
+    if(asset==="stables") unit="USDT";
+    
+    if(tokenGainEl) {
+        if(!isStable) {
+            tokenGainEl.style.display = "block";
+            const txt = LANG==="fr" ? `dont + ${fmtTok(gainedTokens)} ${unit} générés par BlockPilot` : `incl. + ${fmtTok(gainedTokens)} ${unit} generated by BlockPilot`;
+            tokenGainEl.textContent = txt;
+        } else {
+            tokenGainEl.style.display = "none";
+        }
+    }
+    
+    if(priceMeta) priceMeta.textContent = isStable ? "" : T.priceHint(fmtNum(tokenPrice,0), unit, scenario);
+
+    if(growthChart) updateChartData(growthChart, usdInput, apr, scenario, durationYears, asset);
+  }
+
+  function initSimulator() {
+    const amount=$("#amountUSD");
+    const assetSel=$("#assetSel");
+    const chartCanvas = $("#compoundChart");
+
+    if(chartCanvas && window.Chart) growthChart = initChart(chartCanvas);
+
+    // Initial Default Values
+    if(amount && !amount.value) amount.value = "10000";
+    if(assetSel) assetSel.value = "eth"; // Force ETH Default
+
+    // Event Listeners
+    $$("#durationChips .chip").forEach(b => b.addEventListener("click", (e) => {
+        durationYears=Number(b.dataset.duration);
+        recalculateAll();
+    }));
+    amount?.addEventListener("input", recalculateAll);
+    assetSel?.addEventListener("change", recalculateAll);
+
+    // Render immediately with defaults
+    fillApr(CFG.yields);
+    recalculateAll();
+  }
+
+  function initMobileMenu() {
+    const t=$("#navToggle"); // Le bouton est maintenant géré par header.js mais on garde une sécurité
+    // Le vrai initMenu est dans header.js, mais si main.js charge après, on s'assure qu'il ne casse rien
+  }
+
+  function initSignature() {
+    const btns=$$('[data-signature-view]');
+    const frames={ sign: $("#signatureSign"), verify: $("#signatureVerify") };
+    if(!btns.length) return;
+    function setView(v) {
+        btns.forEach(b => b.classList.toggle("active", b.dataset.signatureView===v));
+        if(frames.sign) frames.sign.style.display = v==="sign" ? "block" : "none";
+        if(frames.verify) frames.verify.style.display = v==="verify" ? "block" : "none";
+        const lang = (localStorage.getItem("bp_lang")||"fr").includes("en") ? "en" : "fr";
+        const f = frames[v];
+        if(f && !f.getAttribute("src")) f.src = `../${v==="verify"?"verify":"sign"}.html?embed=1&lang=${lang}`;
+    }
+    btns.forEach(b => b.onclick=()=>setView(b.dataset.signatureView));
+    setView("sign");
+  }
+
+  async function init() {
+    // initMobileMenu(); // Désactivé ici car géré par header.js pour éviter les conflits
+    initSignature();
+    initSimulator(); // Render UI immediately with hardcoded defaults
+
+    // Async Fetch updates (Background)
+    const newCfg = await fetchJSON("../data/blockpilot.json");
+    if(newCfg?.yields) {
+        CFG.yields = { ...CFG.yields, ...newCfg.yields };
+        fillApr(CFG.yields); // Update Yield cards
+        recalculateAll(); // Update Sim
+    }
+    
+    await loadPricesUSD(); // Fetch real prices
+    recalculateAll(); // Update Sim with real prices
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();

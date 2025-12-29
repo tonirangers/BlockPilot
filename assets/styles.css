@@ -106,24 +106,52 @@ body { height: 100%; margin: 0; background-color: var(--bp-surface-alt); font-fa
 .bp-section-subtitle { font-size: 1rem; color: var(--bp-text-muted); font-weight: 400; line-height: 1.6; }
 .tv-widget-wrapper { width: 100%; height: 520px; position: relative; }
 
-/* --- BOUTONS & INPUTS --- */
+/* --- BOUTONS (Style GitBook Premium) --- */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 20px; border-radius: 99px; font-weight: 600; text-decoration: none; font-size: 14px;
-  border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main); transition: all 0.2s;
-}
-.btn--primary { background: var(--bp-primary); border-color: var(--bp-primary); color: #fff; }
-.btn--primary:hover { background: var(--bp-primary-hover); border-color: var(--bp-primary-hover); }
-.btn--text { border:none; background:none; color:var(--bp-text-muted); text-decoration:none; padding:0; }
-.btn--text:hover { color: var(--bp-primary); text-decoration: underline; }
-
-.input, .select, textarea {
-  width: 100%; padding: 10px 14px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  /* Ajout crucial pour l'espace icône/texte */
+  gap: 8px; 
+  padding: 12px 28px; border-radius: var(--bp-radius-pill);
+  font-weight: 700; text-decoration: none; font-size: 14px;
   border: 1px solid var(--bp-border); background: #fff; color: var(--bp-text-main);
-  font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit;
+  /* Transition "snappy" (rapide et fluide) style GitBook */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  /* Ombre de base très légère */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  will-change: transform, box-shadow; /* Optimisation des performances */
 }
-.input:focus, .select:focus, textarea:focus { border-color: var(--bp-primary); box-shadow: 0 0 0 3px var(--bp-primary-soft); }
 
+/* L'effet "Lift" au survol (valable pour tous les boutons) */
+.btn:hover {
+  /* Le bouton remonte de 2px */
+  transform: translateY(-2px);
+  /* L'ombre s'agrandit vers le bas pour l'effet de profondeur */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Bouton Primaire (Vert) */
+.btn--primary { 
+  background: var(--bp-primary); border-color: var(--bp-primary); color: #fff;
+  /* Ombre légèrement colorée pour le bouton principal */
+  box-shadow: 0 1px 3px rgba(60, 117, 110, 0.2);
+}
+.btn--primary:hover { 
+  background: var(--bp-primary-hover); 
+  /* L'ombre devient plus intense au survol */
+  box-shadow: 0 6px 12px -2px rgba(60, 117, 110, 0.3);
+}
+
+/* Bouton Ghost (Email) */
+.btn--ghost { 
+  background: transparent; color: var(--bp-text-muted); border-color: var(--bp-border); 
+  box-shadow: none; /* Pas d'ombre au repos pour le ghost */
+}
+.btn--ghost:hover { 
+  background: var(--bp-surface-alt); color: var(--bp-text-main); border-color: #CBD5E1;
+  /* L'ombre apparaît uniquement au survol ici */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
 /* --- CHIPS --- */
 .scenarioChips .chip {
   border: 1px solid var(--bp-border); background: #fff;

@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlockPilot — Signature & Vérification</title>
+  <title>BlockPilot Capital — Approbation</title>
   <link rel="stylesheet" href="../assets/styles.css" />
-  
   <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/build/sha3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -14,36 +13,39 @@
     .sig-section.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Style des onglets Standard/Seed */
     .mode-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .mode-tab { padding: 8px 16px; border-radius: 99px; border: 1px solid var(--bp-border); background: #fff; cursor: pointer; font-weight: 700; font-size: 14px; color: var(--bp-primary); }
-    .mode-tab.active { background: var(--bp-primary); color: #fff; }
+    .mode-tab { padding: 8px 20px; border-radius: 99px; border: 1px solid var(--bp-border); background: #fff; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--bp-text-muted); transition: 0.2s; }
+    .mode-tab.active { background: var(--bp-primary-soft); color: var(--bp-primary); border-color: var(--bp-primary); }
 
-    /* Zone de résultat détaillée (le bloc que tu aimes) */
-    .output-box { background: rgba(238,247,245,.45); padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid var(--bp-border); text-align: left; }
-    .token-box { background: rgba(11,111,102,.08); border: 1px solid var(--bp-border); padding: 16px; border-radius: 12px; margin-top: 14px; }
-    .token-box code { background: #fff; padding: 8px; border-radius: 8px; display: block; margin: 8px 0; font-size: 11px; word-break: break-all; border: 1px solid var(--bp-border); }
+    .output-box { background: var(--bp-surface-alt); padding: 24px; border-radius: 12px; margin-top: 20px; border: 1px solid var(--bp-border); }
+    .token-box { background: #fff; border: 1px solid var(--bp-border); padding: 20px; border-radius: 12px; margin-top: 16px; }
+    .token-box code { background: var(--bp-surface-alt); padding: 12px; border-radius: 8px; display: block; margin: 12px 0; font-size: 11px; word-break: break-all; border: 1px solid var(--bp-border); font-family: monospace; }
     
-    .tech-details { margin-top: 20px; padding: 15px; background: var(--bp-surface-alt); border-radius: 8px; font-size: 13px; border: 1px solid var(--bp-border); }
-    .copy-btn { background: var(--bp-primary); color: #fff; padding: 8px 14px; border: 0; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+    /* Accordéon Tech */
+    .tech-trigger { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--bp-text-muted); display: flex; align-items: center; gap: 8px; margin-top: 24px; }
+    .tech-content { display: none; margin-top: 12px; padding: 16px; background: var(--bp-surface-alt); border-radius: 8px; font-size: 12px; border: 1px solid var(--bp-border); }
+    .tech-content.show { display: block; }
+
+    .verify-area { width: 100%; height: 160px; font-family: monospace; font-size: 13px; margin: 16px 0; border-radius: 12px; }
     
-    .verify-area { width: 100%; height: 180px; font-family: monospace; font-size: 13px; margin: 15px 0; }
+    /* Status UI améliorée */
+    .status-valid { color: #166534; background: #f0fdf4; padding: 16px; border-radius: 8px; border: 1px solid #bbf7d0; font-weight: 600; }
   </style>
 </head>
 <body data-lang="fr">
   <header class="header">
     <div class="container">
       <nav class="nav">
-        <a class="brand" href="../fr/#overview"><img class="brand__logo" src="../logo.png" alt="BlockPilot" /></a>
+        <a class="brand" href="./index.html"><img class="brand__logo" src="../logo.png" alt="BlockPilot" /></a>
         <button class="navToggle" id="navToggle">Menu</button>
         <div class="nav__links">
-          <a href="../fr/#performance">Performance</a>
-          <a href="../fr/#security">Sécurité</a>
+          <a href="./index.html#performance">Performance</a>
+          <a href="./index.html#security">Sécurité</a>
           <a id="navDocs" href="#docs" style="opacity:0.5;">Docs</a>
           <a href="./signature.html" class="active">Signature</a>
         </div>
         <div class="lang">
-          <a class="pill is-active" href="../fr/signature.html">FR</a>
+          <a class="pill is-active" href="./signature.html">FR</a>
           <a class="pill" href="../en/signature.html">EN</a>
         </div>
       </nav>
@@ -52,68 +54,77 @@
 
   <main class="section">
     <div class="container">
-      <h1 class="h1">Signature Officielle</h1>
-      <p class="p">Approuvez vos conditions ou vérifiez l'authenticité d'un document BPC avec la preuve on-chain.</p>
+      <h1 class="h1">Approbation des Conditions</h1>
+      <p class="p">Signez nos conditions générales de manière immuable. Grâce à la cryptographie, votre accord est gravé dans le marbre pour une transparence totale.</p>
 
       <div class="scenarioChips" style="margin-bottom: 32px;">
-        <button class="chip active" id="tabSign" onclick="switchMainView('sign', this)">✍️ Signer les Conditions</button>
-        <button class="chip" id="tabVerify" onclick="switchMainView('verify', this)">🔍 Vérifier une Signature</button>
+        <button class="chip active" id="tabSign" onclick="switchMainView('sign', this)">Signer le document</button>
+        <button class="chip" id="tabVerify" onclick="switchMainView('verify', this)">Vérifier une signature</button>
       </div>
 
       <div class="bp-card">
         
         <div id="view-sign" class="sig-section active">
           <div class="mode-tabs">
-            <div class="mode-tab active" id="btn-std" onclick="switchMode('standard')">Standard</div>
-            <div class="mode-tab" id="btn-seed" onclick="switchMode('seed')">Seed</div>
+            <div class="mode-tab active" id="btn-std" onclick="switchMode('standard')">Configuration SAFE</div>
+            <div class="mode-tab" id="btn-seed" onclick="switchMode('seed')">Portefeuille EOA</div>
           </div>
 
-          <h2 class="cardTitle" id="display-title">Sign Terms & Conditions</h2>
-          <p class="cardSub" id="display-sub">En signant, vous confirmez avoir lu et accepté les conditions officielles BPC.</p>
-          <p style="font-size: 13px; font-weight: 700; color: var(--bp-text-muted); margin: 10px 0;">Signature off-chain (0 gas) — aucune transaction n'est envoyée.</p>
-
-          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin: 24px 0;">
-            <a id="pdfLink" href="../BPC_Terms.pdf" target="_blank" class="btn">📄 Voir le PDF</a>
-            <button id="signBtn" class="btn btn--primary" onclick="processSignature()">✍️ Signer avec le Wallet</button>
+          <h2 class="cardTitle" id="display-title">Conditions Générales BlockPilot Capital</h2>
+          <p class="cardSub" id="display-sub">En signant, vous confirmez avoir pris connaissance et accepté les conditions officielles.</p>
+          <div style="margin-top:12px; font-size: 13px; color: var(--bp-text-muted);">
+            Note : Signature cryptographique hors-chaîne (0 gas).
           </div>
 
-          <div class="tech-details">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong>Empreinte du document (hash Keccak-256)</strong>
-                <span id="pdfNameDisp" style="font-weight:700; font-size:11px;">BPC_Terms.pdf</span>
+          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 16px; margin: 32px 0;">
+            <a id="pdfLink" href="../BPC_Terms.pdf" target="_blank" class="btn">Consulter le document (PDF)</a>
+            <button id="signBtn" class="btn btn--primary" onclick="processSignature()">Signer avec le wallet</button>
+          </div>
+
+          <div class="tech-trigger" onclick="document.getElementById('tech-content').classList.toggle('show')">
+            <span>Propriétés d'intégrité technique</span>
+            <span style="font-size:10px;">▼</span>
+          </div>
+          <div class="tech-content" id="tech-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <strong>Empreinte numérique (Keccak-256)</strong>
+                <span id="pdfNameDisp" style="color:var(--bp-text-muted);">BPC_Terms.pdf</span>
             </div>
-            <div id="pdfHash" style="font-family:monospace; margin-top:8px; color:var(--bp-primary); word-break:break-all;">Calcul du hash...</div>
+            <div id="pdfHash" style="font-family:monospace; color:var(--bp-primary); font-size:11px;">Calcul de l'empreinte...</div>
           </div>
 
           <div id="signatureOutput" style="display:none;">
-            <div class="output-box" id="fullReceipt">
-                </div>
-            <div class="token-box" id="tokenContainer">
-                <strong>Token de vérification</strong>
+            <div class="output-box" id="fullReceipt"></div>
+            <div class="token-box">
+                <strong style="font-size:14px; color:var(--bp-primary);">Certificat de vérification</strong>
                 <code id="tokenValue"></code>
-                <button class="copy-btn" onclick="copyText('tokenValue')">Copier le token</button>
-                <div style="font-size:11px; color:var(--bp-text-muted); margin-top:8px;">Utilisez ce token dans l'onglet "Vérifier" pour confirmer la signature.</div>
+                <button class="btn" style="padding:6px 16px; font-size:12px;" onclick="copyText('tokenValue')">Copier le certificat</button>
+                <p style="font-size:11px; color:var(--bp-text-muted); margin-top:12px;">Ce certificat permet d'authentifier votre signature via l'onglet de vérification.</p>
             </div>
           </div>
         </div>
 
         <div id="view-verify" class="sig-section">
-          <h2 class="cardTitle">Vérifier une Signature</h2>
-          <p class="cardSub">Collez le token BPC1 ou le bloc signé pour valider l'identité et l'intégrité.</p>
+          <h2 class="cardTitle">Vérification d'intégrité</h2>
+          <p class="cardSub">Authentifiez un certificat BlockPilot Capital pour valider le signataire et le document.</p>
           
-          <textarea id="verifyInput" class="input verify-area" placeholder="Collez le token BPC1... OU le bloc 'Signed as: 0x...'"></textarea>
-          <button class="btn btn--primary" onclick="processVerification()">🔍 Vérifier la validité</button>
+          <textarea id="verifyInput" class="input verify-area" placeholder="Collez le certificat BPC1..."></textarea>
+          <button class="btn btn--primary" onclick="processVerification()">Vérifier la validité</button>
 
-          <div id="verifyResult" style="margin-top:20px;"></div>
+          <div id="verifyResult" style="margin-top:24px;"></div>
         </div>
 
       </div>
     </div>
   </main>
 
+  <footer class="footer">
+    <div class="container">© BlockPilot Capital 2025 · <a href="https://t.me/tonirangers">Telegram</a></div>
+  </footer>
+
   <script>
     const PDFs = { standard: '../BPC_Terms.pdf', seed: '../BPC_Terms_Seed.pdf' };
-    const DOC_IDS = { standard: 'BPC_Terms v1.0 (2025-11-07)', seed: 'BPC_Terms_Seed v1.0 (2025-11-07)' };
+    const DOC_IDS = { standard: 'BlockPilot Capital Terms v1.0', seed: 'BlockPilot Capital Seed Terms v1.0' };
     const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxEr5Wky-9oz2H7QMaWvc0Xi7-u1hEm1Et-ZtKoPyek4Gp2tXH2FN3sx_ys1JqPtRPTLw/exec';
 
     let currentMode = 'standard';
@@ -130,7 +141,7 @@
       currentMode = mode;
       document.getElementById('btn-std').classList.toggle('active', mode === 'standard');
       document.getElementById('btn-seed').classList.toggle('active', mode === 'seed');
-      document.getElementById('display-title').textContent = mode === 'standard' ? 'Sign Terms & Conditions' : 'Sign Terms & Conditions (Seed)';
+      document.getElementById('display-title').textContent = mode === 'standard' ? 'Conditions Générales BlockPilot Capital' : 'Conditions Seed BlockPilot Capital';
       document.getElementById('pdfLink').href = PDFs[mode];
       document.getElementById('pdfNameDisp').textContent = mode === 'standard' ? 'BPC_Terms.pdf' : 'BPC_Terms_Seed.pdf';
       document.getElementById('signatureOutput').style.display = 'none';
@@ -152,47 +163,51 @@
       if(!window.ethereum) return alert("Wallet non détecté.");
       const btn = document.getElementById('signBtn');
       try {
-        btn.disabled = true; btn.textContent = "⏳ Signature en cours...";
+        btn.disabled = true; btn.textContent = "Validation en cours...";
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const address = await signer.getAddress();
         const timestamp = new Date().toISOString();
-        const origin = location.origin;
 
-        const message = `I, ${address}, agree to the BPC Terms (${PDFs[currentMode]})\nDoc ID: ${DOC_IDS[currentMode]}\nOrigin: ${origin}\nPDF Hash: ${currentHash}\nSigned on: ${timestamp}`;
+        const message = `I, ${address}, agree to the BlockPilot Capital Terms (${PDFs[currentMode]})\nDoc ID: ${DOC_IDS[currentMode]}\nPDF Hash: ${currentHash}\nSigned on: ${timestamp}`;
         const signature = await signer.signMessage(message);
 
-        const payload = { address, mode: currentMode, pdf: PDFs[currentMode], pdfHash: currentHash, timestamp, signature, origin, docId: DOC_IDS[currentMode] };
+        const payload = { address, mode: currentMode, pdfHash: currentHash, timestamp, signature, docId: DOC_IDS[currentMode] };
         const token = 'BPC1.' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 
-        // Affichage du reçu détaillé (comme avant)
         document.getElementById('signatureOutput').style.display = 'block';
         document.getElementById('tokenValue').textContent = token;
         document.getElementById('fullReceipt').innerHTML = `
-            <div style="margin-bottom:10px;">✅ <b>Signé en tant que :</b> ${address}</div>
-            <div style="font-size:12px; line-height:1.6;">
-                🕒 <b>Horodatage :</b> ${timestamp}<br>
-                📄 <b>Doc ID :</b> ${DOC_IDS[currentMode]}<br>
-                🧮 <b>Hash PDF :</b> ${currentHash}<br>
-                ✍️ <b>Signature :</b> <span style="font-size:10px; font-family:monospace;">${signature.substring(0,40)}...</span>
+            <div class="status-valid">
+                Document approuvé avec succès par : ${address.substring(0,6)}...${address.substring(38)}
+            </div>
+            <div style="font-size:12px; line-height:1.6; color:var(--bp-text-muted); margin-top:16px;">
+                Horodatage : ${timestamp}<br>
+                ID Document : ${DOC_IDS[currentMode]}<br>
+                Empreinte immuable : ${currentHash.substring(0,20)}...
             </div>
         `;
         
         fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
-      } catch(e) { alert("Erreur."); }
-      finally { btn.disabled = false; btn.textContent = "✍️ Signer avec le Wallet"; }
+      } catch(e) { alert("Signature refusée."); }
+      finally { btn.disabled = false; btn.textContent = "Signer avec le wallet"; }
     }
 
     function processVerification() {
       const input = document.getElementById('verifyInput').value.trim();
       const resDiv = document.getElementById('verifyResult');
       try {
-        const raw = input.startsWith('BPC1.') ? atob(input.split('.')[1]) : input;
+        const raw = atob(input.split('.')[1]);
         const data = JSON.parse(decodeURIComponent(escape(raw)));
-        resDiv.innerHTML = `<div class="output-box" style="background:#f0fdf4;"><strong>✅ Signature Valide</strong><br>Signé par : ${data.address}<br>Document : ${data.docId}</div>`;
+        resDiv.innerHTML = `
+          <div class="status-valid">
+            Certificat authentique détecté<br>
+            <span style="font-size:13px; font-weight:400;">Signataire : ${data.address}</span><br>
+            <span style="font-size:13px; font-weight:400;">Document : ${data.docId}</span>
+          </div>`;
       } catch(e) {
-        resDiv.innerHTML = `<div class="output-box" style="background:#fef2f2;">❌ Format ou signature invalide</div>`;
+        resDiv.innerHTML = `<div style="padding:16px; background:#fef2f2; color:#991b1b; border-radius:8px; border:1px solid #fecaca;">Certificat invalide ou corrompu</div>`;
       }
     }
 

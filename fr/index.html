@@ -60,21 +60,47 @@
           </div>
         </div>
 
-        <aside id="setup" class="bp-card">
-          <div class="cardTitle">Fonctionnement</div>
-          <div style="display:grid; gap:16px;">
-            <div class="mini">
-              <strong>1. Configuration</strong>
-              <span style="color:var(--bp-text-muted); font-size:0.9rem;">On définit votre profil de risque.</span>
+<aside id="setup" class="bp-card" style="display:flex; flex-direction:column; justify-content:center;">
+          <div class="cardTitle" style="text-align:center; margin-bottom:8px;">Le circuit de vos fonds</div>
+          
+          <div class="iso-scene">
+            
+            <div class="iso-group">
+              <div class="iso-tile bank"></div>
+              <div class="iso-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4 8 4v14M5 10a2 2 0 0 0 2-2M19 10a2 2 0 0 1-2-2"/></svg>
+              </div>
+              <div class="iso-label">BANQUE</div>
             </div>
-            <div class="mini">
-              <strong>2. Dépôt</strong>
-              <span style="color:var(--bp-text-muted); font-size:0.9rem;">Vous alimentez votre coffre (virement ou crypto).</span>
+
+            <div class="iso-arrow"></div>
+
+            <div class="iso-group">
+              <div class="iso-tile transit"></div>
+              <div class="iso-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"/></svg>
+              </div>
+              <div class="iso-label">TRANSIT</div>
             </div>
-            <div class="mini">
-              <strong>3. Pilotage</strong>
-              <span style="color:var(--bp-text-muted); font-size:0.9rem;">J’optimise les intérêts, vous validez les retraits.</span>
+
+            <div class="iso-arrow"></div>
+
+            <div class="iso-group">
+              <div class="iso-tile safe"></div>
+              <div class="iso-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <div class="iso-label" style="color:#3C756E;">COFFRE</div>
             </div>
+
+          </div>
+
+          <div style="background:#F8FAFC; border-radius:8px; padding:16px; border:1px solid #E2E8F0; margin-top:16px;">
+            <ul class="bullets" style="margin:0; font-size:13px;">
+              <li><strong>Départ :</strong> Virement Euro classique.</li>
+              <li><strong>Transit :</strong> Conversion via prestataire régulé.</li>
+              <li><strong>Arrivée :</strong> Dépôt dans votre Safe personnel.</li>
+            </ul>
           </div>
         </aside>
       </div>

@@ -20,107 +20,88 @@
 <body data-lang="fr">
 
 <header class="header"></header>
-
-  <main id="overview" class="section">
+<main id="overview" class="section">
     <div class="container">
-      <div class="hero__grid" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:48px; align-items:start;">
+      <div class="hero__grid" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:64px; align-items:start;">
         
-        <div>
+        <div style="padding-top: 16px;">
           <h1 class="h1">Votre patrimoine numérique,<br>géré comme en banque privée.</h1>
-          <p class="lead">
-            BlockPilot optimise vos placements (Bitcoin, Ethereum, Stablecoins) pour générer du rendement. La différence ? Nous ne détenons jamais vos fonds.
+          <p class="lead" style="max-width: 500px;">
+            Optimisation de trésorerie et d'actifs numériques (BTC, ETH, Stablecoins).<br>
+            Sans risque de contrepartie : vous restez le seul détenteur des fonds.
           </p>
 
-          <div style="display:grid; gap:20px; margin-bottom:32px;">
+          <div style="display:grid; gap:24px; margin-bottom:40px; margin-top:32px;">
+            
             <div style="display:flex; gap:16px; align-items:start;">
-              <div style="background:var(--bp-surface-alt); padding:8px; border-radius:8px; color:var(--bp-primary);">
+              <div style="color:var(--bp-primary); padding-top:2px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
               </div>
               <div>
-                <strong style="display:block; font-size:15px; color:var(--bp-text-main); margin-bottom:2px;">Sécurité totale</strong>
-                <span style="font-size:14px; color:var(--bp-text-muted); line-height:1.5;">Aucun retrait possible sans votre signature.</span>
+                <strong style="display:block; font-size:16px; color:var(--bp-text-main); margin-bottom:4px;">Souveraineté (Architecture Safe™)</strong>
+                <span style="font-size:15px; color:var(--bp-text-muted); line-height:1.5;">Un coffre dédié à votre nom. Aucun mouvement de fonds sans votre signature électronique.</span>
               </div>
             </div>
 
             <div style="display:flex; gap:16px; align-items:start;">
-              <div style="background:var(--bp-surface-alt); padding:8px; border-radius:8px; color:var(--bp-primary);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <div style="color:var(--bp-primary); padding-top:2px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
               </div>
               <div>
-                <strong style="display:block; font-size:15px; color:var(--bp-text-main); margin-bottom:2px;">Sur-mesure</strong>
-                <span style="font-size:14px; color:var(--bp-text-muted); line-height:1.5;">Stratégie personnalisée et reporting humain.</span>
+                <strong style="display:block; font-size:16px; color:var(--bp-text-main); margin-bottom:4px;">Mandat de Gestion Actif</strong>
+                <span style="font-size:15px; color:var(--bp-text-muted); line-height:1.5;">Nous pilotons les stratégies de rendement pour vous. Reporting humain trimestriel.</span>
               </div>
             </div>
 
             <div style="display:flex; gap:16px; align-items:start;">
-              <div style="background:var(--bp-surface-alt); padding:8px; border-radius:8px; color:var(--bp-primary);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div style="color:var(--bp-primary); padding-top:2px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </div>
               <div>
-                <strong style="display:block; font-size:15px; color:var(--bp-text-main); margin-bottom:2px;">Simple</strong>
-                <span style="font-size:14px; color:var(--bp-text-muted); line-height:1.5;">On s'occupe de la technique, vous validez.</span>
+                <strong style="display:block; font-size:16px; color:var(--bp-text-main); margin-bottom:4px;">Transparence Totale</strong>
+                <span style="font-size:15px; color:var(--bp-text-muted); line-height:1.5;">Suivi des positions en temps réel et vérifiables publiquement (On-chain).</span>
               </div>
             </div>
-          </div>
 
-          <div class="bp-card" style="padding:24px; margin-bottom:32px; border:1px solid #E2E8F0; box-shadow:none; background:#F8FAFC;">
-             <div style="font-weight:700; margin-bottom:12px; color:var(--bp-primary);">L'offre BlockPilot</div>
-             <ul class="bullets" style="margin:0;">
-               <li>Un coffre sécurisé (Safe) à votre nom</li>
-               <li>Une stratégie de rendement active</li>
-               <li>Un suivi trimestriel clair</li>
-               <li>Vérification des fonds en temps réel</li>
-             </ul>
           </div>
 
           <div style="display:flex; gap:16px; align-items:center;">
             <a class="btn btn--primary" href="https://calendar.app.google/bQWcTHd22XDzuCt6A">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>Réserver un audit</span>
             </a>
-            
-            <a class="btn" href="mailto:contact@blockpilot.io">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              Email
+            <a class="btn btn--text" href="mailto:contact@blockpilot.io" style="padding-left:0;">
+              En savoir plus &rarr;
             </a>
           </div>
         </div>
 
         <aside id="setup" class="bp-card">
-          <div class="cardTitle">Votre Parcours d'Investisseur</div>
+          <div class="cardTitle" style="margin-bottom:24px;">Protocole d'Investissement</div>
           
-          <div style="margin-top:24px;">
+          <div>
             <div class="mini" style="padding-top:0;">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bp-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                <strong style="color:var(--bp-primary); font-size:15px;">1. Conseil & Setup</strong>
-              </div>
-              <span style="color:var(--bp-text-muted); font-size:0.95rem; line-height:1.6; display:block;">
-                On définit le profil. Configuration accompagnée de vos accès (Wallet Zeal, IBAN, Carte).
+              <strong style="color:var(--bp-primary); font-size:15px; display:block; margin-bottom:4px;">1. Onboarding Privé</strong>
+              <span style="color:var(--bp-text-muted); font-size:0.95rem; line-height:1.6;">
+                Définition du profil de risque. Mise en place assistée de votre infrastructure (Wallet, IBAN, Sécurité).
               </span>
             </div>
 
             <div class="mini">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bp-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <strong style="color:var(--bp-primary); font-size:15px;">2. Alimentation Flexible</strong>
-              </div>
-              <span style="color:var(--bp-text-muted); font-size:0.95rem; line-height:1.6; display:block;">
-                Virement Bancaire (EUR, CHF, USD) ou Crypto direct vers votre Safe sécurisé.
+              <strong style="color:var(--bp-primary); font-size:15px; display:block; margin-bottom:4px;">2. Apport de Capitaux</strong>
+              <span style="color:var(--bp-text-muted); font-size:0.95rem; line-height:1.6;">
+                Virement Bancaire (Toutes devises) ou transfert Crypto vers votre coffre. Réception sécurisée.
               </span>
             </div>
 
             <div class="mini" style="border-bottom:none; padding-bottom:0;">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--bp-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-                <strong style="color:var(--bp-primary); font-size:15px;">3. Gestion Active</strong>
-              </div>
-              <span style="color:var(--bp-text-muted); font-size:0.95rem; line-height:1.6; display:block;">
-                J'optimise les stratégies de rendement. Vous suivez la performance et validez les retraits.
+              <strong style="color:var(--bp-primary); font-size:15px; display:block; margin-bottom:4px;">3. Pilotage & Revenus</strong>
+              <span style="color:var(--bp-text-muted); font-size:0.95rem; line-height:1.6;">
+                Activation des stratégies. Vous suivez l'évolution du capital et validez les sorties.
               </span>
             </div>
           </div>
         </aside>
+
       </div>
     </div>
   </main>

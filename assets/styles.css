@@ -176,72 +176,43 @@ body { background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif
   .doc-layout { display: block; }
   .doc-sidebar { position: relative; top: 0; width: 100%; border-right: none; border-bottom: 1px solid var(--bp-border); margin-bottom: 32px; padding-bottom: 24px; max-height: none; }
 }
-/* --- ISOMETRIC CLAY ENGINE (SimCity 2000 Style) --- */
-.iso-scene {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 24px;
-  padding: 40px 0;
-  perspective: 800px; /* Donne la profondeur */
+/* --- FLAT FLOW ENGINE (Clean & Minimal) --- */
+.flat-scene {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 8px; margin-bottom: 24px;
 }
 
-.iso-group {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  transform-style: preserve-3d;
-  transform: rotateX(60deg) rotateZ(-45deg); /* L'angle isométrique magique */
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Effet ressort */
+.flat-item {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; width: 80px;
 }
 
-/* L'effet de survol (la tuile se soulève) */
-.iso-group:hover {
-  transform: rotateX(60deg) rotateZ(-45deg) translateZ(10px);
-}
-
-/* Le Bloc "Clay" (Argile) */
-.iso-tile {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  border-radius: 12px; /* Bevel "Low Poly lissé" */
-  box-shadow: 
-    -10px 10px 20px rgba(0,0,0,0.1), /* Ombre portée douce */
-    inset 0 0 0 2px rgba(255,255,255,0.1); /* Petit highlight interne */
-}
-
-/* Couleurs des Blocs */
-.iso-tile.bank { background: linear-gradient(135deg, #ffffff, #f1f5f9); }
-.iso-tile.transit { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
-.iso-tile.safe { background: linear-gradient(135deg, #3C756E, #2E5C56); box-shadow: -10px 10px 20px rgba(60, 117, 110, 0.3); }
-
-/* L'icône qui flotte au dessus */
-.iso-icon {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-60deg) translateZ(20px); /* Contre-rotation pour rester debout face caméra */
-  color: #0F172A;
-  background: #fff;
-  padding: 8px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+.flat-icon {
+  width: 56px; height: 56px;
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-}
-.iso-tile.safe .iso-icon { color: #3C756E; }
-
-/* Les Flèches de connexion */
-.iso-arrow {
-  width: 20px; height: 2px; background: #CBD5E1;
-  transform: rotate(-45deg); /* Suit l'axe isométrique */
-  opacity: 0.6;
+  border: 1px solid var(--bp-border);
+  background: #fff;
+  color: var(--bp-text-muted);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-/* Libellés sous les blocs */
-.iso-label {
-  position: absolute;
-  bottom: -30px; left: 50%;
-  transform: translateX(-50%) rotateZ(45deg) rotateX(-60deg); /* Contre-rotation */
-  font-size: 11px; font-weight: 700; color: #64748B;
-  white-space: nowrap;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+/* Variante Safe (Verte) */
+.flat-icon.safe {
+  background: var(--bp-primary-soft);
+  border-color: var(--bp-primary);
+  color: var(--bp-primary);
+}
+
+.flat-label {
+  font-size: 11px; font-weight: 700; color: var(--bp-text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.flat-arrow {
+  flex: 1; height: 1px; background: #E2E8F0; margin: 0 16px; position: relative; top: -14px;
+}
+.flat-arrow::after {
+  content: ""; position: absolute; right: 0; top: -3px;
+  width: 6px; height: 6px;
+  border-top: 2px solid #E2E8F0; border-right: 2px solid #E2E8F0;
+  transform: rotate(45deg);
 }

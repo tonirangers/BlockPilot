@@ -1,49 +1,49 @@
-/* assets/main.js - Logic for BlockPilot (Double Compounding) */
+/* assets/main.js - BlockPilot Pro (Live Prices + Double Compounding) */
 
 // --- CONFIGURATION ---
+// CAGR = Moyenne historique annuelle (Croissance Prix)
+// Yield = Rendement DeFi (Intérêts composés)
 
 const ASSETS = {
   stables: {
     name: "Stables",
     type: "stable",
-    refPrice: 1, // $1
     yield: 0.13, // 13% APY
-    cagr: 0,     // Prix stable
+    cagr: 0,     // Prix fixe $1
     color: "#2563EB"
   },
   btc: {
     name: "Bitcoin",
     type: "crypto",
-    refPrice: 95000, // Prix Réf pour le calcul des tokens
-    yield: 0.04, // 4% Yield (Token qui s'accumule)
-    cagr: 0.45,  // 45% Croissance Prix (Moyenne historique)
+    yield: 0.04, // 4% Yield
+    cagr: 0.45,  // +45%/an (Moyenne Historique)
     color: "#F7931A"
   },
   eth: {
     name: "Ethereum",
     type: "crypto",
-    refPrice: 3300, 
     yield: 0.05, // 5% Yield
-    cagr: 0.55,  // 55% Croissance Prix
+    cagr: 0.55,  // +55%/an (Moyenne Historique)
     color: "#627EEA"
   },
   bnb: {
     name: "BNB",
     type: "crypto",
-    refPrice: 650, 
     yield: 0.03, // 3% Yield
-    cagr: 0.45,  // 45% Croissance Prix
+    cagr: 0.45,  // +45%/an (Aligné BTC)
     color: "#F0B90B"
   },
   eur: {
     name: "Euro",
     type: "fiat",
-    refPrice: 1.05,
     yield: 0.03, 
     cagr: 0,
     color: "#CBD5E1"
   }
 };
+
+// Variable globale pour stocker les prix LIVE
+let LIVE_PRICES = { btc: 95000, eth: 3300, bnb: 650, eur: 1.05, stables: 1 };
 
 // --- INIT ---
 
@@ -51,7 +51,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initSimulator();
   initChart();
+  fetchLivePrices(); // On lance la récupération des prix
 });
+
+/* --- FETCH PRICES (Binance API) --- */
+async function fetchLivePrices() {
+  try {
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+    if(res.ok) {
+      const data = await res.json();
+      data.forEach(t => {
+          if(t.symbol === "BTCUSDT") LIVE_PRICES.btc = parseFloat(t.price);
+          if(t.symbol === "ETHUSDT") LIVE_PRICES.eth = parseFloat(t.price);
+          if(t.symbol === "BNBUSDT") LIVE_PRICES.bnb = parseFloat(t.price);
+          if(t.symbol === "EURUSDT") LIVE_PRICES.eur = parseFloat(t.price);
+      });
+      updateSim(); // Recalculer avec les vrais prix
+    }
+  } catch(e) { console.log("Live price fetch failed, using defaults"); }
+}
 
 /* --- HEADER --- */
 function initHeader() {
@@ -116,62 +134,57 @@ function updateSim() {
   const years = activeDur ? parseInt(activeDur.dataset.duration) : 3;
 
   // Calculs Double Composition
-  // 1. Croissance du STOCK de tokens (Yield)
-  // 2. Croissance du PRIX du token (CAGR)
-  
   let currentVal = startAmount;
   let dataPoints = [startAmount];
   let passiveVal = startAmount;
   let passivePoints = [startAmount];
 
-  // Pour le calcul des tokens générés
-  const startTokens = startAmount / asset.refPrice;
+  // Récupération du prix LIVE
+  const refPrice = LIVE_PRICES[assetKey] || 1;
+  const startTokens = startAmount / refPrice;
   let currentTokens = startTokens;
 
   for(let i=1; i<=years; i++) {
-    // BlockPilot : Le nombre de tokens augmente (Yield) ET le prix augmente (CAGR)
-    currentTokens = currentTokens * (1 + asset.yield); // Le stock grossit
-    currentVal = currentVal * (1 + asset.yield) * (1 + asset.cagr); // La valeur grossit doublement
+    // BlockPilot : Le stock grossit (Yield) ET le prix monte (CAGR)
+    currentTokens = currentTokens * (1 + asset.yield);
+    currentVal = currentVal * (1 + asset.yield) * (1 + asset.cagr);
     dataPoints.push(currentVal);
     
-    // Passif : Le stock est fixe, seul le prix augmente
+    // Passif : Stock fixe, Prix monte
     passiveVal = passiveVal * (1 + asset.cagr);
     passivePoints.push(passiveVal);
   }
 
   // --- UI UPDATE ---
   
-  // APR Cards (Haut)
+  // APR Cards
   document.getElementById('aprStables').innerText = (ASSETS.stables.yield * 100).toFixed(0) + "%";
   document.getElementById('aprBtc').innerText = ((ASSETS.btc.yield + ASSETS.btc.cagr)*100).toFixed(0) + "%";
   document.getElementById('aprEth').innerText = ((ASSETS.eth.yield + ASSETS.eth.cagr)*100).toFixed(0) + "%";
 
-  // Résultats (Bas)
+  // Résultats
   const finalVal = dataPoints[dataPoints.length - 1];
   const totalGain = finalVal - startAmount;
   
-  // Affichage Valeur Future
   document.getElementById('val12Scn').innerText = formatCurrency(finalVal, assetKey);
-  
-  // Affichage Gain Total $
   document.getElementById('gainText').innerText = "+" + formatCurrency(totalGain, assetKey);
 
-  // Affichage Tokens Générés ("dont + 0.45 ETH...")
+  // Preuve par les Tokens
   const tokenGainEl = document.getElementById('tokenGainText');
-  if(asset.cagr > 0 && assetKey !== 'eur' && assetKey !== 'stables') {
+  if(asset.cagr > 0 && assetKey !== 'eur') {
     const generatedTokens = currentTokens - startTokens;
-    const tokenSymbol = (assetKey === 'btc') ? 'BTC' : (assetKey === 'eth') ? 'ETH' : 'BNB';
+    const tokenSymbol = (assetKey === 'btc') ? 'BTC' : (assetKey === 'eth') ? 'ETH' : (assetKey === 'bnb') ? 'BNB' : '';
     tokenGainEl.innerHTML = `dont <strong>+ ${generatedTokens.toLocaleString('en-US', {maximumFractionDigits: 4})} ${tokenSymbol}</strong> générés par les intérêts.`;
     tokenGainEl.style.display = 'block';
   } else {
-    // Pour Stables/Euro, on affiche juste le gain en cash
     tokenGainEl.style.display = 'none';
   }
   
-  // Explication Technique (Footer du bloc)
+  // Explication Technique (Footer)
   let hypotheseText = "";
   if(asset.cagr > 0) {
-     hypotheseText = `Prix réf : ~${asset.refPrice.toLocaleString()} $. Hypothèse : +${(asset.cagr*100).toFixed(0)}%/an (Moyenne historique).`;
+     // Affiche le prix LIVE en référence
+     hypotheseText = `Prix réf (Live) : ~${Math.round(refPrice).toLocaleString()} $. Hypothèse : +${(asset.cagr*100).toFixed(0)}%/an (Moyenne historique).`;
   } else {
      hypotheseText = `Hypothèse : Valeur stable. Rendement pur.`;
   }
@@ -192,7 +205,7 @@ function initChart() {
       labels: ['Start', 'Y1', 'Y2', 'Y3'],
       datasets: [
         {
-          label: 'Avec BlockPilot (Prix + Yield)',
+          label: 'Avec BlockPilot',
           data: [],
           borderColor: '#3C756E',
           backgroundColor: 'rgba(60, 117, 110, 0.1)',
@@ -201,7 +214,7 @@ function initChart() {
           fill: true
         },
         {
-          label: 'Holding Passif (Prix seul)',
+          label: 'Holding Passif',
           data: [],
           borderColor: '#94A3B8',
           borderWidth: 2,

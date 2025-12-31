@@ -8,23 +8,24 @@
     "signature": "../signature.html"
   },
   "yields": {
-    "stables": 0.1,
-    "btc": 0.02,
-    "eth": 0.04,
-    "bnb": 0.13
+    "stables": 0.12,
+    "btc": 0.04,
+    "eth": 0.05,
+    "bnb": 0.13,
+    "eur": 0.04
   },
-    "defaults": {
-      "amountUSD": 10000,
-      "asset": "stables",
-      "scenario": 0.2,
-      "marketDefault": "btc",
-      "marketPeriod": 1825,
-      "adoptionPeriod": 1825
-    },
-    "fallbackPricesUSD": {
-      "btc": 100000,
-      "eth": 3500,
-      "bnb": 650
-    },
-    "price_scenarios": [0, 0.2, 0.5]
-  }
+  "defaults": {
+    "amountUSD": 10000,
+    "asset": "stables",
+    "scenario": 0.2,
+    "marketDefault": "btc",
+    "marketPeriod": 1825,
+    "adoptionPeriod": 1825
+  },
+  "fallbackPricesUSD": {
+    "btc": 96000,
+    "eth": 3300,
+    "bnb": 610
+  },
+  "price_scenarios": [0, 0.2, 0.5]
+}

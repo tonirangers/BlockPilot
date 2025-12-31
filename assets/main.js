@@ -1,263 +1,199 @@
-/* assets/main.js - BlockPilot Pro (Live Prices + Double Compounding) */
+/* assets/main.js - BlockPilot Logic (Live & Clean) */
 
-// --- CONFIGURATION ---
-// CAGR = Moyenne historique annuelle (Croissance Prix)
-// Yield = Rendement DeFi (Intérêts composés)
-
-const ASSETS = {
-  stables: {
-    name: "Stables",
-    type: "stable",
-    yield: 0.13, // 13% APY
-    cagr: 0,     // Prix fixe $1
-    color: "#2563EB"
-  },
-  btc: {
-    name: "Bitcoin",
-    type: "crypto",
-    yield: 0.04, // 4% Yield
-    cagr: 0.45,  // +45%/an (Moyenne Historique)
-    color: "#F7931A"
-  },
-  eth: {
-    name: "Ethereum",
-    type: "crypto",
-    yield: 0.05, // 5% Yield
-    cagr: 0.55,  // +55%/an (Moyenne Historique)
-    color: "#627EEA"
-  },
-  bnb: {
-    name: "BNB",
-    type: "crypto",
-    yield: 0.03, // 3% Yield
-    cagr: 0.45,  // +45%/an (Aligné BTC)
-    color: "#F0B90B"
-  },
-  eur: {
-    name: "Euro",
-    type: "fiat",
-    yield: 0.03, 
-    cagr: 0,
-    color: "#CBD5E1"
-  }
-};
-
-// Variable globale pour stocker les prix LIVE
-let LIVE_PRICES = { btc: 95000, eth: 3300, bnb: 650, eur: 1.05, stables: 1 };
-
-// --- INIT ---
-
-document.addEventListener('DOMContentLoaded', () => {
-  initHeader();
-  initSimulator();
-  initChart();
-  fetchLivePrices(); // On lance la récupération des prix
-});
-
-/* --- FETCH PRICES (Binance API) --- */
-async function fetchLivePrices() {
-  try {
-    const res = await fetch("https://api.binance.com/api/v3/ticker/price");
-    if(res.ok) {
-      const data = await res.json();
-      data.forEach(t => {
-          if(t.symbol === "BTCUSDT") LIVE_PRICES.btc = parseFloat(t.price);
-          if(t.symbol === "ETHUSDT") LIVE_PRICES.eth = parseFloat(t.price);
-          if(t.symbol === "BNBUSDT") LIVE_PRICES.bnb = parseFloat(t.price);
-          if(t.symbol === "EURUSDT") LIVE_PRICES.eur = parseFloat(t.price);
-      });
-      updateSim(); // Recalculer avec les vrais prix
-    }
-  } catch(e) { console.log("Live price fetch failed, using defaults"); }
-}
-
-/* --- HEADER --- */
-function initHeader() {
-  const headerEl = document.querySelector('.header');
-  if(headerEl) {
-    headerEl.innerHTML = `
-    <div class="container nav">
-      <a href="index.html" class="brand">
-        <img src="../logo.png" width="32" height="32" alt="Logo" style="border-radius:6px;">
-        <span>BlockPilot</span>
-      </a>
-      <div class="nav__links">
-        <a href="#overview" class="active">Overview</a>
-        <a href="#performance">Performance</a>
-        <a href="#security">Sécurité</a>
-        <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank" style="color:var(--bp-primary); font-weight:700;">Audit</a>
-      </div>
-      <div class="lang">
-        <a href="../fr/index.html" class="pill ${document.body.dataset.lang === 'fr' ? 'is-active' : ''}">FR</a>
-        <a href="../en/index.html" class="pill ${document.body.dataset.lang === 'en' ? 'is-active' : ''}">EN</a>
-      </div>
-      <button class="navToggle" onclick="document.body.classList.toggle('menu-open')">☰</button>
-    </div>`;
-  }
-}
-
-/* --- SIMULATOR --- */
-let myChart = null;
-
-function initSimulator() {
-  const amountInput = document.getElementById('amountUSD');
-  const assetSel = document.getElementById('assetSel');
+(async () => {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
   
-  // Durée Chips
-  const durationChips = document.querySelectorAll('#durationChips .chip');
-  durationChips.forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#durationChips .chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      updateSim();
-    });
-  });
-  // Active "3 ans" par défaut
-  if(durationChips[1]) durationChips[1].classList.add('active');
+  // CONFIGURATION DES RENDEMENTS & CROISSANCE
+  // Yield = Intérêts composés (Votre perf)
+  // CAGR = Croissance Prix Moyenne Historique (L'hypothèse figée)
+  const CONFIG = {
+    stables: { yield: 0.12, cagr: 0, refPrice: 1 },
+    btc:     { yield: 0.04, cagr: 0.45, refPrice: 95000 },
+    eth:     { yield: 0.05, cagr: 0.55, refPrice: 3300 },
+    bnb:     { yield: 0.13, cagr: 0.45, refPrice: 650 }, // BNB Ajouté
+    eur:     { yield: 0.04, cagr: 0, refPrice: 1.05 }
+  };
 
-  if(amountInput) amountInput.addEventListener('input', updateSim);
-  if(assetSel) assetSel.addEventListener('change', updateSim);
+  // Variable pour stocker les prix LIVE (init avec défauts au cas où)
+  let LIVE_PRICES = { ...CONFIG }; 
+  // On mappe juste les valeurs refPrice dans un format simple
+  Object.keys(CONFIG).forEach(k => LIVE_PRICES[k] = CONFIG[k].refPrice);
 
-  updateSim();
-}
-
-function updateSim() {
-  const amountInput = document.getElementById('amountUSD');
-  const assetSel = document.getElementById('assetSel');
-  if(!amountInput || !assetSel) return;
-
-  let startAmount = parseFloat(amountInput.value) || 0;
-  const assetKey = assetSel.value;
-  const asset = ASSETS[assetKey];
-  
-  const activeDur = document.querySelector('#durationChips .chip.active');
-  const years = activeDur ? parseInt(activeDur.dataset.duration) : 3;
-
-  // Calculs Double Composition
-  let currentVal = startAmount;
-  let dataPoints = [startAmount];
-  let passiveVal = startAmount;
-  let passivePoints = [startAmount];
-
-  // Récupération du prix LIVE
-  const refPrice = LIVE_PRICES[assetKey] || 1;
-  const startTokens = startAmount / refPrice;
-  let currentTokens = startTokens;
-
-  for(let i=1; i<=years; i++) {
-    // BlockPilot : Le stock grossit (Yield) ET le prix monte (CAGR)
-    currentTokens = currentTokens * (1 + asset.yield);
-    currentVal = currentVal * (1 + asset.yield) * (1 + asset.cagr);
-    dataPoints.push(currentVal);
-    
-    // Passif : Stock fixe, Prix monte
-    passiveVal = passiveVal * (1 + asset.cagr);
-    passivePoints.push(passiveVal);
-  }
-
-  // --- UI UPDATE ---
-  
-  // APR Cards
-  document.getElementById('aprStables').innerText = (ASSETS.stables.yield * 100).toFixed(0) + "%";
-  document.getElementById('aprBtc').innerText = ((ASSETS.btc.yield + ASSETS.btc.cagr)*100).toFixed(0) + "%";
-  document.getElementById('aprEth').innerText = ((ASSETS.eth.yield + ASSETS.eth.cagr)*100).toFixed(0) + "%";
-
-  // Résultats
-  const finalVal = dataPoints[dataPoints.length - 1];
-  const totalGain = finalVal - startAmount;
-  
-  document.getElementById('val12Scn').innerText = formatCurrency(finalVal, assetKey);
-  document.getElementById('gainText').innerText = "+" + formatCurrency(totalGain, assetKey);
-
-  // Preuve par les Tokens
-  const tokenGainEl = document.getElementById('tokenGainText');
-  if(asset.cagr > 0 && assetKey !== 'eur') {
-    const generatedTokens = currentTokens - startTokens;
-    const tokenSymbol = (assetKey === 'btc') ? 'BTC' : (assetKey === 'eth') ? 'ETH' : (assetKey === 'bnb') ? 'BNB' : '';
-    tokenGainEl.innerHTML = `dont <strong>+ ${generatedTokens.toLocaleString('en-US', {maximumFractionDigits: 4})} ${tokenSymbol}</strong> générés par les intérêts.`;
-    tokenGainEl.style.display = 'block';
-  } else {
-    tokenGainEl.style.display = 'none';
-  }
-  
-  // Explication Technique (Footer)
-  let hypotheseText = "";
-  if(asset.cagr > 0) {
-     // Affiche le prix LIVE en référence
-     hypotheseText = `Prix réf (Live) : ~${Math.round(refPrice).toLocaleString()} $. Hypothèse : +${(asset.cagr*100).toFixed(0)}%/an (Moyenne historique).`;
-  } else {
-     hypotheseText = `Hypothèse : Valeur stable. Rendement pur.`;
-  }
-
-  document.getElementById('priceMeta').innerHTML = hypotheseText;
-
-  updateChart(dataPoints, passivePoints, years);
-}
-
-/* --- CHART --- */
-function initChart() {
-  const ctx = document.getElementById('compoundChart');
-  if(!ctx) return;
-
-  myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Start', 'Y1', 'Y2', 'Y3'],
-      datasets: [
-        {
-          label: 'Avec BlockPilot',
-          data: [],
-          borderColor: '#3C756E',
-          backgroundColor: 'rgba(60, 117, 110, 0.1)',
-          borderWidth: 3,
-          tension: 0.4,
-          fill: true
-        },
-        {
-          label: 'Holding Passif',
-          data: [],
-          borderColor: '#94A3B8',
-          borderWidth: 2,
-          borderDash: [5, 5],
-          tension: 0.4,
-          pointRadius: 0
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: true, position:'bottom' },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: function(context) {
-              return context.dataset.label + ': ' + Math.round(context.raw).toLocaleString() + ' $';
-            }
-          }
-        }
-      },
-      scales: {
-        y: { display: false },
-        x: { grid: {display: false} }
+  // --- 1. FETCH PRICES (BINANCE) ---
+  async function loadPrices() {
+    try {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+      if(res.ok) {
+        const data = await res.json();
+        data.forEach(t => {
+          if(t.symbol==="BTCUSDT") LIVE_PRICES.btc = parseFloat(t.price);
+          if(t.symbol==="ETHUSDT") LIVE_PRICES.eth = parseFloat(t.price);
+          if(t.symbol==="BNBUSDT") LIVE_PRICES.bnb = parseFloat(t.price);
+          if(t.symbol==="EURUSDT") LIVE_PRICES.eur = parseFloat(t.price);
+        });
+        updateSim(); // Recalcul dès qu'on a les vrais prix
       }
+    } catch(e) { console.log("API Error, using defaults"); }
+  }
+
+  // --- 2. UPDATE SIMULATOR ---
+  function updateSim() {
+    const amountInput = $("#amountUSD");
+    const assetSel = $("#assetSel");
+    if(!amountInput || !assetSel) return;
+
+    let startUSD = parseFloat(amountInput.value.replace(/\s/g, '')) || 0;
+    const assetKey = assetSel.value;
+    const cfg = CONFIG[assetKey];
+    
+    // Récupération Durée
+    const activeChip = $("#durationChips .chip.active");
+    const years = activeChip ? parseInt(activeChip.dataset.duration) : 3;
+
+    // Récupération Prix Live
+    const startPrice = (assetKey === 'stables') ? 1 : LIVE_PRICES[assetKey];
+
+    // CALCULS DOUBLE COMPOSITION
+    // 1. On convertit le capital en Tokens (au prix d'aujourd'hui)
+    const startTokens = startUSD / startPrice;
+    
+    // 2. Le nombre de tokens augmente grâce au Yield (Intérêts composés)
+    const finalTokens = startTokens * Math.pow(1 + cfg.yield, years);
+    const generatedTokens = finalTokens - startTokens;
+
+    // 3. Le prix du token augmente grâce au CAGR (Hypothèse marché)
+    //    Si c'est du stable, le prix ne bouge pas.
+    const finalPrice = startPrice * Math.pow(1 + cfg.cagr, years);
+
+    // 4. Valeur Finale en USD
+    const finalUSD = finalTokens * finalPrice;
+    const totalGainUSD = finalUSD - startUSD;
+
+    // --- AFFICHAGE ---
+    
+    // Cartes APR (Haut)
+    $("#aprStables").innerText = (CONFIG.stables.yield * 100).toFixed(0) + "%";
+    $("#aprBtc").innerText = ((CONFIG.btc.yield + CONFIG.btc.cagr)*100).toFixed(0) + "%";
+    $("#aprEth").innerText = ((CONFIG.eth.yield + CONFIG.eth.cagr)*100).toFixed(0) + "%";
+    $("#aprEur").innerText = (CONFIG.eur.yield * 100).toFixed(0) + "%";
+
+    // Gros Chiffres
+    $("#val12Scn").innerText = formatUSD(finalUSD);
+    $("#gainText").innerText = "+" + formatUSD(totalGainUSD);
+    $("#gainText").style.color = "#3C756E";
+
+    // La Preuve (Tokens générés)
+    const tokenArea = $("#tokenGainText");
+    if(cfg.cagr > 0 && assetKey !== 'eur') {
+        const symbol = assetKey.toUpperCase();
+        tokenArea.innerHTML = `dont <strong>+ ${generatedTokens.toLocaleString('en-US', {maximumFractionDigits: 4})} ${symbol}</strong> générés par BlockPilot.`;
+        tokenArea.style.display = 'block';
+    } else {
+        tokenArea.style.display = 'none';
     }
-  });
-}
 
-function updateChart(dataActive, dataPassive, years) {
-  if(!myChart) return;
-  const labels = ['Départ'];
-  for(let i=1; i<=years; i++) labels.push('Année '+i);
-  myChart.data.labels = labels;
-  myChart.data.datasets[0].data = dataActive;
-  myChart.data.datasets[1].data = dataPassive;
-  myChart.update();
-}
+    // Explication Technique (Bas)
+    const priceMeta = $("#priceMeta");
+    if(cfg.cagr > 0) {
+        priceMeta.innerHTML = `Prix réf (Live) : ~${Math.round(startPrice).toLocaleString()} $. Hypothèse : +${(cfg.cagr*100).toFixed(0)}%/an (Moyenne historique).`;
+    } else {
+        priceMeta.innerHTML = "Hypothèse : Valeur stable. Rendement pur.";
+    }
 
-function formatCurrency(val, type) {
-  const currency = (type === 'eur') ? 'EUR' : 'USD';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(val);
-}
+    updateChart([startUSD], finalUSD, years, cfg);
+  }
+
+  // --- 3. CHART ---
+  let myChart = null;
+  function updateChart(startData, finalUSD, years, cfg) {
+    const ctx = $("#compoundChart");
+    if(!ctx) return;
+
+    // Génération des points intermédiaires pour la courbe
+    let dataActive = [];
+    let dataPassive = [];
+    let labels = [];
+    
+    // Point 0
+    let currentVal = 10000; // Base 10k pour le graph (plus propre)
+    let passiveVal = 10000;
+    dataActive.push(currentVal);
+    dataPassive.push(passiveVal);
+    labels.push("Départ");
+
+    for(let i=1; i<=years; i++) {
+        currentVal = currentVal * (1 + cfg.yield) * (1 + cfg.cagr);
+        passiveVal = passiveVal * (1 + cfg.cagr);
+        dataActive.push(currentVal);
+        dataPassive.push(passiveVal);
+        labels.push("Année " + i);
+    }
+
+    if(myChart) myChart.destroy();
+
+    myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Avec BlockPilot (Yield + Prix)',
+            data: dataActive,
+            borderColor: '#3C756E',
+            backgroundColor: 'rgba(60, 117, 110, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Holding Passif (Prix seul)',
+            data: dataPassive,
+            borderColor: '#94A3B8',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            tension: 0.4,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position:'bottom' } },
+        scales: { y: { display: false }, x: { grid: {display: false} } }
+      }
+    });
+  }
+
+  // --- UTILS ---
+  function formatUSD(val) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+  }
+
+  function initListeners() {
+    const amount = $("#amountUSD");
+    const asset = $("#assetSel");
+    const chips = $$("#durationChips .chip");
+
+    // Click Chips
+    chips.forEach(btn => {
+        btn.onclick = () => {
+            chips.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            updateSim();
+        }
+    });
+    // Default Active
+    if(chips[1]) chips[1].classList.add('active');
+
+    // Inputs
+    amount.oninput = updateSim;
+    asset.onchange = updateSim;
+  }
+
+  // START
+  initListeners();
+  loadPrices();
+  updateSim(); // Premier calcul avec valeurs par défaut
+})();

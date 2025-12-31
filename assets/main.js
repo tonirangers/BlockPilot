@@ -8,13 +8,13 @@
   const I18N = {
     fr: {
       menu: "Menu", close: "Fermer", 
-      priceHint: (px, unit, scn) => `Prix réf : ~${px} $/${unit}. Hypothèse : +${(scn*100).toFixed(0)}%/an (Moyenne historique).`,
+      priceHint: (px, unit, scn) => `Prix réf : ~${px} $/${unit}.`,
       chartLabel: "Stratégie BlockPilot (Yield + Prix)",
       chartHold: "Holding Passif (Prix seul)"
     },
     en: {
       menu: "Menu", close: "Close",
-      priceHint: (px, unit, scn) => `Ref price: ~$${px}/${unit}. Assumption: +${(scn*100).toFixed(0)}%/yr (Historical avg).`,
+      priceHint: (px, unit, scn) => `Ref price: ~$${px}/${unit}.`,
       chartLabel: "BlockPilot Strategy (Yield + Price)",
       chartHold: "Passive Holding (Price only)"
     }
@@ -160,15 +160,10 @@
     // UI State
     $$("#durationChips .chip").forEach(c => c.classList.toggle("active", Number(c.dataset.duration)===durationYears));
     
+    // NETTOYAGE UI : On n'affiche plus le bouton "chip" de scénario
     if(scenarioWrap) {
-        if(isStable) {
-            scenarioWrap.innerHTML = `<span class="chip active" style="cursor:default; opacity:0.8;">${LANG==="fr"?"Prix Fixe":"Fixed Price"}</span>`;
-            if(stableNote) stableNote.style.display="none";
-        } else {
-            const txt = `+${(scenario*100).toFixed(0)}%/an (Avg)`;
-            scenarioWrap.innerHTML = `<span class="chip active" style="cursor:default; border-color:var(--bp-primary); color:var(--bp-primary); background:var(--bp-primary-soft);">${txt}</span>`;
-            if(stableNote) stableNote.style.display="none";
-        }
+        scenarioWrap.innerHTML = ""; 
+        if(stableNote) stableNote.style.display="none";
     }
 
     if (!usdInput) { 
@@ -215,7 +210,15 @@
         }
     }
     
-    if(priceMeta) priceMeta.textContent = isStable ? "" : T.priceHint(fmtNum(tokenPrice,0), unit, scenario);
+    // MISE A JOUR FOOTNOTE : On indique l'hypothèse ici discrètement
+    if(priceMeta) {
+        if (isStable) {
+             priceMeta.textContent = "";
+        } else {
+             const growthTxt = LANG==="fr" ? `Hypothèse croissance : +${(scenario*100).toFixed(0)}%/an (Moy. histo).` : `Growth assumption: +${(scenario*100).toFixed(0)}%/yr (Hist. avg).`;
+             priceMeta.textContent = `${T.priceHint(fmtNum(tokenPrice,0), unit, scenario)} ${growthTxt}`;
+        }
+    }
 
     if(growthChart) updateChartData(growthChart, usdInput, apr, scenario, durationYears, asset);
   }
@@ -245,8 +248,8 @@
   }
 
   function initMobileMenu() {
-    const t=$("#navToggle"); // Le bouton est maintenant géré par header.js mais on garde une sécurité
-    // Le vrai initMenu est dans header.js, mais si main.js charge après, on s'assure qu'il ne casse rien
+    const t=$("#navToggle"); 
+    // Handled by header.js
   }
 
   function initSignature() {
@@ -266,20 +269,19 @@
   }
 
   async function init() {
-    // initMobileMenu(); // Désactivé ici car géré par header.js pour éviter les conflits
     initSignature();
-    initSimulator(); // Render UI immediately with hardcoded defaults
+    initSimulator(); 
 
     // Async Fetch updates (Background)
     const newCfg = await fetchJSON("../data/blockpilot.json");
     if(newCfg?.yields) {
         CFG.yields = { ...CFG.yields, ...newCfg.yields };
-        fillApr(CFG.yields); // Update Yield cards
-        recalculateAll(); // Update Sim
+        fillApr(CFG.yields); 
+        recalculateAll(); 
     }
     
     await loadPricesUSD(); // Fetch real prices
-    recalculateAll(); // Update Sim with real prices
+    recalculateAll(); 
   }
 
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();

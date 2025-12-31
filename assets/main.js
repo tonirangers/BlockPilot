@@ -1,286 +1,228 @@
-/* assets/main.js - BlockPilot Pro (Robust Instant Load) */
-(async () => {
-  const $ = (s, el=document) => el.querySelector(s);
-  const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
-  const fmtNum = (v, max=2) => !isFinite(v) ? "—" : new Intl.NumberFormat(undefined, { maximumFractionDigits: max }).format(v);
+/* assets/main.js - BlockPilot Logic (Clean & Fixed) */
+
+// --- CONFIGURATION ---
+
+const ASSETS = {
+  stables: {
+    name: "Stables",
+    type: "stable",
+    yield: 0.13, // 13% Yield
+    cagr: 0,     // Prix fixe
+    color: "#2563EB"
+  },
+  btc: {
+    name: "Bitcoin",
+    type: "crypto",
+    yield: 0.04, // 4% Yield
+    cagr: 0.45,  // 45% Croissance Prix (Moyenne lissée)
+    color: "#F7931A"
+  },
+  eth: {
+    name: "Ethereum",
+    type: "crypto",
+    yield: 0.05, // 5% Yield
+    cagr: 0.55,  // 55% Croissance Prix
+    color: "#627EEA"
+  },
+  bnb: {
+    name: "BNB",
+    type: "crypto",
+    yield: 0.03, // 3% Yield (Launchpool estimation lissée)
+    cagr: 0.45,  // 45% Croissance Prix (Similaire BTC)
+    color: "#F0B90B"
+  },
+  eur: {
+    name: "Euro",
+    type: "fiat",
+    yield: 0.03, // 3% Yield
+    cagr: 0,
+    color: "#CBD5E1"
+  }
+};
+
+
+// --- LOGIC ---
+
+document.addEventListener('DOMContentLoaded', () => {
+  initHeader();
+  initSimulator();
+  initChart();
+});
+
+/* --- HEADER --- */
+function initHeader() {
+  const headerEl = document.querySelector('.header');
+  if(headerEl) {
+    headerEl.innerHTML = `
+    <div class="container nav">
+      <a href="index.html" class="brand">
+        <img src="../logo.png" width="32" height="32" alt="Logo" style="border-radius:6px;">
+        <span>BlockPilot</span>
+      </a>
+      <div class="nav__links">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#performance">Performance</a>
+        <a href="#security">Sécurité</a>
+        <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank" style="color:var(--bp-primary); font-weight:700;">Audit</a>
+      </div>
+      <div class="lang">
+        <a href="../fr/index.html" class="pill ${document.body.dataset.lang === 'fr' ? 'is-active' : ''}">FR</a>
+        <a href="../en/index.html" class="pill ${document.body.dataset.lang === 'en' ? 'is-active' : ''}">EN</a>
+      </div>
+      <button class="navToggle" onclick="document.body.classList.toggle('menu-open')">☰</button>
+    </div>`;
+  }
+}
+
+/* --- SIMULATOR --- */
+let myChart = null;
+
+function initSimulator() {
+  const amountInput = document.getElementById('amountUSD');
+  const assetSel = document.getElementById('assetSel');
   
-  const LANG = document.body?.dataset?.lang || "fr";
-  const I18N = {
-    fr: {
-      menu: "Menu", close: "Fermer", 
-      priceHint: (px, unit, scn) => `Prix réf : ~${px} $/${unit}. Hypothèse : +${(scn*100).toFixed(0)}%/an (Moyenne historique).`,
-      chartLabel: "Stratégie BlockPilot (Yield + Prix)",
-      chartHold: "Holding Passif (Prix seul)"
-    },
-    en: {
-      menu: "Menu", close: "Close",
-      priceHint: (px, unit, scn) => `Ref price: ~$${px}/${unit}. Assumption: +${(scn*100).toFixed(0)}%/yr (Historical avg).`,
-      chartLabel: "BlockPilot Strategy (Yield + Price)",
-      chartHold: "Passive Holding (Price only)"
-    }
-  };
-  const T = I18N[LANG] || I18N.fr;
-
-  // --- DATA DEFAULTS (Hardcoded for instant render) ---
-  let CFG = { yields: { stables:0.12, btc:0.04, eth:0.05, bnb:0.13, eur:0.04 } };
-  let PRICES = { btc:96000, eth:3300, bnb:610, stables:1, eur:1.05 };
-  
-  const CAGR = { stables: 0, eur: 0, btc: 0.45, eth: 0.55, bnb: 0.40 };
-
-  async function fetchJSON(url) {
-    try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; }
-  }
-
-  // --- UI UPDATERS ---
-  function fillApr(yields) {
-    const set=(id, v)=>{ const el=$(id); if (el) el.textContent=(Number(v||0)*100).toFixed(0)+"%"; };
-    set("#aprStables", yields.stables);
-    set("#aprBtc", yields.btc);
-    set("#aprEth", yields.eth);
-    set("#aprBnb", yields.bnb);
-    set("#aprEur", yields.eur);
-  }
-
-  async function loadPricesUSD() {
-    try {
-      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
-      if(res.ok) {
-        const data = await res.json();
-        data.forEach(t => {
-            if(t.symbol==="BTCUSDT") PRICES.btc = Number(t.price);
-            if(t.symbol==="ETHUSDT") PRICES.eth = Number(t.price);
-            if(t.symbol==="BNBUSDT") PRICES.bnb = Number(t.price);
-            if(t.symbol==="EURUSDT") PRICES.eur = Number(t.price);
-        });
-      }
-    } catch(e) { console.log("Price fetch failed, using defaults"); }
-  }
-
-  // --- CHART ENGINE ---
-  let growthChart = null;
-  function computeTokens(principalTokens, apr, years) {
-    const n=12; const r=apr/n;
-    return principalTokens*Math.pow(1+r, n*years);
-  }
-
-  function initChart(ctx) {
-    if(!ctx) return null;
-    if(window.growthChartInstance) window.growthChartInstance.destroy(); // Safety cleanup
-    
-    return new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: T.chartLabel,
-            data: [],
-            borderColor: '#3C756E',
-            backgroundColor: 'rgba(60, 117, 110, 0.1)',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true,
-            pointRadius: 0, 
-            pointHitRadius: 10
-          },
-          {
-            label: T.chartHold,
-            data: [],
-            borderColor: '#94A3B8',
-            borderWidth: 2,
-            borderDash: [5, 5],
-            tension: 0.4,
-            pointRadius: 0,
-            fill: false
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20, color: '#64748B' } },
-          tooltip: { 
-            mode: 'index', intersect: false, 
-            backgroundColor: '#0F172A', titleColor: '#94A3B8', bodyFont: { weight: 'bold' },
-            callbacks: { label: (c) => ` ${c.dataset.label}: $${Math.round(c.raw).toLocaleString()}` }
-          }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: '#94A3B8' } },
-          y: { grid: { color: '#F1F5F9' }, ticks: { callback: (v)=> '$' + (v/1000).toFixed(0) + 'k', color: '#64748B' } }
-        },
-        interaction: { mode: 'nearest', axis: 'x', intersect: false }
-      }
+  // Chips Durée
+  const durationChips = document.querySelectorAll('#durationChips .chip');
+  durationChips.forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#durationChips .chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateSim();
     });
+  });
+  // Active "3 ans" par défaut
+  if(durationChips[1]) durationChips[1].classList.add('active');
+
+  if(amountInput) amountInput.addEventListener('input', updateSim);
+  if(assetSel) assetSel.addEventListener('change', updateSim);
+
+  updateSim();
+}
+
+function updateSim() {
+  const amountInput = document.getElementById('amountUSD');
+  const assetSel = document.getElementById('assetSel');
+  if(!amountInput || !assetSel) return;
+
+  let startAmount = parseFloat(amountInput.value) || 0;
+  const assetKey = assetSel.value;
+  const asset = ASSETS[assetKey];
+  
+  const activeDur = document.querySelector('#durationChips .chip.active');
+  const years = activeDur ? parseInt(activeDur.dataset.duration) : 3;
+
+  // Calculs : On prend juste le CAGR défini en haut (pas de multiplicateur compliqué)
+  const annualYield = asset.yield; 
+  const annualCagr = asset.cagr; 
+  
+  let currentVal = startAmount;
+  let dataPoints = [startAmount];
+  let passiveVal = startAmount;
+  let passivePoints = [startAmount];
+
+  for(let i=1; i<=years; i++) {
+    currentVal = currentVal * (1 + annualYield) * (1 + annualCagr);
+    dataPoints.push(currentVal);
+    
+    passiveVal = passiveVal * (1 + annualCagr);
+    passivePoints.push(passiveVal);
   }
 
-  function updateChartData(chart, principalUSD, apr, priceScenario, duration, asset) {
-    if(!chart) return;
-    const labels = [];
-    const dataBP = [];
-    const dataHold = [];
-    const startPrice = asset==="eur" ? PRICES.eur : (asset==="stables"?1:PRICES[asset]);
-    const tokenAmount = principalUSD / startPrice;
+  // --- UI UPDATE ---
+  
+  // APR Cards
+  document.getElementById('aprStables').innerText = (ASSETS.stables.yield * 100).toFixed(0) + "%";
+  document.getElementById('aprBtc').innerText = ((ASSETS.btc.yield + ASSETS.btc.cagr)*100).toFixed(0) + "%";
+  document.getElementById('aprEth').innerText = ((ASSETS.eth.yield + ASSETS.eth.cagr)*100).toFixed(0) + "%";
 
-    for(let y=0; y<=duration; y++) {
-      labels.push(LANG==="fr" ? `Année ${y}` : `Year ${y}`);
-      const projectedPrice = startPrice * Math.pow(1 + priceScenario, y);
-      const valHold = tokenAmount * projectedPrice;
-      const tokensWithYield = computeTokens(tokenAmount, apr, y);
-      const valStrat = tokensWithYield * projectedPrice;
-      dataHold.push(valHold);
-      dataBP.push(valStrat);
-    }
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = dataBP;
-    chart.data.datasets[1].data = dataHold;
-    chart.update();
+  // Resultats
+  const finalVal = dataPoints[dataPoints.length - 1];
+  const totalGain = finalVal - startAmount;
+  
+  document.getElementById('val12Scn').innerText = formatCurrency(finalVal, assetKey);
+  document.getElementById('gainText').innerText = "+" + formatCurrency(totalGain, assetKey);
+  
+  // Explication Unique (Le fameux "doublon" corrigé)
+  const gainPercent = ((finalVal / startAmount - 1) * 100).toFixed(0);
+  
+  let hypotheseText = "";
+  if(asset.cagr > 0) {
+    hypotheseText = `Hypothèse : +${(asset.cagr*100).toFixed(0)}%/an (Moyenne historique) + Yield composé.`;
+  } else {
+    hypotheseText = `Hypothèse : Valeur stable (1:1) + Yield composé.`;
   }
 
-  // --- MAIN LOGIC ---
-  let durationYears = 3;
+  document.getElementById('priceMeta').innerHTML = 
+    `${hypotheseText}<br>` +
+    `Gain estimé : <strong>+${gainPercent}%</strong> sur ${years} ans.`;
 
-  function recalculateAll() {
-    const amount=$("#amountUSD");
-    const assetSel=$("#assetSel");
-    const scenarioWrap=$("#priceScenarios");
-    const stableNote=$("#stableScenarioNote");
-    const priceMeta=$("#priceMeta");
+  updateChart(dataPoints, passivePoints, years);
+}
 
-    const rawVal = (amount?.value ?? "").replace(/\s/g, "").replace(",", ".");
-    const usdInput = rawVal ? Number(rawVal) : 0;
-    const asset = assetSel?.value || "eth"; 
-    const apr = Number(CFG.yields?.[asset] ?? 0);
-    
-    // Smart Scenario
-    const scenario = CAGR[asset] || 0;
-    const isStable = asset==="stables" || asset==="eur";
+/* --- CHART --- */
+function initChart() {
+  const ctx = document.getElementById('compoundChart');
+  if(!ctx) return;
 
-    // UI State
-    $$("#durationChips .chip").forEach(c => c.classList.toggle("active", Number(c.dataset.duration)===durationYears));
-    
-    if(scenarioWrap) {
-        if(isStable) {
-            scenarioWrap.innerHTML = `<span class="chip active" style="cursor:default; opacity:0.8;">${LANG==="fr"?"Prix Fixe":"Fixed Price"}</span>`;
-            if(stableNote) stableNote.style.display="none";
-        } else {
-            const txt = `+${(scenario*100).toFixed(0)}%/an (Avg)`;
-            scenarioWrap.innerHTML = `<span class="chip active" style="cursor:default; border-color:var(--bp-primary); color:var(--bp-primary); background:var(--bp-primary-soft);">${txt}</span>`;
-            if(stableNote) stableNote.style.display="none";
+  myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Start', 'Y1', 'Y2', 'Y3'],
+      datasets: [
+        {
+          label: 'Avec BlockPilot',
+          data: [],
+          borderColor: '#3C756E',
+          backgroundColor: 'rgba(60, 117, 110, 0.1)',
+          borderWidth: 3,
+          tension: 0.4,
+          fill: true
+        },
+        {
+          label: 'Holding Passif',
+          data: [],
+          borderColor: '#94A3B8',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          tension: 0.4,
+          pointRadius: 0
         }
-    }
-
-    if (!usdInput) { 
-        $$(".sim-val").forEach(e=>e.textContent="—"); 
-        ["#val12Scn", "#gainText", "#tokenGainText"].forEach(id=>{ const el=$(id); if(el) el.textContent=""; });
-        return; 
-    }
-
-    // Maths
-    const tokenPrice = asset==="eur" ? PRICES.eur : (asset==="stables"?1:PRICES[asset]);
-    const principalTokens = usdInput / tokenPrice;
-    const finalTokens = computeTokens(principalTokens, apr, durationYears);
-    const gainedTokens = finalTokens - principalTokens;
-    const priceGrowth = Math.pow(1+scenario, durationYears);
-    const finalPrice = tokenPrice * priceGrowth;
-    const finalDollars = finalTokens * finalPrice;
-    const gainDollars = finalDollars - usdInput;
-
-    // Text Updates
-    const fmtUSD = (v) => new Intl.NumberFormat(undefined, { style:"currency", currency: "USD", maximumFractionDigits:0 }).format(v);
-    const fmtTok = (v) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(v);
-    
-    const set=(id,t)=>{ const el=$(id); if(el) el.textContent=t; };
-    set("#val12Scn", fmtUSD(finalDollars));
-    
-    const gainEl = $("#gainText");
-    if(gainEl) {
-        const profitLabel = LANG==="fr" ? "de profit total" : "total profit";
-        gainEl.textContent = `+ ${fmtUSD(gainDollars)} ${profitLabel}`;
-        gainEl.style.color = "#3C756E"; 
-    }
-
-    const tokenGainEl = $("#tokenGainText");
-    let unit = asset.toUpperCase();
-    if(asset==="stables") unit="USDT";
-    
-    if(tokenGainEl) {
-        if(!isStable) {
-            tokenGainEl.style.display = "block";
-            const txt = LANG==="fr" ? `dont + ${fmtTok(gainedTokens)} ${unit} générés par BlockPilot` : `incl. + ${fmtTok(gainedTokens)} ${unit} generated by BlockPilot`;
-            tokenGainEl.textContent = txt;
-        } else {
-            tokenGainEl.style.display = "none";
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position:'bottom' },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ' + Math.round(context.raw).toLocaleString() + ' $';
+            }
+          }
         }
+      },
+      scales: {
+        y: { display: false },
+        x: { grid: {display: false} }
+      }
     }
-    
-    if(priceMeta) priceMeta.textContent = isStable ? "" : T.priceHint(fmtNum(tokenPrice,0), unit, scenario);
+  });
+}
 
-    if(growthChart) updateChartData(growthChart, usdInput, apr, scenario, durationYears, asset);
-  }
+function updateChart(dataActive, dataPassive, years) {
+  if(!myChart) return;
+  const labels = ['Départ'];
+  for(let i=1; i<=years; i++) labels.push('Année '+i);
+  myChart.data.labels = labels;
+  myChart.data.datasets[0].data = dataActive;
+  myChart.data.datasets[1].data = dataPassive;
+  myChart.update();
+}
 
-  function initSimulator() {
-    const amount=$("#amountUSD");
-    const assetSel=$("#assetSel");
-    const chartCanvas = $("#compoundChart");
-
-    if(chartCanvas && window.Chart) growthChart = initChart(chartCanvas);
-
-    // Initial Default Values
-    if(amount && !amount.value) amount.value = "10000";
-    if(assetSel) assetSel.value = "eth"; // Force ETH Default
-
-    // Event Listeners
-    $$("#durationChips .chip").forEach(b => b.addEventListener("click", (e) => {
-        durationYears=Number(b.dataset.duration);
-        recalculateAll();
-    }));
-    amount?.addEventListener("input", recalculateAll);
-    assetSel?.addEventListener("change", recalculateAll);
-
-    // Render immediately with defaults
-    fillApr(CFG.yields);
-    recalculateAll();
-  }
-
-  function initMobileMenu() {
-    const t=$("#navToggle"); // Le bouton est maintenant géré par header.js mais on garde une sécurité
-    // Le vrai initMenu est dans header.js, mais si main.js charge après, on s'assure qu'il ne casse rien
-  }
-
-  function initSignature() {
-    const btns=$$('[data-signature-view]');
-    const frames={ sign: $("#signatureSign"), verify: $("#signatureVerify") };
-    if(!btns.length) return;
-    function setView(v) {
-        btns.forEach(b => b.classList.toggle("active", b.dataset.signatureView===v));
-        if(frames.sign) frames.sign.style.display = v==="sign" ? "block" : "none";
-        if(frames.verify) frames.verify.style.display = v==="verify" ? "block" : "none";
-        const lang = (localStorage.getItem("bp_lang")||"fr").includes("en") ? "en" : "fr";
-        const f = frames[v];
-        if(f && !f.getAttribute("src")) f.src = `../${v==="verify"?"verify":"sign"}.html?embed=1&lang=${lang}`;
-    }
-    btns.forEach(b => b.onclick=()=>setView(b.dataset.signatureView));
-    setView("sign");
-  }
-
-  async function init() {
-    // initMobileMenu(); // Désactivé ici car géré par header.js pour éviter les conflits
-    initSignature();
-    initSimulator(); // Render UI immediately with hardcoded defaults
-
-    // Async Fetch updates (Background)
-    const newCfg = await fetchJSON("../data/blockpilot.json");
-    if(newCfg?.yields) {
-        CFG.yields = { ...CFG.yields, ...newCfg.yields };
-        fillApr(CFG.yields); // Update Yield cards
-        recalculateAll(); // Update Sim
-    }
-    
-    await loadPricesUSD(); // Fetch real prices
-    recalculateAll(); // Update Sim with real prices
-  }
-
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
-})();
+function formatCurrency(val, type) {
+  const currency = (type === 'eur') ? 'EUR' : 'USD';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(val);
+}

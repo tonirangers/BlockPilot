@@ -6,7 +6,6 @@
   <title>BlockPilot — Gestion privée d’actifs numériques</title>
   <link rel="stylesheet" href="../assets/styles.css" />
   <meta name="google-site-verification" content="yv1FFNh3JCob8OnTquZTeHR0ozcoV2wsiIsVRxjPT-w" />
-  <link rel="icon" type="image/png" href="../logo.png" />
 </head>
 
 <body data-lang="fr">
@@ -170,6 +169,10 @@
             <div style="font-size:0.85rem; color:#64748B;">ETH</div>
             <div class="n" id="aprEth">—</div>
           </div>
+          <div class="ycard">
+            <div style="font-size:0.85rem; color:#64748B;">BNB</div>
+            <div class="n" id="aprBnb">—</div>
+          </div>
           <div class="ycard" style="border-color:#CBD5E1;">
             <div style="font-size:0.85rem; color:#64748B;">Euro</div>
             <div class="n" id="aprEur">4%</div>
@@ -194,7 +197,8 @@
               <option value="stables">Stables ($)</option>
               <option value="btc">Bitcoin</option>
               <option value="eth">Ethereum</option>
-              <option value="bnb">BNB (Binance)</option> <option value="eur">Euro (€)</option>
+              <option value="bnb">BNB (Binance)</option>
+              <option value="eur">Euro (€)</option>
             </select>
           </div>
         </div>
@@ -208,18 +212,28 @@
           </div>
         </div>
 
+        <div id="priceScenarioRow" style="margin-bottom:24px;">
+          <div style="font-size:0.75rem; font-weight:700; color:#64748B; margin-bottom:8px;">TENDANCE HISTORIQUE (Moyenne 5 ans)</div>
+          <div class="scenarioChips" id="priceScenarios" style="display:flex; gap:8px;"></div>
+          <div id="stableScenarioNote" style="font-size:0.85rem; color:#64748B; padding-top:8px;">Stables : prix fixe.</div>
+        </div>
+
         <div style="background:#F8FAFC; padding:24px; border-radius:12px; border:1px solid #E2E8F0;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
              <div style="font-size:0.9rem; color:#64748B;">Valeur future</div>
              <div id="val12Scn" style="font-size:1.8rem; font-weight:800; color:var(--bp-primary);">—</div>
           </div>
+          <div id="val12Flat" style="font-size:0.85rem; color:#64748B; margin-top:4px;"></div>
           
-          <div style="margin-top:8px;">
+          <div style="margin-top:24px; border-top:1px dashed #E2E8F0; padding-top:16px;">
              <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
-                <div style="color:#64748B;">Gain estimé ($)</div>
-                <div id="gainText" style="font-weight:700; color:#3C756E;">—</div>
+                <div style="color:#64748B;">Gain estimé</div>
+                <div id="gainText" style="font-weight:700;">—</div>
              </div>
-             <div id="tokenGainText" style="text-align:right; font-size:0.85rem; color:#64748B; margin-top:4px; display:none;"></div>
+             <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-top:8px;">
+                <div style="color:#64748B;">Capital initial (en tokens)</div>
+                <div id="depTok" style="font-weight:600;">—</div>
+             </div>
           </div>
         </div>
         
@@ -282,61 +296,6 @@
             <li>Time-lock / délai anti-panique si besoin.</li>
             <li>Guard / monitoring selon profil de risque.</li>
           </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="partner" class="section" style="border-top: 1px solid #E2E8F0; background: #fff;">
-    <div class="container-premium">
-      <div class="bp-card" style="background: linear-gradient(135deg, #1C4A42 0%, #112926 100%); color: white; border:none; padding: 48px; position:relative; overflow:hidden;">
-        
-        <div style="position:absolute; top:-60px; right:-60px; opacity:0.07; transform: rotate(15deg); color:#fff;">
-          <svg width="350" height="350" viewBox="0 0 24 24" fill="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
-        </div>
-
-        <div style="position:relative; z-index:2; display:grid; grid-template-columns: 1.4fr 1fr; gap:64px; align-items:center;">
-          <div>
-            <div style="text-transform:uppercase; letter-spacing:0.05em; font-size:12px; font-weight:700; color:#86EFAC; margin-bottom:12px;">Programme Partenaire</div>
-            <h2 style="font-size:36px; font-weight:800; margin-bottom:24px; line-height:1.1; letter-spacing:-0.02em;">Votre réseau est un actif.<br>Valorisez-le.</h2>
-            <p style="color:#E2E8F0; font-size:16px; margin-bottom:32px; line-height:1.6; max-width:480px;">
-              Vous connaissez des profils qualifiés (Chefs d'entreprises, Expatriés, Investisseurs) ?
-              Devenez apporteur d'affaires et touchez une commission sur <strong>l'ensemble de la facturation</strong> de vos filleuls.
-            </p>
-            
-            <div style="display:flex; gap:32px; border-top:1px solid rgba(255,255,255,0.1); padding-top:24px;">
-              <div>
-                <strong style="display:block; font-size:28px; color:#86EFAC;">20%</strong>
-                <span style="font-size:13px; color:#94A3B8; font-weight:500;">De nos honoraires</span>
-              </div>
-              <div>
-                <strong style="display:block; font-size:28px; color:#fff;">Stables</strong>
-                <span style="font-size:13px; color:#94A3B8; font-weight:500;">Euro ou Dollar (Crypto)</span>
-              </div>
-              <div>
-                <strong style="display:block; font-size:28px; color:#fff;">∞</strong>
-                <span style="font-size:13px; color:#94A3B8; font-weight:500;">Récurrent à vie</span>
-              </div>
-            </div>
-          </div>
-
-          <div style="background:rgba(255,255,255,0.05); backdrop-filter:blur(12px); padding:32px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-              <div style="background:#fff; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#1C4A42;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-              </div>
-              <div>
-                <strong style="font-size:15px; display:block;">Paiements Rapides</strong>
-                <span style="font-size:13px; color:#94A3B8;">Directement sur votre Wallet / Carte.</span>
-              </div>
-            </div>
-            <p style="font-size:14px; color:#CBD5E1; line-height:1.6; margin:0 0 24px 0;">
-              "Un seul apport de 100k€ génère une rente récurrente. De quoi financer vos extras, simplement grâce à une mise en relation."
-            </p>
-            <a href="mailto:toni@blockpilot.capital?subject=Demande%20Partenariat" class="btn" style="width:100%; border:none; background:#fff; color:#0F172A; justify-content:center; height:48px; font-size:15px;">
-              Devenir Partenaire
-            </a>
-          </div>
         </div>
       </div>
     </div>

@@ -105,7 +105,7 @@ body { background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif
 .bullets { list-style: none; padding: 0; margin: 0 0 24px; }
 .bullets li { position: relative; padding-left: 24px; margin-bottom: 8px; color: var(--bp-text-muted); font-size: 15px; }
 .bullets li::before { 
-  content: "•"; color: var(--bp-primary); position: absolute; left: 6px; font-weight: bold; font-size: 18px; line-height: 1.4; 
+  content: "â€¢"; color: var(--bp-primary); position: absolute; left: 6px; font-weight: bold; font-size: 18px; line-height: 1.4; 
 }
 .tip { border-bottom: 1px dotted var(--bp-text-muted); cursor: help; }
 
@@ -246,7 +246,7 @@ body { background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif
   .doc-layout { display: block; }
   .doc-sidebar { position: relative; top: 0; width: 100%; border-right: none; border-bottom: 1px solid var(--bp-border); margin-bottom: 32px; padding-bottom: 24px; max-height: none; }
 }
-/* --- TIMELINE (Liste Verticale Connectée) --- */
+/* --- TIMELINE (Liste Verticale ConnectÃ©e) --- */
 .timeline { position: relative; padding-left: 8px; }
 
 .tl-item { position: relative; padding-left: 24px; padding-bottom: 32px; }
@@ -259,7 +259,7 @@ body { background-color: var(--bp-surface-alt); font-family: 'Inter', sans-serif
 }
 .tl-item:last-child::before { display: none; }
 
-/* La bulle numéro */
+/* La bulle numÃ©ro */
 .tl-marker {
   position: absolute; left: 0; top: 0;
   width: 24px; height: 24px;

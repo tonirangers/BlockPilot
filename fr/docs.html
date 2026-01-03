@@ -447,7 +447,7 @@
         <ol>
             <li><strong>Par Notification :</strong> Un simple email ou message écrit suffit pour acter la fin du mandat.</li>
             <li><strong>Par Révocation Technique :</strong> Vous avez le pouvoir souverain de révoquer la clé de signature de BlockPilot directement sur la Blockchain. Cela stoppe instantanément toute possibilité de gestion de notre part.</li>
-            <li><strong>Calcul Final :</strong> Une "Termination Snapshot" (photo finale) est prise à la date de fin pour calculer les derniers frais de gestion au prorata et la commission de performance si positive.</li>
+            <li><strong>Calcul Final :</strong> Une "Termination Snapshot" (final photo) est prise à la date de fin pour calculer les derniers frais de gestion au prorata et la commission de performance si positive.</li>
         </ol>
 
         <h2 id="7-4">7.4 Protection des Données (Privacy)</h2>
@@ -515,45 +515,109 @@
 <script src="../assets/main.js"></script>
 <script src="../assets/header.js"></script>
 
-<!-- DOCUMENTATION SCRIPT CORRIGÉ -->
+<!-- DOCUMENTATION SCRIPT -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. NAVIGATION (Reste inchangé)
     const content = document.querySelector('.doc-content');
     const leftNav = document.getElementById('doc-nav');
     
-    if(content && leftNav) {
-        // ... (Ton code de navigation existant peut rester ici) ...
-    }
+    // ICONS MAP
+    const icons = {
+      default: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>',
+      1: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>', // Shield/Bank
+      2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>', // Finance/$
+      3: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>', // Book/Prep
+      4: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>', // Flash/Activation
+      5: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>', // Dashboard
+      6: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>', // FAQ
+      7: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', // Law/Contract
+      8: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>' // Search/Lexique
+    };
 
-    // 2. CORRECTION DES BOUTONS COPIER
-    // On cible uniquement les 'pre' pour éviter le double emballage
-    document.querySelectorAll('pre').forEach(block => {
+    // 1. GENERATE LEFT NAVIGATION (H1 Only to keep it clean with icons)
+    const headers = content.querySelectorAll('h1, h2');
+    headers.forEach(header => {
+      const link = document.createElement('a');
+      link.href = '#' + header.id;
+      
+      // Determine Icon based on Chapter Number (H1)
+      let iconHtml = '';
+      if (header.tagName === 'H1') {
+        // Extract number from text "CHAPITRE 1" -> 1
+        const match = header.textContent.match(/CHAPITRE (\d+)/);
+        const num = match ? match[1] : 'default';
+        iconHtml = icons[num] || icons.default;
         
-        // On crée le conteneur
-        const wrapper = document.createElement('div');
-        wrapper.className = 'code-block';
+        // Clean text "CHAPITRE 1 : TITLE" -> "1. TITLE" or just "TITLE"
+        link.innerHTML = `${iconHtml}<span>${header.textContent.replace('CHAPITRE ', '')}</span>`;
+        link.classList.add('doc-nav-link');
+      } else {
+        // H2
+        link.textContent = header.textContent;
+        link.classList.add('doc-nav-link', 'sub');
+      }
+
+      leftNav.appendChild(link);
+    });
+
+    // 3. INTERACTIVITY: Active State on Scroll
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -60% 0px', // Trigger when element is near top
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Remove active from all
+          document.querySelectorAll('.doc-nav-link').forEach(l => l.classList.remove('active'));
+          
+          // Add active to corresponding link
+          const id = entry.target.id;
+          const leftLink = leftNav.querySelector(`a[href="#${id}"]`);
+          
+          if (leftLink) {
+             leftLink.classList.add('active');
+          }
+        }
+      });
+    }, observerOptions);
+
+    content.querySelectorAll('h1, h2').forEach(h => observer.observe(h));
+
+    // 4. COPY BUTTONS FOR CODE BLOCKS - FIXED
+    document.querySelectorAll('pre').forEach(pre => {
+        let wrapper = pre.parentElement;
         
-        // On insère le conteneur avant le bloc <pre>
-        block.parentNode.insertBefore(wrapper, block);
-        
-        // On déplace le <pre> DANS le conteneur
-        wrapper.appendChild(block);
-        
-        // On ajoute le bouton
+        // Cas 1 : Le <pre> est déjà dans un <div class="code-block"> (Cas de ton fichier actuel)
+        if (wrapper.classList.contains('code-block')) {
+            // On vérifie si le bouton existe déjà pour pas le doubler
+            if (!wrapper.querySelector('.copy-btn')) {
+                addCopyButton(wrapper, pre);
+            }
+        } 
+        // Cas 2 : Le <pre> est nu (Cas standard)
+        else {
+            wrapper = document.createElement('div');
+            wrapper.className = 'code-block';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+            addCopyButton(wrapper, pre);
+        }
+    });
+
+    function addCopyButton(wrapper, contentSource) {
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
-        btn.textContent = 'Copier'; // Ou 'Copy' selon la langue
-        
+        btn.textContent = 'Copier';
         btn.onclick = () => {
-            // On copie le texte brut du code
-            navigator.clipboard.writeText(block.innerText);
+            navigator.clipboard.writeText(contentSource.innerText);
             btn.textContent = 'Copié !';
             setTimeout(() => btn.textContent = 'Copier', 2000);
         };
-        
         wrapper.appendChild(btn);
-    });
+    }
   });
 </script>
 </body>

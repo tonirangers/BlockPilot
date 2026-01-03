@@ -222,28 +222,28 @@
             <li><strong>Investor Profile:</strong>
                 <ul>
                     <li>Fill out the <a href="https://forms.gle/QAmqwCXFMBHVJ7EHA" target="_blank">Profile Form</a>.</li>
-                    <li>Here you paste your Zeal address (0x...) so we can identify you.</li>
+                    <li>Here you paste your Zeal address (0x...) so I can identify you.</li>
                 </ul>
             </li>
         </ol>
-        <p>Once done, send us a message (Telegram/Mail): "Toni, it's good, wallet ready and form filled."</p>
+        <p>Once done, send me a message (Telegram/Mail): "Toni, it's good, wallet ready and form filled."</p>
 
         <h1 id="chap4">CHAPTER 4: DEPLOYMENT & FOLLOW-UP (ACTIVATION)</h1>
-        <p>This is the magic step. We take over to build your private banking infrastructure.</p>
+        <p>This is the magic step. I take over to build your private banking infrastructure.</p>
 
-        <h2 id="4-1">4.1 Building the Safe (Our Role)</h2>
-        <p>Upon receipt of your green light, we deploy your Safe on the Blockchain.</p>
+        <h2 id="4-1">4.1 Building the Safe (My Role)</h2>
+        <p>Upon receipt of your green light, I deploy your Safe on the Blockchain.</p>
         <ul>
-            <li>We configure the 1/2 Signature (We can operate, you keep control).</li>
-            <li>We install the Guard module (Anti-theft security).</li>
-            <li>We verify that everything is operational.</li>
+            <li>I configure the 1/2 Signature (I can operate, you keep control).</li>
+            <li>I install the Guard module (Anti-theft security).</li>
+            <li>I verify that everything is operational.</li>
         </ul>
 
         <h2 id="4-2">4.2 Transferring Funds (Funding)</h2>
-        <p>We communicate the address of your new Safe to you.</p>
+        <p>I communicate the address of your new Safe to you.</p>
         <ol>
             <li>From your Zeal wallet (or MEXC), you send your cryptos to the Safe address.</li>
-            <li><strong>Tip:</strong> We always do a small test (10€) before sending the rest. We accompany you live (Call/Chat) for this step if needed.</li>
+            <li><strong>Tip:</strong> We always do a small test (10€) before sending the rest. I accompany you live (Call/Chat) for this step if needed.</li>
         </ol>
 
         <h2 id="4-3">4.3 Follow-up: "Watch Only" Mode (Pro Tip)</h2>
@@ -286,7 +286,7 @@
             <li>In Zeal, click on your profile/account icon (top left).</li>
             <li>Select "Add Account".</li>
             <li>Choose "Track any wallet" (or "Watch address").</li>
-            <li>Paste your Safe address (the one we gave you).</li>
+            <li>Paste your Safe address (the one I gave you).</li>
             <li>Give it a name: "BlockPilot Vault".</li>
         </ol>
         <p><strong>Result:</strong> You now have two views in the app.</p>
@@ -304,7 +304,7 @@
                 </ul>
             </li>
         </ul>
-        <p><strong>Total Transparency:</strong> You see exactly what we see. Impossible to cheat on the numbers.</p>
+        <p><strong>Total Transparency:</strong> You see exactly what I see. Impossible to cheat on the numbers.</p>
 
         <h2 id="5-3">5.3 BlockPilot Management: Active Financial Engineering</h2>
         <p>Your money doesn't sleep. Once secured in the Safe, we deploy institutional yield strategies, usually inaccessible to individuals.</p>
@@ -330,19 +330,19 @@
         </ul>
         
         <div class="callout">
-            <strong>The Role of the Guard (Security):</strong> We have technical rights to execute these complex financial operations (Swaps, Deposits, Rebalancing) to generate performance.
-            <br>However, the Guard watches closely: it technically forbids us to send funds to a destination other than validated protocols or your own wallet.
+            <strong>The Role of the Guard (Security):</strong> I have technical rights to execute these complex financial operations (Swaps, Deposits, Rebalancing) to generate performance.
+            <br>However, the Guard watches closely: it technically forbids me to send funds to a destination other than validated protocols or your own wallet.
         </div>
 
         <h2 id="5-4">5.4 Retrieving Your Gains (Off-Ramp)</h2>
         <p>The ultimate goal is to enjoy your money. The system is designed to be fluid.</p>
         <p><strong>The Exit Scenario:</strong></p>
         <ol>
-            <li><strong>Request:</strong> You send us a message: "Toni, I want to withdraw €5,000 for a vacation."</li>
+            <li><strong>Request:</strong> You send me a message: "Toni, I want to withdraw €5,000 for a vacation."</li>
             <li><strong>Execution:</strong>
                 <ul>
-                    <li>We disengage capital from Yield strategies (Unstake/Withdraw).</li>
-                    <li>We prepare the transfer transaction from the Safe to your personal Zeal Wallet.</li>
+                    <li>I disengage capital from Yield strategies (Unstake/Withdraw).</li>
+                    <li>I prepare the transfer transaction from the Safe to your personal Zeal Wallet.</li>
                 </ul>
             </li>
             <li><strong>Usage (The "Lifestyle"):</strong>
@@ -586,25 +586,38 @@
 
     content.querySelectorAll('h1, h2').forEach(h => observer.observe(h));
 
-    // 4. COPY BUTTONS FOR CODE BLOCKS
-    document.querySelectorAll('pre, code').forEach(block => {
-        if (block.tagName === 'CODE' && block.parentElement.tagName !== 'PRE') return;
+    // 4. COPY BUTTONS FOR CODE BLOCKS - FIXED
+    document.querySelectorAll('pre').forEach(pre => {
+        let wrapper = pre.parentElement;
         
-        const wrapper = document.createElement('div');
-        wrapper.className = 'code-block';
-        block.parentNode.insertBefore(wrapper, block);
-        wrapper.appendChild(block);
-        
+        // Cas 1 : Le <pre> est déjà dans un <div class="code-block"> (Cas de ton fichier actuel)
+        if (wrapper.classList.contains('code-block')) {
+            // On vérifie si le bouton existe déjà pour pas le doubler
+            if (!wrapper.querySelector('.copy-btn')) {
+                addCopyButton(wrapper, pre);
+            }
+        } 
+        // Cas 2 : Le <pre> est nu (Cas standard)
+        else {
+            wrapper = document.createElement('div');
+            wrapper.className = 'code-block';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+            addCopyButton(wrapper, pre);
+        }
+    });
+
+    function addCopyButton(wrapper, contentSource) {
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
         btn.textContent = 'Copy';
         btn.onclick = () => {
-            navigator.clipboard.writeText(block.textContent);
+            navigator.clipboard.writeText(contentSource.innerText);
             btn.textContent = 'Copied!';
             setTimeout(() => btn.textContent = 'Copy', 2000);
         };
         wrapper.appendChild(btn);
-    });
+    }
   });
 </script>
 </body>

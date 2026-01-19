@@ -255,7 +255,7 @@
   }
 
   async function init() {
-    initSignature();
+    // initSignature(); // <--- DÉSACTIVÉ ICI (COMMENTÉ)
     initSimulator(); 
 
     // Async Fetch updates (Background)

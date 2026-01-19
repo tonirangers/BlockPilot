@@ -13,11 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentFile = path.split("/").pop() || "index.html";
 
   // 2. DICTIONNAIRE DES TEXTES
-  const txt = {
+const txt = {
     perf: isEn ? "Performance" : "Performance",
     sec: isEn ? "Security" : "Sécurité",
     docs: isEn ? "Docs" : "Docs",
-    sign: isEn ? "Signature" : "Signature",
+    sign: isEn ? "Join" : "Souscrire", // <-- Changement ici (Souscrire / Join)
     menu: isEn ? "Menu" : "Menu",
     close: isEn ? "Close" : "Fermer"
   };
@@ -26,7 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Le logo et le menu doivent rester dans la langue actuelle
   const homeLink = `${root}/${currentLang}/index.html`;
   const docsLink = `${root}/${currentLang}/docs.html`;
-  const signLink = `${root}/${currentLang}/signature.html`;
+// Avant c'était signature.html, maintenant :
+  const signLink = `${root}/${currentLang}/onboarding.html`;
 
   // Le switcher de langue doit pointer vers le MÊME fichier mais dans l'autre dossier
   const linkFr = `${root}/fr/${currentFile}`;

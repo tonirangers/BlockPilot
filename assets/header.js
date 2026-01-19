@@ -1,39 +1,30 @@
-/* assets/header.js - Header Intelligent (Auto-traduction & Liens contextuels) */
+/* assets/header.js - BlockPilot Pro */
 document.addEventListener("DOMContentLoaded", () => {
   
-  // 1. DÉTECTION DU CONTEXTE (Langue & Racine)
-  const currentLang = document.documentElement.lang || "fr"; // 'fr' ou 'en'
+  const currentLang = document.documentElement.lang || "fr"; 
   const isEn = currentLang === "en";
-  
   const path = window.location.pathname;
-  // Détermine si on doit remonter d'un dossier (..) ou rester (.)
   const root = (path.includes('/fr/') || path.includes('/en/')) ? ".." : ".";
-  
-  // Détermine le nom du fichier actuel pour le switch de langue (ex: docs.html)
   const currentFile = path.split("/").pop() || "index.html";
 
-  // 2. DICTIONNAIRE DES TEXTES
-const txt = {
+  // TEXTES DU MENU
+  const txt = {
     perf: isEn ? "Performance" : "Performance",
     sec: isEn ? "Security" : "Sécurité",
     docs: isEn ? "Docs" : "Docs",
-    sign: isEn ? "Join" : "Souscrire", // <-- Changement ici (Souscrire / Join)
+    sign: isEn ? "Join" : "Souscrire", // <--- Changé ici
     menu: isEn ? "Menu" : "Menu",
     close: isEn ? "Close" : "Fermer"
   };
 
-  // 3. CONSTRUCTION DES LIENS
-  // Le logo et le menu doivent rester dans la langue actuelle
+  // LIENS
   const homeLink = `${root}/${currentLang}/index.html`;
   const docsLink = `${root}/${currentLang}/docs.html`;
-// Avant c'était signature.html, maintenant :
-  const signLink = `${root}/${currentLang}/onboarding.html`;
+  const signLink = `${root}/${currentLang}/onboarding.html`; // <--- Pointe vers la nouvelle page
 
-  // Le switcher de langue doit pointer vers le MÊME fichier mais dans l'autre dossier
   const linkFr = `${root}/fr/${currentFile}`;
   const linkEn = `${root}/en/${currentFile}`;
 
-  // 4. HTML DU HEADER
   const headerHTML = `
   <div class="container">
     <nav class="nav">
@@ -73,26 +64,19 @@ const txt = {
     </nav>
   </div>`;
 
-  // 5. INJECTION ET LOGIQUE
   const headerEl = document.querySelector("header.header");
   if (headerEl) {
     headerEl.innerHTML = headerHTML;
     
-    // Highlight lien actif
     const links = headerEl.querySelectorAll(".nav__links a");
     links.forEach(link => {
-        // On compare le nom du fichier (ex: signature.html)
         const hrefFile = link.getAttribute("href").split('/').pop(); 
-        // Cas particulier : si on est sur index.html, on veut aussi activer les ancres #performance etc
         if(currentFile === hrefFile || (currentFile === "index.html" && hrefFile.startsWith("index.html"))) {
-             // Petit hack : ne pas activer "Performance" si on est sur "Signature"
              if(!window.location.hash && hrefFile.includes("#")) return; 
-             // Logic simple : si l'URL contient le href, c'est actif (pour docs et signature)
              if(currentFile === hrefFile.split('#')[0]) link.classList.add("active");
         }
     });
 
-    // Mobile Menu
     const t = document.getElementById("navToggle");
     if(t) {
         t.onclick = () => {

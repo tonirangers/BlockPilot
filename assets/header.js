@@ -1,30 +1,39 @@
-/* assets/header.js - BlockPilot Pro */
+/* assets/header.js - BlockPilot Pro (Private Banking Logic) */
 document.addEventListener("DOMContentLoaded", () => {
   
-  const currentLang = document.documentElement.lang || "fr"; 
+  // 1. DÉTECTION DU CONTEXTE (Langue & Racine)
+  const currentLang = document.documentElement.lang || "fr"; // 'fr' ou 'en'
   const isEn = currentLang === "en";
+  
   const path = window.location.pathname;
+  // Détermine si on doit remonter d'un dossier (..) ou rester (.)
   const root = (path.includes('/fr/') || path.includes('/en/')) ? ".." : ".";
+  
+  // Détermine le nom du fichier actuel pour le switch de langue (ex: docs.html)
   const currentFile = path.split("/").pop() || "index.html";
 
-  // TEXTES DU MENU
+  // 2. DICTIONNAIRE DES TEXTES
   const txt = {
     perf: isEn ? "Performance" : "Performance",
     sec: isEn ? "Security" : "Sécurité",
     docs: isEn ? "Docs" : "Docs",
-    sign: isEn ? "Join" : "Souscrire", // <--- Changé ici
+    sign: isEn ? "Join" : "Souscrire", // <--- Changement du texte
     menu: isEn ? "Menu" : "Menu",
     close: isEn ? "Close" : "Fermer"
   };
 
-  // LIENS
+  // 3. CONSTRUCTION DES LIENS
   const homeLink = `${root}/${currentLang}/index.html`;
   const docsLink = `${root}/${currentLang}/docs.html`;
-  const signLink = `${root}/${currentLang}/onboarding.html`; // <--- Pointe vers la nouvelle page
+  
+  // LIEN DIRECT VERS TALLY
+  const signLink = "https://tally.so/r/KYxLGM"; 
 
+  // Le switcher de langue
   const linkFr = `${root}/fr/${currentFile}`;
   const linkEn = `${root}/en/${currentFile}`;
 
+  // 4. HTML DU HEADER
   const headerHTML = `
   <div class="container">
     <nav class="nav">
@@ -51,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${txt.docs}
         </a>
 
-        <a href="${signLink}">
+        <a href="${signLink}" target="_blank">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
           ${txt.sign}
         </a>
@@ -64,19 +73,26 @@ document.addEventListener("DOMContentLoaded", () => {
     </nav>
   </div>`;
 
+  // 5. INJECTION ET LOGIQUE
   const headerEl = document.querySelector("header.header");
   if (headerEl) {
     headerEl.innerHTML = headerHTML;
     
+    // Highlight lien actif
     const links = headerEl.querySelectorAll(".nav__links a");
     links.forEach(link => {
-        const hrefFile = link.getAttribute("href").split('/').pop(); 
+        const href = link.getAttribute("href");
+        // On ignore le lien Tally pour l'active state
+        if (href.includes("tally.so")) return;
+
+        const hrefFile = href.split('/').pop(); 
         if(currentFile === hrefFile || (currentFile === "index.html" && hrefFile.startsWith("index.html"))) {
              if(!window.location.hash && hrefFile.includes("#")) return; 
              if(currentFile === hrefFile.split('#')[0]) link.classList.add("active");
         }
     });
 
+    // Mobile Menu
     const t = document.getElementById("navToggle");
     if(t) {
         t.onclick = () => {

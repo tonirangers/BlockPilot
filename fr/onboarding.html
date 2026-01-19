@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlockPilot — Ouverture de Compte</title>
+  
+  <meta name="description" content="Formulaire d'inscription et de qualification investisseur BlockPilot." />
+  <link rel="icon" type="image/png" href="../logo.png" />
+  <link rel="stylesheet" href="../assets/styles.css" />
+  
+  <style>
+    /* Petit ajustement pour que le formulaire respire */
+    .tally-container {
+      background: #FFFFFF;
+      border: 1px solid var(--bp-border);
+      border-radius: var(--bp-radius-card);
+      box-shadow: var(--bp-shadow-card);
+      overflow: hidden;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+
+<body data-lang="fr">
+
+<header class="header"></header>
+
+<main class="section">
+  <div class="container-premium">
+    
+    <!-- En-tête de page simple et élégant -->
+    <div class="bp-section-header">
+      <h1 class="bp-section-title">Devenir Client</h1>
+      <p class="bp-section-subtitle">Remplissez ce formulaire pour initier votre procédure d'onboarding (KYC & Qualification).</p>
+    </div>
+
+    <!-- Intégration Tally -->
+    <div class="tally-container">
+      <iframe 
+        src="https://tally.so/embed/KYxLGM?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
+        loading="lazy" 
+        width="100%" 
+        height="200" 
+        frameborder="0" 
+        marginheight="0" 
+        marginwidth="0" 
+        title="Onboarding BlockPilot">
+      </iframe>
+    </div>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container-premium">
+    <span>© Copyright BlockPilot Capital ltd 2025</span>
+  </div>
+</footer>
+
+<!-- Scripts essentiels -->
+<script src="../assets/header.js"></script>
+<!-- Le script Tally pour redimensionner l'iframe automatiquement -->
+<script async src="https://tally.so/widgets/embed.js"></script> 
+
+</body>
+</html>

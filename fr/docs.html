@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Documentation Client — BlockPilot</title>
   <link rel="stylesheet" href="../assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body data-lang="fr">
@@ -24,17 +27,19 @@
       <!-- CONTENU PRINCIPAL -->
       <article class="doc-content">
         
-        <h1 id="chap1">CHAPITRE 1 : DÉMARRAGE RAPIDE (QUICKSTART)</h1>
+        <h1 id="chap1">CHAPITRE 1 : DÉMARRAGE RAPIDE (10-15 MIN)</h1>
         
         <div class="callout callout-important">
-            <strong>Checklist : Votre gestion activée en 5 minutes</strong>
+            <strong>Checklist : votre compte activé simplement</strong>
             <ul class="bullets" style="margin-top:10px;">
-                <li>✅ <strong>Étape 1 :</strong> Installer l'application <strong>Zeal</strong> sur votre téléphone.</li>
-                <li>✅ <strong>Étape 2 :</strong> Approvisionner votre compte (Virement SEPA ou transfert Crypto).</li>
-                <li>✅ <strong>Étape 3 :</strong> Remplir le formulaire unique : <a href="https://tally.so/r/KYxLGM" target="_blank"><strong>https://tally.so/r/KYxLGM</strong></a></li>
-                <li>✅ <strong>Étape 4 :</strong> Recevoir l'adresse de votre coffre (Safe) et valider le dépôt.</li>
+                <li>✅ <strong>Étape 1 :</strong> Installer <strong>Zeal</strong> et créer votre accès (FaceID/Passkey possible).</li>
+                <li>✅ <strong>Étape 2 :</strong> Activer votre compte dans Zeal (IBAN) OU préparer vos cryptos sur un exchange.</li>
+                <li>✅ <strong>Étape 3 :</strong> Remplir le formulaire unique (signature incluse) : <a href="https://tally.so/r/KYxLGM" target="_blank"><strong>https://tally.so/r/KYxLGM</strong></a></li>
+                <li>✅ <strong>Étape 4 :</strong> Réserver votre call d’activation (10 min) : <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank"><strong>Lien Calendly</strong></a></li>
+                <li>✅ <strong>Étape 5 :</strong> Pendant le call, on valide votre mode (SAFE recommandé / Managed Wallet sur demande), on vous donne l’adresse exacte de dépôt et on fait un test (10€).</li>
+                <li>✅ <strong>Étape 6 :</strong> Ajouter le coffre en “Watch-only” dans Zeal (pour voir votre solde en direct).</li>
             </ul>
-            <p style="font-size: 13px; margin-top: 10px; color: var(--bp-text-muted);"><em>Une fois ces étapes franchies, nous prenons le relais. Vous n'avez plus rien à faire.</em></p>
+            <p style="font-size: 13px; margin-top: 10px; color: var(--bp-text-muted);"><em>Après cela, vous suivez votre solde en temps réel, et nous opérons la stratégie au quotidien.</em></p>
         </div>
 
         <h2 id="1-1">1.1 Qui fait quoi ?</h2>
@@ -48,77 +53,95 @@
                 <td>Pilote les fonds pour générer du rendement.</td>
             </tr>
             <tr>
-                <td>Définit les adresses de retrait autorisées.</td>
-                <td>Surveille les opportunités de marché 24/7.</td>
+                <td>Effectue le dépôt initial (avec test) vers l’adresse communiquée pendant le call.</td>
+                <td>Sélectionne et surveille les protocoles 24/7.</td>
             </tr>
             <tr>
-                <td>Valide les dépôts initiaux.</td>
+                <td>Confirme ses adresses de retrait autorisées.</td>
                 <td>Fournit le reporting et la sécurité technique.</td>
             </tr>
         </table>
 
         <h1 id="chap2">CHAPITRE 2 : VOTRE INTERFACE (L'APP ZEAL)</h1>
-        <p>Zeal est l'outil le plus simple pour les profils "Banque Privée". Il permet de gérer vos actifs numériques aussi facilement qu'une application bancaire classique.</p>
-
-        <h2 id="2-1">2.1 Installation & Sécurité (Passkey)</h2>
-        <p>Lors de la création, Zeal vous proposera d'utiliser <strong>FaceID</strong> ou une <strong>Passkey</strong>. C'est très pratique pour un usage quotidien, mais cela ne remplace pas la sauvegarde physique.</p>
         
+        <h2 id="2-1">2.1 Installation & Sécurité</h2>
+        <p>Zeal permet une création rapide via <strong>FaceID ou Passkey</strong>. C'est l'option la plus simple pour un usage quotidien.</p>
         <div class="callout">
-            <strong>⚠️ Le Piège à éviter :</strong>
-            <p>Si vous perdez votre téléphone et que vous n'avez pas noté votre <strong>Phrase de Récupération (12 ou 24 mots)</strong>, personne ne pourra récupérer votre argent. Notez-la sur papier, jamais sur un cloud ou en photo.</p>
+            <strong>⚠️ Rappel de Sécurité :</strong>
+            <p>Même si vous utilisez FaceID, vous devez impérativement noter votre <strong>Phrase de Récupération (12 ou 24 mots)</strong> sur papier. Si vous perdez votre téléphone, c'est votre seule assurance-vie. Ne la stockez jamais sur un cloud ou en photo.</p>
         </div>
 
-        <h2 id="2-2">2.2 Approvisionnement (Le Carburant)</h2>
+        <h2 id="2-2">2.2 Approvisionnement (Le carburant)</h2>
+        <p><strong>Option A — Depuis votre banque (recommandé)</strong></p>
         <ul>
-            <li><strong>Par Virement :</strong> Activez l'IBAN personnel dans Zeal. Envoyez vos Euros, ils arrivent instantanément ou sous 24h.</li>
-            <li><strong>Par Exchange :</strong> Si vous utilisez MEXC ou Binance, envoyez vos fonds vers votre adresse Zeal (commençant par 0x...).
-            <br><a href="https://promote.mexc.co/r/rO0gT3a8" target="_blank">Lien d'inscription MEXC (Partenaire)</a></li>
+            <li>Dans Zeal, activez votre compte (IBAN) en suivant le parcours intégré.</li>
+            <li>Faites un virement SEPA vers votre nouvel IBAN Zeal.</li>
+            <li>Une fois crédité, nous vous guiderons pour la suite pendant le call d’activation.</li>
+        </ul>
+        <p><strong>Option B — Depuis un exchange (MEXC / Binance)</strong></p>
+        <ul>
+            <li>Achetez ou stockez vos actifs (USDC/USDT/ETH/BTC) sur votre plateforme habituelle.</li>
+            <li>Pendant le call, nous vous donnerons l’adresse exacte de dépôt vers votre coffre et nous ferons un test ensemble (10€).</li>
         </ul>
 
         <h1 id="chap3">CHAPITRE 3 : LES MODES DE GESTION</h1>
-        <p>Nous adaptons la structure technique à votre besoin de confort ou de sécurité maximale.</p>
-
+        
         <h2 id="3-1">3.1 SAFE Mode (Recommandé)</h2>
-        <p>C'est votre coffre-fort dédié sur la Blockchain. 
-        <br><strong>Conséquence :</strong> Vous seul détenez la clé de récupération. Même si BlockPilot disparaît, vous gardez le contrôle total et mathématique de vos fonds.</p>
+        <p>C'est votre coffre dédié. Vous gardez la souveraineté totale et mathématique sur vos fonds.</p>
 
         <h2 id="3-2">3.2 Managed Wallet (Option sur demande)</h2>
-        <p>Pour réduire la friction et les frais de création pour certains profils. 
-        <br><strong>Conséquence :</strong> BlockPilot détient la clé technique pour opérer plus vite. La sortie est sécurisée par vos adresses autorisées et un délai de vérification. La clé (seed) ne vous est remise que sur demande de clôture.</p>
+        <p>Uniquement si vous souhaitez minimiser la friction d'onboarding. La sécurité des sorties est assurée par vos adresses autorisées, un délai de sécurité et une vérification humaine.</p>
+
+        <h1 id="chap3bis">CHAPITRE 3bis : ARCHITECTURE DE SÉCURITÉ (SAFE + GUARD)</h1>
+        <p>En SAFE Mode, vos actifs sont dans un coffre (Safe) dédié à votre nom. BlockPilot dispose d’une clé opérateur pour exécuter la stratégie, mais il existe des verrous techniques et contractuels.</p>
+
+        <h3>La “Vitre” (le Guard)</h3>
+        <p><strong>Objectif :</strong> Empêcher les sorties simples vers des portefeuilles externes tant que la sécurité n’est pas relevée (ex: besoin de 2 signatures).</p>
+        <p><strong>Concrètement :</strong> BlockPilot peut exécuter des opérations financières (échanges, dépôts en protocoles, transferts entre réseaux), mais une sortie directe vers un portefeuille inconnu est conçue pour exiger un processus renforcé.</p>
+
+        <h3>Le “Marteau” (Votre souveraineté)</h3>
+        <p>Vous n’êtes jamais captif : vous pouvez révoquer nos droits et reprendre la main à tout moment, même si BlockPilot est indisponible. Nous vous remettons un <strong>“Emergency Recovery Kit”</strong> lors de l'onboarding pour garantir cette liberté.</p>
+
+        <div class="callout">
+            <p style="font-size: 13px;"><em>Note de transparence : Un Guard peut ne pas bloquer certains flux vers des contrats intelligents (ex: routes de dépôt). Les règles de retrait restent donc cadrées par nos procédures internes et par les Conditions Générales.</em></p>
+        </div>
 
         <h1 id="chap4">CHAPITRE 4 : SÉCURITÉ (LES 5 RÈGLES D'OR)</h1>
         <div class="bp-card">
             <ol>
                 <li><strong>Jamais votre Seed :</strong> BlockPilot ne vous demandera JAMAIS vos 12/24 mots.</li>
                 <li><strong>Pas de Cloud :</strong> Ne stockez jamais vos accès sur Google Drive, iCloud ou par email.</li>
-                <li><strong>Canaux Officiels :</strong> Les instructions sensibles (retrait) se font <u>uniquement par Email</u>. Telegram est pour le chat rapide.</li>
+                <li><strong>Canaux Officiels :</strong> Les instructions sensibles (retrait) se font <u>uniquement par Email</u>.</li>
                 <li><strong>Vérifiez l'URL :</strong> Assurez-vous d'être toujours sur <em>blockpilot.capital</em>.</li>
-                <li><strong>Test de transfert :</strong> Pour un premier gros dépôt, faites toujours un test avec 10€ pour vous rassurer.</li>
+                <li><strong>Test de transfert :</strong> On commence toujours par un test de 10€ ensemble.</li>
             </ol>
         </div>
 
         <h1 id="chap5">CHAPITRE 5 : TRANSPARENCE & SUIVI</h1>
+        <p><strong>Zeal (Watch-only) :</strong> C'est votre vue simplifiée pour consulter votre solde total sur votre téléphone.</p>
+        <p><strong>DeBank (Audit détaillé) :</strong> C'est l'outil professionnel. En y collant l'adresse de votre coffre, vous voyez le détail exact de chaque position et les intérêts accumulés seconde après seconde.</p>
+
+        <h1 id="chap6">CHAPITRE 6 : FAQ (QUESTIONS FRÉQUENTES)</h1>
         
-        <h2 id="5-1">5.1 Suivre son solde</h2>
-        <ul>
-            <li><strong>Dans Zeal (Vue simple) :</strong> Utilisez la fonction "Watch-only" pour voir le solde de votre coffre directement sur votre téléphone.</li>
-            <li><strong>Sur DeBank (Vue détaillée) :</strong> Collez l'adresse de votre coffre sur <a href="https://debank.com" target="_blank">DeBank.com</a> pour voir le détail précis de chaque placement, les intérêts courus et les protocoles utilisés.</li>
-        </ul>
+        <h3>"Pourquoi mon wallet Zeal affiche 0 ?"</h3>
+        <p>C’est normal : votre “wallet personnel” (votre clé de signature) est généralement vide. Votre capital est en sécurité dans le <strong>coffre (Safe)</strong>. Il suffit d'ajouter le Safe en “Watch-only” dans Zeal pour voir votre solde en direct.</p>
 
-        <h2 id="5-2">5.2 Tarification Claire</h2>
-        <ul>
-            <li><strong>Mandat Standard :</strong> 0,50% par trimestre (Rolling Quarter) + 4% sur les bénéfices nets.</li>
-            <li><strong>Mandat Stable-Only :</strong> 1% par an (prélevé par trimestre), 0% sur la performance.</li>
-        </ul>
-        <p><em>Les frais sont réglés directement on-chain, en toute transparence.</em></p>
+        <h3>"Je dois faire quoi après avoir rempli le formulaire ?"</h3>
+        <p>Réservez votre <strong>call d’activation</strong>. C'est l'étape cruciale où nous validons votre configuration, vous donnons l'adresse de dépôt et effectuons le test de 10€ ensemble.</p>
 
-        <h1 id="chap6">CHAPITRE 6 : GARANTIES DE SORTIE</h1>
-        
-        <h2 id="6-1">6.1 L'Emergency Recovery Kit</h2>
-        <p>En SAFE Mode, vous n'êtes jamais captif. Nous vous fournissons un guide pour révoquer nos droits de signature et reprendre le contrôle total en suivant la procédure, sans notre intervention. C'est votre garantie de souveraineté absolue.</p>
+        <h3>"Comment retirer mes fonds ?"</h3>
+        <p>Envoyez-nous simplement un email. Nous désengageons les fonds et les renvoyons vers votre adresse autorisée (votre compte Zeal ou votre banque). Pour votre sécurité, tout changement d'adresse de retrait impose un délai de 24h.</p>
 
-        <h2 id="6-2">6.2 Adresses de Retrait</h2>
-        <p>Pour votre sécurité, nous ne pouvons envoyer de l'argent que vers les adresses que vous avez pré-approuvées. Tout changement d'adresse impose un <strong>délai de sécurité de 24 heures</strong> (voir Conditions Générales).</p>
+        <h1 id="chap7">ANNEXE A — RÉFÉRENCES ON-CHAIN (GUARDS)</h1>
+        <p>Ces adresses sont fournies à titre de vérification pour les utilisateurs avancés. 
+        <br><strong>Note :</strong> Nous n'annonçons jamais de changement d'adresses via Telegram.</p>
+        <div class="code-block">
+<pre><code>* BNB Chain : 0x07fC94A5061d6C02f2a0122dAd32E67ca2Afd82C
+* Ethereum  : 0x703a9597e1a95E4bdd627a8c0872b77fbbB003eb
+* Arbitrum  : 0x77D15BDC0A514EB835CB7006d03C5529C957dAe4
+* Base      : 0xdbf2766711c12af8c46a06d13b36d826f919c413
+* Gnosis    : 0x92a214bBB8cE8273C60A8E4a88cfbF2bd736D167</code></pre>
+        </div>
 
         <p style="text-align: center; margin-top: 40px;">
             <a href="../BPC_Terms.pdf" target="_blank" class="btn">Consulter les Conditions Générales (PDF)</a>
@@ -146,12 +169,14 @@
     
     const icons = {
       default: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>',
-      1: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>', // Flash
-      2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>', // Wallet
-      3: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>', // Mandats
-      4: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>', // Shield
-      5: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>', // Eye
-      6: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"></polyline><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg>' // Check
+      1: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>',
+      2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
+      3: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+      '3bis': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+      4: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+      5: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+      6: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+      7: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg>'
     };
 
     const headers = content.querySelectorAll('h1, h2');
@@ -159,9 +184,9 @@
       const link = document.createElement('a');
       link.href = '#' + header.id;
       if (header.tagName === 'H1') {
-        const match = header.textContent.match(/CHAPITRE (\d+)/);
+        const match = header.textContent.match(/CHAPITRE (\d+|3bis|7)/);
         const num = match ? match[1] : 'default';
-        link.innerHTML = `${icons[num]}<span>${header.textContent.split(': ')[1]}</span>`;
+        link.innerHTML = `${icons[num] || icons.default}<span>${header.textContent.split(': ')[1] || header.textContent.split(' — ')[1]}</span>`;
         link.classList.add('doc-nav-link');
       } else {
         link.textContent = header.textContent.split('. ')[1] || header.textContent;

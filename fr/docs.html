@@ -5,40 +5,31 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Guide Client — BlockPilot Capital</title>
   
-  <!-- Cache-busting -->
-  <link rel="stylesheet" href="../assets/styles.css?v=FINAL_2" />
+  <!-- Cache-busting v3 -->
+  <link rel="stylesheet" href="../assets/styles.css?v=3" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Styles spécifiques pour s'aligner sur la Home Page -->
   <style>
-    /* Force le header blanc sticky */
-    .header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #E2E8F0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    /* Style des Yield Cards (identique Home) */
-    .yieldCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 16px; }
-    .ycard { border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; text-align: center; background: #fff; }
-    .ycard .label { font-size: 0.85rem; color: #64748B; display: block; margin-bottom: 4px; }
-    .ycard .n { font-weight: 700; font-size: 18px; color: #3C756E; }
-    .ycard.passive .n { color: #94A3B8; } /* Gris pour banque/hodl */
-
-    /* Alignement Footer */
-    .footer { border-top: 1px solid #E2E8F0; padding: 48px 0; margin-top: 64px; text-align: center; font-size: 14px; color: #64748B; }
+    /* Styles spécifiques pour le graphique Yield (CSS pur) */
+    .yield-visual { display: flex; flex-direction: column; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 24px; border-radius: 12px; margin: 24px 0; }
+    .yield-bar-group { display: flex; align-items: center; gap: 12px; }
+    .yield-label { width: 120px; font-size: 13px; font-weight: 600; color: #64748B; }
+    .yield-track { flex: 1; height: 24px; background: #E2E8F0; border-radius: 4px; overflow: hidden; position: relative; }
+    .yield-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 700; color: white; }
+    .fill-bank { width: 10%; background: #94A3B8; }
+    .fill-bp { width: 85%; background: linear-gradient(90deg, #3C756E 0%, #4FD1C5 100%); }
+    
+    /* Icones inline pour remplacer les emojis */
+    .icon-inline { width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 6px; stroke-width: 2; }
+    .text-green { color: #3C756E; }
   </style>
 </head>
 
 <body data-lang="fr">
 
-<!-- Header injecté via JS -->
 <header class="header"></header>
 
 <main class="section" style="padding-top: 48px;">
@@ -55,21 +46,46 @@
       <article class="doc-content">
         
         <p style="font-size: 13px; color: #64748B; margin-bottom: 32px; font-style: italic; border-left: 3px solid #E2E8F0; padding-left: 12px;">
-            Note : Ce guide facilite l’onboarding. En cas de différence, les <a href="../BPC_Terms.pdf" target="_blank" style="color:#3C756E; text-decoration:underline;">Conditions Générales</a> font foi.
+            Note : Ce guide résume l’onboarding. En cas de conflit, les <a href="../BPC_Terms.pdf" target="_blank" style="color:#3C756E; text-decoration:underline;">Conditions Générales (PDF)</a> priment.
         </p>
 
         <h1 id="chap1">CHAPITRE 1 : DÉMARRAGE RAPIDE (10–15 MIN)</h1>
         <p>Votre check-list pour activer la gestion privée.</p>
         
         <div class="callout callout-important">
-            <strong>🚀 Parcours d'activation :</strong>
+            <strong style="display:flex; align-items:center; gap:8px;">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                Parcours d'activation :
+            </strong>
             <ul class="bullets" style="margin-top:12px;">
-                <li>✅ <strong>Étape 1 :</strong> Installer <a href="https://www.zeal.app/claim?r=yNI4%2Fwwr9cr4s%3Futm_channel%3Dsystem_share" target="_blank" style="color:#3C756E; font-weight:600;">Zeal</a> et créer votre accès (FaceID/Passkey).</li>
-                <li>✅ <strong>Étape 2 :</strong> Activer votre IBAN dans Zeal OU préparer vos cryptos (Exchange).</li>
-                <li>✅ <strong>Étape 3 :</strong> Remplir le formulaire unique : <a href="https://tally.so/r/KYxLGM" target="_blank" style="color:#3C756E; font-weight:600;">Formulaire d'Ouverture</a></li>
-                <li>✅ <strong>Étape 4 :</strong> Réserver votre call : <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank" style="color:#3C756E; font-weight:600;">Agenda Gestionnaire</a></li>
-                <li>✅ <strong>Étape 5 :</strong> Pendant le call : Validation du mode et <strong>dépôt des fonds</strong> (Euro ou Crypto).</li>
-                <li>✅ <strong>Étape 6 :</strong> Ajout de la vue "Watch-only" pour voir votre solde.</li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 1 :</strong> Installer <strong>Zeal</strong> et créer votre accès (FaceID/Passkey).
+                </li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 2 :</strong> Activer votre compte dans Zeal (IBAN) OU préparer vos actifs sur un exchange.
+                </li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 3 :</strong> Remplir le formulaire unique : <a href="https://tally.so/r/KYxLGM" target="_blank" style="color:#3C756E; font-weight:600;">Formulaire d'Ouverture</a>
+                </li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 4 :</strong> Réserver votre call d’activation : <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank" style="color:#3C756E; font-weight:600;">Agenda Gestionnaire</a>
+                </li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 5 :</strong> Pendant le call : Validation du mode et <strong>dépôt des fonds</strong> (Euro ou Crypto).
+                </li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 6 :</strong> Ajout de la vue "Watch-only" pour voir votre solde.
+                </li>
+                <li>
+                    <svg class="icon-inline text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <strong>Étape 7 :</strong> Ouvrir la page <a href="../performance.html" target="_blank" style="color:#3C756E;">Performance</a> et l’ajouter en favori (repères marché).
+                </li>
             </ul>
         </div>
 
@@ -94,23 +110,28 @@
         </table>
 
         <h1 id="chap2">CHAPITRE 2 : ZEAL (INSTALLATION & APPROVISIONNEMENT)</h1>
-        <p>Zeal est votre hub financier. Il remplace votre banque et votre exchange.</p>
+        <p>Zeal est votre hub financier : une app simple pour suivre votre portefeuille, déposer en euros (selon disponibilité) et interagir avec votre coffre (Safe). Vous gardez une expérience “banque + crypto” au même endroit, sans complexité technique.</p>
         
         <p style="margin: 24px 0;">
             <a href="https://www.zeal.app/claim?r=yNI4%2Fwwr9cr4s%3Futm_channel%3Dsystem_share" target="_blank" class="btn btn--primary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Télécharger Zeal (Referral Officiel)
+                Télécharger Zeal (Lien Officiel)
             </a>
         </p>
 
         <h2 id="2-1">2.1 Installation & Sécurité</h2>
-        <p>Zeal utilise les standards modernes (Passkey/Biométrie). C'est plus simple et plus sûr qu'un mot de passe classique.</p>
+        <p>Zeal utilise des standards modernes (Passkey / Biométrie). En pratique, votre sécurité dépend surtout de votre compte Apple/Google et de vos protections locales.</p>
+        
         <div class="bp-card" style="padding: 24px; border-left: 4px solid #3C756E;">
-            <strong style="color:#0F172A; display:block; margin-bottom:12px;">🔒 Règles de Prudence :</strong>
+            <strong style="color:#0F172A; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Règles de prudence (simples) :
+            </strong>
             <ul class="bullets">
-                <li>Activez FaceID / TouchID.</li>
-                <li>Sécurisez votre Cloud (iCloud/Google) avec la double authentification (2FA), car c'est là que réside votre backup.</li>
-                <li>Si vous utilisez la méthode manuelle (12 mots), notez-les sur <strong>papier</strong>. Jamais de photo.</li>
+                <li>Activez FaceID/TouchID + un code fort.</li>
+                <li>Activez la 2FA sur votre compte iCloud/Google (c’est critique si la sauvegarde est liée au cloud).</li>
+                <li>Ne partagez jamais vos accès, ni vos codes de validation.</li>
+                <li>Si l’app affiche une procédure de récupération (ex : phrase de récupération ou clé), suivez-la strictement et conservez-la hors ligne (papier), jamais en photo / cloud.</li>
             </ul>
         </div>
 
@@ -131,10 +152,10 @@
         <h1 id="chap3">CHAPITRE 3 : MODES DE GESTION</h1>
 
         <h2 id="3-1">3.1 SAFE Mode (Recommandé)</h2>
-        <p>Vos actifs sont dans un coffre-fort intelligent. Vous détenez la clé ultime de récupération. C'est le standard de souveraineté absolue.</p>
+        <p>Vos actifs sont dans un coffre-fort intelligent. Vous détenez la clé ultime de récupération. C'est le standard de souveraineté maximale.</p>
 
         <h2 id="3-2">3.2 Managed Wallet (Sur demande)</h2>
-        <p>Une option pour simplifier le démarrage. BlockPilot garde la clé technique pour vous, mais les retraits sont strictement limités à vos adresses validées.</p>
+        <p>Une option pour simplifier le démarrage. BlockPilot opère techniquement le wallet pour vous, mais les retraits sont strictement limités à vos adresses validées.</p>
 
         <h1 id="chap4">CHAPITRE 4 : ARCHITECTURE DE SÉCURITÉ</h1>
         <p>Comment nous protégeons votre argent tout en le faisant travailler ?</p>
@@ -152,28 +173,32 @@
         <h1 id="chap5">CHAPITRE 5 : YIELD & PERFORMANCE</h1>
         
         <h2 id="5-1">5.1 Comprendre le Yield (Rendement)</h2>
-        <p>Contrairement à un compte bancaire où l'argent dort, la DeFi permet de prêter votre capital à des acteurs institutionnels ou de fournir de la liquidité aux marchés.</p>
+        <p>La DeFi permet de mettre votre capital au travail via des marchés on-chain (prêt/emprunt, liquidité, stratégies de rendement), avec des taux qui varient selon l’offre et la demande.</p>
         <p><strong>L'analogie Immobilière :</strong></p>
         <ul>
             <li><strong>HODL (Crypto simple) :</strong> Vous achetez un appartement vide. Vous espérez juste que le prix monte dans 10 ans.</li>
             <li><strong>YIELD (BlockPilot) :</strong> Vous achetez l'appartement, et nous le mettons en location. Vous touchez des loyers tous les jours, en plus de la potentielle plus-value.</li>
         </ul>
+        <p><strong>Notre objectif :</strong> rendement net compétitif, avec une gestion prudente (diversification, plafonds d’expo, contrôle du risque protocole). Le rendement n’est pas garanti et peut varier.</p>
 
-        <!-- VISUALISATION DU YIELD (STYLE HOMEPAGE) -->
-        <div class="bp-card" style="margin-top:24px; padding:24px;">
-            <strong style="display:block; margin-bottom:12px; color:#0F172A;">Comparatif de Rendement :</strong>
-            <div class="yieldCards">
-                <div class="ycard passive">
-                    <span class="label">Compte Courant</span>
-                    <div class="n">0%</div>
+        <!-- VISUALISATION DU YIELD -->
+        <div class="yield-visual">
+            <div class="yield-bar-group">
+                <span class="yield-label">Compte Classique</span>
+                <div class="yield-track">
+                    <div class="yield-fill fill-bank" style="width: 15%;">2-3%</div>
                 </div>
-                <div class="ycard passive">
-                    <span class="label">Crypto (HODL)</span>
-                    <div class="n">0%</div>
+            </div>
+            <div class="yield-bar-group">
+                <span class="yield-label">Crypto (HODL)</span>
+                <div class="yield-track">
+                    <div class="yield-fill fill-bank" style="width: 5%; background: #CBD5E1; color: #475569;">0%</div>
                 </div>
-                <div class="ycard" style="border-color:#3C756E; background:#F0FDFA;">
-                    <span class="label" style="color:#3C756E; font-weight:600;">BlockPilot</span>
-                    <div class="n">Yield + Rewards</div>
+            </div>
+            <div class="yield-bar-group">
+                <span class="yield-label" style="color:#3C756E;">BlockPilot</span>
+                <div class="yield-track">
+                    <div class="yield-fill fill-bp">Yield + Rewards</div>
                 </div>
             </div>
         </div>
@@ -181,13 +206,24 @@
         <h2 id="5-2">5.2 Farming & Incentives (Le Bonus)</h2>
         <p>En plus des intérêts classiques, certains protocoles distribuent des récompenses (tokens) pour attirer la liquidité. C'est le "Farming".</p>
         <p>Notre rôle est de capter ces bonus, de les vendre régulièrement pour sécuriser le profit, et de les réinjecter dans votre capital pour créer des intérêts composés.</p>
+        <p><em>Par défaut, on privilégie la sécurisation : rewards converties en stable quand c’est pertinent, puis réinvesties. Si des rewards sont illiquides/verrouillées, elles sont suivies séparément comme un upside optionnel.</em></p>
 
         <h2 id="5-3">5.3 Où voir ma performance ?</h2>
+        <p>Votre suivi se fait à 3 niveaux :</p>
+        
+        <h3>A. Votre portefeuille (votre Safe)</h3>
         <ul>
-            <li><strong>DeBank / Zeal :</strong> Pour voir la performance de <strong>votre</strong> portefeuille personnel.</li>
-            <li><strong>Page Performance (Site) :</strong> Pour voir la tendance globale du marché (Macro).</li>
+            <li><strong>Zeal (simple) :</strong> Vue mobile, lisible en 10 secondes.</li>
+            <li><strong>DeBank (détaillé) :</strong> Audit complet on-chain (positions, historique, rewards, mouvements).</li>
         </ul>
-        <p style="margin-top:16px;">
+
+        <h3>B. Votre relevé BlockPilot (trimestriel)</h3>
+        <p>Vous recevez un relevé clair : NAV début/fin, dépôts/retraits, performance nette, frais (gestion + performance), et High-Water Mark (HWM).</p>
+
+        <h3>C. La page “Performance” du site (benchmarks marché)</h3>
+        <p>Cette page montre la tendance marché (macro) et des repères (BTC/ETH/indices). Ce n’est pas votre PnL personnel : votre PnL est sur Zeal/DeBank + relevé trimestriel.</p>
+
+        <p style="margin-top:20px;">
             <a href="../performance.html" target="_blank" class="btn btn--primary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
                 Voir les Tendances Marché
@@ -205,7 +241,7 @@
             <tr>
                 <td><strong>Standard</strong></td>
                 <td>0,50% de la NAV</td>
-                <td>4% sur les bénéfices nets (HWM)</td>
+                <td>4% sur les bénéfices nets</td>
             </tr>
             <tr>
                 <td><strong>Stable-Only</strong></td>
@@ -213,6 +249,9 @@
                 <td>0%</td>
             </tr>
         </table>
+        <p style="font-size:13px; color:#64748B; margin-top:12px;">
+            <strong>HWM (High-Water Mark) :</strong> la commission de performance s’applique uniquement si votre portefeuille dépasse son plus haut niveau précédent.
+        </p>
 
         <h1 id="chap7">CHAPITRE 7 : FAQ & LIENS</h1>
         
@@ -221,7 +260,7 @@
             <li><strong>Pourquoi Zeal affiche 0 ?</strong> Vous regardez votre clé (vide), pas le coffre. Ajoutez le Safe en "Watch-only".</li>
             <li><strong>Perte de téléphone ?</strong> Restaurez Zeal via votre Cloud ou Passkey sur un nouvel appareil.</li>
             <li><strong>BlockPilot disparaît ?</strong> Utilisez l'Emergency Kit pour récupérer les fonds.</li>
-            <li><strong>Délais de retrait ?</strong> Quelques heures à 48h maximum (temps de désengagement des protocoles).</li>
+            <li><strong>Délais de retrait ?</strong> Généralement quelques heures à 48h selon liquidité/conditions réseau.</li>
         </ul>
 
         <h2 id="7-2">Références Techniques (Guards)</h2>
@@ -239,7 +278,7 @@
             <li><strong>Telegram (Chat) :</strong> <a href="https://t.me/tonirangers" target="_blank">@tonirangers</a></li>
         </ul>
         <p style="text-align: center; margin-top: 48px;">
-            <a href="../BPC_Terms.pdf" target="_blank" class="btn" style="color: #64748B; border-color: #CBD5E1;">
+            <a href="../BPC_Terms.pdf" target="_blank" class="btn" style="color: #64748B; border-color: #E2E8F0;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 Télécharger les Conditions Générales (PDF)
             </a>
@@ -253,7 +292,7 @@
 
 <footer class="footer">
   <div class="container-premium">
-    <span>© Copyright BlockPilot Capital ltd 2026</span>
+    <span>© Copyright BlockPilot Capital Ltd 2026</span>
   </div>
 </footer>
 
@@ -266,7 +305,7 @@
     const content = document.querySelector('.doc-content');
     const leftNav = document.getElementById('doc-nav');
     
-    // Icones SVG propres
+    // Icones SVG propres (Feather style)
     const icons = {
       default: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>',
       1: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>',

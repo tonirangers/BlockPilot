@@ -4,15 +4,103 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Guide Client — BlockPilot Capital</title>
-  <!-- Cache-busting v20260121 pour forcer la mise à jour des styles -->
-  <link rel="stylesheet" href="../assets/styles.css?v=20260121" />
+  
+  <!-- Cache-busting pour forcer le rechargement -->
+  <link rel="stylesheet" href="../assets/styles.css?v=20260121_FINAL" />
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS CORRECTIF SPECIFIQUE POUR CETTE PAGE (HEADER & UI) -->
+  <style>
+    /* 1. Force le Header à être visible sur fond blanc */
+    .header {
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #E2E8F0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    /* 2. Styles des Boutons Premium (Green/Gold) */
+    .btn--primary {
+      background-color: #0F172A; /* Dark Navy/Green */
+      color: #FFFFFF;
+      border: 1px solid #0F172A;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn--primary:hover {
+      background-color: #3C756E; /* BlockPilot Green */
+      border-color: #3C756E;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(60, 117, 110, 0.2);
+    }
+
+    /* 3. Graphique Yield CSS (Animation simple) */
+    .yield-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 24px;
+      border-radius: 12px;
+      margin: 24px 0;
+    }
+    .yield-bar-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .yield-label {
+      width: 120px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+    }
+    .yield-track {
+      flex: 1;
+      height: 24px;
+      background: #E2E8F0;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .yield-fill {
+      height: 100%;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      animation: grow 2s ease-out forwards;
+    }
+    .fill-bank { width: 10%; background: #94A3B8; }
+    .fill-bp { width: 85%; background: linear-gradient(90deg, #3C756E 0%, #4FD1C5 100%); box-shadow: 0 0 10px rgba(79, 209, 197, 0.3); }
+    
+    @keyframes grow { from { width: 0; } }
+
+    /* Petit ajustement liens */
+    a { color: #3C756E; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+  </style>
 </head>
 
 <body data-lang="fr">
 
+<!-- Le script header.js injectera le contenu ici. Le CSS ci-dessus assure le rendu. -->
 <header class="header"></header>
 
 <main class="section" style="padding-top: 48px;">
@@ -28,23 +116,22 @@
       <!-- CONTENU DE LA DOCUMENTATION -->
       <article class="doc-content">
         
-        <p style="font-size: 13px; color: var(--bp-text-muted); margin-bottom: 32px; font-style: italic;">
-            Note : Ce guide résume l’onboarding ; en cas de conflit ou d'ambiguïté, les <a href="../BPC_Terms.pdf" target="_blank">Conditions Générales (PDF)</a> priment.
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 32px; font-style: italic; border-left: 3px solid #E2E8F0; padding-left: 12px;">
+            Note : Ce guide simplifie l’onboarding. En cas de différence, ce sont toujours les <a href="../BPC_Terms.pdf" target="_blank">Conditions Générales (PDF)</a> qui font foi.
         </p>
 
         <h1 id="chap1">CHAPITRE 1 : DÉMARRAGE RAPIDE (10–15 MIN)</h1>
-        <p>Ce parcours balisé vous permet d'activer votre gestion privée en toute simplicité.</p>
+        <p>Votre check-list pour activer votre gestion privée sans friction.</p>
         
         <div class="callout callout-important">
-            <strong>Checklist d'activation :</strong>
+            <strong>🚀 Parcours d'activation :</strong>
             <ul class="bullets" style="margin-top:12px;">
                 <li>✅ <strong>Étape 1 :</strong> Installer <strong>Zeal</strong> et créer votre accès (FaceID/Passkey).</li>
                 <li>✅ <strong>Étape 2 :</strong> Activer votre compte dans Zeal (IBAN) OU préparer vos actifs sur un exchange.</li>
-                <li>✅ <strong>Étape 3 :</strong> Remplir le formulaire unique (signature incluse) : <a href="https://tally.so/r/KYxLGM" target="_blank"><strong>Formulaire Tally</strong></a></li>
-                <li>✅ <strong>Étape 4 :</strong> Réserver votre call d’activation (10 min) : <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank"><strong>Lien Calendly</strong></a></li>
-                <li>✅ <strong>Étape 5 :</strong> Validation du mode de gestion et test de dépôt (10€) avec votre gestionnaire.</li>
-                <li>✅ <strong>Étape 6 :</strong> Configuration de la vue "Watch-only" dans Zeal pour suivre votre solde.</li>
-                <li>✅ <strong>Étape bonus :</strong> Ouvrir la page <a href="{{PERFORMANCE_PAGE_URL}}">Performance</a> et la mettre en favori.</li>
+                <li>✅ <strong>Étape 3 :</strong> Remplir le formulaire unique : <a href="https://tally.so/r/KYxLGM" target="_blank"><strong>Formulaire d'Ouverture</strong></a></li>
+                <li>✅ <strong>Étape 4 :</strong> Réserver votre call d’activation : <a href="https://calendar.app.google/bQWcTHd22XDzuCt6A" target="_blank"><strong>Agenda Gestionnaire</strong></a></li>
+                <li>✅ <strong>Étape 5 :</strong> Validation du mode et test de dépôt (10€) avec nous.</li>
+                <li>✅ <strong>Étape 6 :</strong> Ajout de la vue "Watch-only" dans Zeal.</li>
             </ul>
         </div>
 
@@ -55,113 +142,136 @@
                 <th>BlockPilot (Nous)</th>
             </tr>
             <tr>
-                <td>Détient les clés du coffre (Souveraineté technique).</td>
-                <td>Pilote les fonds pour générer du rendement (Yield).</td>
+                <td>Détient les clés du coffre (Souveraineté).</td>
+                <td>Pilote les stratégies de rendement (Yield).</td>
             </tr>
             <tr>
-                <td>Effectue le dépôt initial (test inclus) vers l’adresse communiquée.</td>
-                <td>Sélectionne et surveille les protocoles 24/7.</td>
+                <td>Effectue le dépôt initial.</td>
+                <td>Surveille les protocoles et le risque 24/7.</td>
             </tr>
             <tr>
-                <td>Confirme ses adresses de retrait autorisées.</td>
-                <td>Fournit le reporting et assure la maintenance de l'infrastructure.</td>
+                <td>Valide les adresses de retrait.</td>
+                <td>Gère le reporting et la technique.</td>
             </tr>
         </table>
 
         <h1 id="chap2">CHAPITRE 2 : ZEAL (INSTALLATION & APPROVISIONNEMENT)</h1>
-        <p>Zeal est votre hub financier central. Téléchargez Zeal via notre lien officiel : <a href="{{ZEAL_REFERRAL_LINK}}" target="_blank"><strong>{{ZEAL_REFERRAL_LINK}}</strong></a></p>
+        <p>Zeal est votre hub financier. Il remplace votre banque et votre exchange.</p>
+        
+        <p style="margin: 24px 0;">
+            <a href="https://www.zeal.app/claim?r=yNI4%2Fwwr9cr4s%3Futm_channel%3Dsystem_share" target="_blank" class="btn btn--primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Télécharger Zeal (Lien Officiel)
+            </a>
+        </p>
 
-        <h2 id="2-1">2.1 Installation & sécurité</h2>
-        <p>Zeal privilégie une connexion moderne via <strong>Passkey ou biométrie</strong> (FaceID/Empreinte). La restauration de votre compte s'effectue généralement via un backup cloud sécurisé (iCloud/Google) selon votre configuration.</p>
+        <h2 id="2-1">2.1 Installation & Sécurité</h2>
+        <p>Zeal utilise les standards modernes (Passkey/Biométrie). C'est plus simple et plus sûr qu'un mot de passe classique.</p>
         <div class="callout">
-            <strong>Règles de prudence :</strong>
+            <strong>🔒 Les Règles de Prudence :</strong>
             <ul class="bullets">
-                <li>Activez systématiquement le verrouillage biométrique dans l'application.</li>
-                <li>Protégez votre compte Apple ou Google avec une double authentification (2FA).</li>
-                <li>Ne partagez jamais vos accès ou codes de validation.</li>
-                <li>Si l’application vous présente des instructions de récupération spécifiques (ex: phrase de secours), suivez-les à la lettre et conservez-les hors-ligne.</li>
+                <li>Activez FaceID / TouchID pour ouvrir l'app.</li>
+                <li>Sécurisez votre compte Cloud (iCloud/Google) avec la double authentification (2FA), car c'est souvent là que se trouve votre backup crypté.</li>
+                <li>Ne partagez jamais vos codes.</li>
+                <li>Si vous choisissez la méthode manuelle (12 mots), notez-les sur <strong>papier</strong> uniquement.</li>
             </ul>
         </div>
 
-        <h2 id="2-2">2.2 Approvisionnement (Banque / Exchange)</h2>
+        <h2 id="2-2">2.2 Approvisionnement (Le Carburant)</h2>
         <ul>
-            <li><strong>Option A (Banque) :</strong> Activez l'IBAN personnel dans Zeal. Faites un virement SEPA. Une fois crédité, nous finalisons l'envoi vers le coffre pendant le call.</li>
-            <li><strong>Option B (Exchange) :</strong> Préparez vos actifs (USDC/USDT/ETH/BTC) sur votre plateforme habituelle (ex: <a href="https://promote.mexc.co/r/rO0gT3a8" target="_blank" style="text-decoration:none; font-weight:600;">MEXC Partenaire</a>). Le transfert final se fera durant le call.</li>
+            <li><strong>Option A (Banque - Recommandé) :</strong> Activez l'IBAN dans Zeal. Faites un virement SEPA instantané. C'est le plus simple.</li>
+            <li><strong>Option B (Exchange) :</strong> Si vous avez déjà des cryptos, préparez-les sur votre plateforme (ex: <a href="https://promote.mexc.co/r/rO0gT3a8" target="_blank">MEXC Partenaire</a>). Nous ferons le transfert ensemble lors du call.</li>
         </ul>
 
         <h2 id="2-3">2.3 Voir son coffre en “watch-only”</h2>
-        <p>Une fois les fonds dans le coffre (Safe), votre portefeuille Zeal principal affichera "0". C'est normal. Pour voir votre capital :</p>
+        <p>Une fois les fonds dans le coffre (Safe), votre solde Zeal personnel affichera "0". C'est normal. Pour voir votre capital géré :</p>
         <ol>
             <li>Dans Zeal : <strong>Add Account</strong> > <strong>Track any wallet</strong>.</li>
-            <li>Collez l'adresse de votre Safe fournie par votre gestionnaire.</li>
+            <li>Collez l'adresse de votre Safe (fournie par votre gestionnaire).</li>
         </ol>
 
-        <div class="callout" style="background: var(--bp-primary-soft);">
-            <strong>Ressources & Liens Utiles :</strong>
+        <div class="callout" style="background: #F0FDFA; border-color: #3C756E;">
+            <strong>Besoin d'aide sur Zeal ?</strong>
             <ul style="margin-bottom:0;">
-                <li><strong>Zeal :</strong> <a href="{{ZEAL_REFERRAL_LINK}}" target="_blank">Lien de téléchargement</a> | <a href="https://www.zeal.app/fr/learn/how-zeal-works" target="_blank">Comment ça marche ? (Tuto)</a></li>
-                <li><strong>Exchange :</strong> <a href="https://promote.mexc.co/r/rO0gT3a8" target="_blank">MEXC (Partenaire)</a></li>
+                <li><a href="https://www.zeal.app/fr/learn/how-zeal-works" target="_blank">Tutoriel : Comment ça marche ?</a></li>
+                <li><a href="https://www.zeal.app/help" target="_blank">Centre d'aide Officiel</a></li>
             </ul>
         </div>
 
         <h1 id="chap3">CHAPITRE 3 : MODES DE GESTION</h1>
-        <p>Nous adaptons la structure technique à votre profil. Les méthodes de rendement peuvent évoluer à tout moment selon les conditions de marché.</p>
 
         <h2 id="3-1">3.1 SAFE Mode (Recommandé)</h2>
-        <p>Vos actifs sont dans un coffre-fort intelligent (Smart Contract) dont vous détenez la clé de récupération finale. En cas de disparition de BlockPilot, vous gardez le contrôle mathématique de vos fonds.</p>
+        <p>Vos actifs sont dans un coffre-fort intelligent. Vous détenez la clé ultime de récupération. C'est le standard de souveraineté absolue.</p>
 
-        <h2 id="3-2">3.2 Managed Wallet (Option sur demande)</h2>
-        <p>Option simplifiée pour minimiser la friction au démarrage. BlockPilot détient la clé technique, mais la sécurité des sorties est verrouillée par vos adresses autorisées et une vérification humaine systématique.</p>
+        <h2 id="3-2">3.2 Managed Wallet (Sur demande)</h2>
+        <p>Une option pour simplifier le démarrage. BlockPilot garde la clé technique pour vous, mais les retraits sont strictement limités à vos adresses validées.</p>
 
-        <h1 id="chap4">CHAPITRE 4 : ARCHITECTURE DE SÉCURITÉ & RETRAITS</h1>
-        <p>Le SAFE Mode utilise une architecture à double verrouillage.</p>
+        <h1 id="chap4">CHAPITRE 4 : ARCHITECTURE DE SÉCURITÉ</h1>
+        <p>Comment nous protégeons votre argent tout en le faisant travailler ?</p>
 
         <h2 id="4-1">4.1 La “Vitre” (Le Guard)</h2>
-        <p>Le Guard est un module qui bloque techniquement les sorties simples vers des portefeuilles inconnus. BlockPilot peut déplacer les fonds entre les protocoles de rendement validés, mais ne peut pas les extraire vers l'extérieur sans un processus renforcé.</p>
-        <p><em>Note : Un Guard ne couvre pas tous les scénarios d'interaction avec les contrats intelligents ; la sécurité repose également sur nos procédures internes et les Conditions Générales.</em></p>
+        <p>Le Guard est un filtre de sécurité. Il autorise BlockPilot à interagir avec des protocoles financiers (pour générer du yield), mais il <strong>bloque techniquement</strong> les virements simples vers des inconnus. L'argent ne peut pas sortir par erreur.</p>
 
-        <h2 id="4-2">4.2 Le “Marteau” (Emergency Recovery Kit)</h2>
-        <p>Vous n'êtes jamais captif. Nous vous remettons un guide technique à l'onboarding vous permettant de révoquer nos droits de signature et de reprendre la main totale sur votre coffre, même si nous sommes indisponibles.</p>
+        <h2 id="4-2">4.2 Le “Marteau” (Emergency Kit)</h2>
+        <p>Si BlockPilot disparaît, vous n'êtes pas bloqué. Vous disposez d'un kit de secours technique pour "casser la vitre" (révoquer nos droits) et récupérer vos fonds vous-même.</p>
 
-        <h2 id="4-3">4.3 Règles de retrait (Whitelist + Délai)</h2>
-        <p>Pour votre protection, l'argent ne peut sortir que vers vos <strong>adresses de retrait autorisées</strong> (votre compte Zeal ou votre banque). Toute demande d'ajout d'une nouvelle adresse impose un <strong>délai de sécurité de 24 heures</strong>.</p>
+        <h2 id="4-3">4.3 Règles de Retrait</h2>
+        <p>Tout ajout d'une nouvelle adresse de retrait déclenche un <strong>délai de sécurité de 24 heures</strong>. C'est le temps nécessaire pour stopper un pirate qui aurait volé vos accès.</p>
 
-        <h1 id="chap5">CHAPITRE 5 : TRANSPARENCE, SUIVI & PERFORMANCE</h1>
+        <h1 id="chap5">CHAPITRE 5 : YIELD, PERFORMANCE & SUIVI</h1>
         
-        <h2 id="5-1">5.1 Zeal (Vue simple)</h2>
-        <p>Idéal pour consulter votre solde global et vos actifs disponibles en un coup d'œil sur mobile.</p>
-
-        <h2 id="5-2">5.2 DeBank (Vue détaillée)</h2>
-        <p>En collant l'adresse de votre Safe sur <a href="https://debank.com" target="_blank">DeBank.com</a>, vous accédez à un audit en temps réel : protocoles utilisés, intérêts courus et historique complet.</p>
-
-        <h2 id="5-3">5.3 Yield : d’où vient la performance ?</h2>
-        <p>Le rendement (“yield”) correspond aux intérêts générés par des protocoles DeFi majeurs (prêt/emprunt, marchés monétaires, stratégies de rendement) et à des optimisations de placement. Notre travail consiste à sélectionner des sources de rendement cohérentes avec votre profil, surveiller le risque, et ajuster les allocations quand le marché évolue.</p>
-        <p><strong>Important :</strong> le rendement n’est jamais “fixe”. Il varie selon l’offre/demande (taux), la liquidité et les conditions de marché. Notre objectif est d’obtenir un rendement net compétitif tout en restant dans une approche prudente et contrôlée.</p>
-        <p><strong>Ce que BlockPilot fait au quotidien :</strong></p>
-        <ul class="bullets">
-            <li>Sélection et surveillance de protocoles (audit, TVL, historique, incidents).</li>
-            <li>Rééquilibrages et arbitrages d’opportunité quand le ratio rendement/risque change.</li>
-            <li>Contrôle des expositions et des plafonds (par chaîne, par protocole, par type d'actif).</li>
-            <li>Gestion opérationnelle : claims, conversions, consolidation du reporting.</li>
+        <h2 id="5-1">5.1 Suivi Mobile & Audit</h2>
+        <ul>
+            <li><strong>Zeal (Mobile) :</strong> Pour voir votre solde total au café.</li>
+            <li><strong>DeBank (Audit) :</strong> Pour voir le détail de chaque placement en temps réel.</li>
         </ul>
 
-        <h2 id="5-4">5.4 Farming / Incentives : le “bonus”</h2>
-        <p>Le farming correspond à des incentives (récompenses) distribuées par certains protocoles pour attirer de la liquidité. C’est souvent un ‘bonus’ qui peut significativement améliorer la performance — mais c’est aussi la partie la plus variable (valeur du token reward, durée du programme, liquidité).</p>
-        <p><strong>Notre approche :</strong> quand des récompenses sont liquides, elles peuvent être (i) converties en stablecoins pour sécuriser le gain, ou (ii) réinvesties/compounded selon la stratégie et votre profil. Quand elles sont illiquides ou verrouillées, elles sont traitées comme un upside optionnel, suivi séparément.</p>
-        <p><em>Les incentives ne sont pas garanties et peuvent s’arrêter. Nous ne basons pas une stratégie uniquement sur un farming temporaire. Vous pouvez suivre ces mouvements directement dans l'historique on-chain via DeBank.</em></p>
+        <h2 id="5-2">5.2 Comprendre le Yield (Rendement)</h2>
+        <p>Contrairement à un compte bancaire où l'argent dort, la DeFi permet de prêter votre capital à des acteurs institutionnels ou de fournir de la liquidité aux marchés. En échange, vous recevez des intérêts, souvent payés à la seconde.</p>
+        <p><strong>L'analogie Immobilière :</strong></p>
+        <ul>
+            <li><strong>HODL (Crypto simple) :</strong> Vous achetez un appartement et vous attendez que le prix monte dans 10 ans. L'appartement est vide.</li>
+            <li><strong>YIELD (BlockPilot) :</strong> Vous achetez l'appartement, mais nous le mettons en location (Airbnb/Bail). Vous touchez des loyers tous les jours, en plus de la potentielle plus-value.</li>
+        </ul>
 
-        <h2 id="5-5">5.5 Performance en temps réel : votre tableau de bord</h2>
-        <p>Vous avez deux niveaux de suivi : la vue mobile (Zeal) et l'audit complet (DeBank). En complément, nous mettons à disposition une page ‘Performance’ sur notre site, pensée pour être lisible en 10 secondes : évolution, repères marché, et visibilité temps réel.</p>
+        <!-- VISUALISATION DU YIELD (CSS ONLY) -->
+        <div class="yield-visual">
+            <div class="yield-bar-group">
+                <span class="yield-label">Compte Classique</span>
+                <div class="yield-track">
+                    <div class="yield-fill fill-bank" style="width: 15%;">2-3%</div>
+                </div>
+            </div>
+            <div class="yield-bar-group">
+                <span class="yield-label">Crypto (HODL)</span>
+                <div class="yield-track">
+                    <div class="yield-fill fill-bank" style="width: 5%; background: #CBD5E1; color: #475569;">0%</div>
+                </div>
+            </div>
+            <div class="yield-bar-group">
+                <span class="yield-label" style="color:#3C756E;">Strategie BlockPilot</span>
+                <div class="yield-track">
+                    <div class="yield-fill fill-bp">Yield + Rewards</div>
+                </div>
+            </div>
+            <p style="font-size: 11px; text-align: right; margin:0; color: #94A3B8;">*Graphique illustratif des mécaniques de rendement.</p>
+        </div>
+
+        <h2 id="5-3">5.3 Farming & Incentives (Le Bonus)</h2>
+        <p>En plus des intérêts classiques, certains protocoles distribuent des récompenses (tokens) pour attirer la liquidité. C'est le "Farming".</p>
+        <p>Notre rôle est de capter ces bonus, de les vendre régulièrement pour sécuriser le profit, et de les réinjecter dans votre capital pour créer des intérêts composés.</p>
+
+        <h2 id="5-4">5.4 Performance en Temps Réel</h2>
+        <p>Vous n'attendez pas la fin du mois pour savoir combien vous avez gagné.</p>
         <p style="margin-top:20px;">
-            <a href="{{PERFORMANCE_PAGE_URL}}" target="_blank" class="btn btn--primary">Voir la Performance (temps réel)</a>
+            <a href="../performance.html" target="_blank" class="btn btn--primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                Voir la Performance Live
+            </a>
         </p>
-        <p style="font-size: 13px; color: var(--bp-text-muted);">Astuce : vous pouvez aussi cliquer sur ‘Performance’ depuis le menu principal du site.</p>
-
-        <h2 id="5-6">5.6 Reporting trimestriel</h2>
-        <p>Chaque trimestre, nous consolidons votre activité dans un relevé détaillé. Ce rapport inclut la valeur nette (NAV), le détail des flux, les frais appliqués et la mise à jour de votre base de référence (High Water Mark).</p>
 
         <h1 id="chap6">CHAPITRE 6 : TARIFICATION</h1>
-        <p>Nos honoraires sont réglés directement on-chain vers notre adresse officielle de collecte.</p>
+        <p>Tout est automatisé via Smart Contract vers notre adresse de collecte (<code>0xD1...aafD</code>).</p>
         <table class="doc-table">
             <tr>
                 <th>Mandat</th>
@@ -179,20 +289,18 @@
                 <td>0%</td>
             </tr>
         </table>
-        <p style="font-size: 12px; color: var(--bp-text-muted);">Adresse de collecte : <code>0xD1D7F129F662De2dCFEADb2ac19860fC9c0AaafD</code></p>
 
-        <h1 id="chap7">CHAPITRE 7 : FAQ</h1>
+        <h1 id="chap7">CHAPITRE 7 : FAQ & LIENS</h1>
+        
+        <h2 id="7-1">Questions Fréquentes</h2>
         <ul>
-            <li><strong>Où voir la performance ?</strong> Zeal (solde global), DeBank (détail des positions) et la page <a href="{{PERFORMANCE_PAGE_URL}}">Performance</a> du site.</li>
-            <li><strong>Pourquoi Zeal affiche 0 ?</strong> Votre capital est dans le coffre (Safe), pas sur votre clé personnelle. Utilisez le mode "Watch-only".</li>
-            <li><strong>Perte de téléphone ?</strong> Restaurez votre compte Zeal via votre backup cloud (iCloud/Google) ou votre phrase de secours.</li>
-            <li><strong>Temps de retrait ?</strong> Le désengagement des stratégies prend généralement quelques heures à 48h selon la liquidité des protocoles.</li>
-            <li><strong>BlockPilot disparaît ?</strong> Utilisez votre Emergency Recovery Kit pour reprendre le contrôle total.</li>
-            <li><strong>Hack d'un protocole ?</strong> Nous utilisons uniquement des protocoles "Blue Chip" audités, mais le risque technologique tiers est inhérent à la DeFi (voir CG).</li>
+            <li><strong>Pourquoi Zeal affiche 0 ?</strong> Vous regardez votre clé (vide), pas le coffre. Ajoutez le Safe en "Watch-only".</li>
+            <li><strong>Perte de téléphone ?</strong> Restaurez Zeal via votre Cloud ou Passkey sur un nouvel appareil.</li>
+            <li><strong>BlockPilot disparaît ?</strong> Utilisez l'Emergency Kit pour récupérer les fonds.</li>
+            <li><strong>Délais de retrait ?</strong> Quelques heures à 48h maximum (temps de désengagement des protocoles).</li>
         </ul>
 
-        <h1 id="chap8">CHAPITRE 8 : RÉFÉRENCES ON-CHAIN & LIENS</h1>
-        <p>Adresses officielles des Guards (pour vérification). <strong>Note :</strong> Nous n'annonçons jamais de changement d'adresses via Telegram.</p>
+        <h2 id="7-2">Références Techniques (Guards)</h2>
         <div class="code-block">
 <pre><code>* BNB Chain : 0x07fC94A5061d6C02f2a0122dAd32E67ca2Afd82C
 * Ethereum  : 0x703a9597e1a95E4bdd627a8c0872b77fbbB003eb
@@ -201,14 +309,16 @@
 * Gnosis    : 0x92a214bBB8cE8273C60A8E4a88cfbF2bd736D167</code></pre>
         </div>
 
-        <h1 id="chap9">CHAPITRE 9 : CADRE & CANAL OFFICIEL</h1>
-        <p>Ce guide est un outil pédagogique. Seules les <strong>Conditions Générales</strong> font foi juridiquement.</p>
+        <h1 id="chap8">CHAPITRE 8 : CONTACT & CADRE</h1>
         <ul>
-            <li><strong>Email (Seul canal contractuel) :</strong> <a href="mailto:support@blockpilot.capital">support@blockpilot.capital</a></li>
-            <li><strong>Telegram (Support rapide) :</strong> <a href="https://t.me/tonirangers" target="_blank">@tonirangers</a></li>
+            <li><strong>Email (Officiel / Retraits) :</strong> <a href="mailto:support@blockpilot.capital">support@blockpilot.capital</a></li>
+            <li><strong>Telegram (Chat) :</strong> <a href="https://t.me/tonirangers" target="_blank">@tonirangers</a></li>
         </ul>
         <p style="text-align: center; margin-top: 48px;">
-            <a href="../BPC_Terms.pdf" target="_blank" class="btn btn--primary">Télécharger les CG (PDF)</a>
+            <a href="../BPC_Terms.pdf" target="_blank" class="btn btn--primary" style="background-color: #334155; border-color: #334155;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Télécharger les Conditions Générales (PDF)
+            </a>
         </p>
 
       </article>
@@ -223,28 +333,27 @@
   </div>
 </footer>
 
-<!-- Assets avec Cache-busting v20260121 -->
+<!-- Assets avec Cache-busting -->
 <script src="../assets/main.js?v=20260121"></script>
 <script src="../assets/header.js?v=20260121"></script>
 
-<!-- NAVIGATION SCRIPT -->
+<!-- NAVIGATION AUTOMATIQUE -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const content = document.querySelector('.doc-content');
     const leftNav = document.getElementById('doc-nav');
     
-    // MAPPING DES ICÔNES PAR CHAPITRE
+    // Icones SVG propres
     const icons = {
       default: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>',
       1: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>',
       2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
       3: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
       4: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
-      5: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+      5: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>',
       6: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
       7: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
-      8: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
-      9: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg>'
+      8: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg>'
     };
 
     const headers = content.querySelectorAll('h1, h2');
@@ -254,7 +363,7 @@
       if (header.tagName === 'H1') {
         const match = header.textContent.match(/CHAPITRE (\d+)/);
         const num = match ? match[1] : 'default';
-        link.innerHTML = `${icons[num] || icons.default}<span>${header.textContent.split(' — ')[1] || header.textContent.split(' : ')[1]}</span>`;
+        link.innerHTML = `${icons[num] || icons.default}<span>${header.textContent.split(' : ')[1] || header.textContent}</span>`;
         link.classList.add('doc-nav-link');
       } else {
         link.textContent = header.textContent.split('. ')[1] || header.textContent;
@@ -263,6 +372,7 @@
       leftNav.appendChild(link);
     });
 
+    // Scroll Spy
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {

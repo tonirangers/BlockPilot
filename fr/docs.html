@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Guide Client — BlockPilot Capital</title>
   
-  <!-- Favicon & Meta (Alignement avec le site principal) -->
+  <!-- Favicon & Meta -->
   <link rel="icon" type="image/png" href="../logo.png" />
   <meta name="description" content="Guide de démarrage et gestion BlockPilot." />
 
   <!-- Styles Globaux -->
-  <link rel="stylesheet" href="../assets/styles.css?v=7" />
+  <link rel="stylesheet" href="../assets/styles.css?v=8" />
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,11 +76,11 @@
         align-items: start;
     }
 
-    /* Container Boutons Flex (Fix Mobile & Bug Affichage) */
+    /* Container Boutons Flex (Correction Bug Affichage) */
     .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
-    /* On enlève le white-space nowrap strict pour éviter les débordements sur petits écrans */
-    .btn-group .btn { white-space: normal; text-align: center; } 
-    .btn svg { flex-shrink: 0; } /* Empêche l'icône de s'écraser */
+    /* On remet nowrap pour éviter le bouton "gros" et on gère l'alignement */
+    .btn-group .btn { white-space: nowrap; display: inline-flex; align-items: center; } 
+    .btn svg { flex-shrink: 0; } 
 
     /* Tables */
     .lexique-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #F1F5F9; }
@@ -315,7 +315,7 @@
             </tr>
             <tr>
                 <td><strong>Stable-Only</strong></td>
-                <td>0,25% par an</td>
+                <td>0,25% de la NAV</td>
                 <td>2,5% sur les bénéfices nets</td>
             </tr>
         </table>
@@ -398,8 +398,8 @@
   </div>
 </footer>
 
-<script src="../assets/main.js?v=7"></script>
-<script src="../assets/header.js?v=7"></script>
+<script src="../assets/main.js?v=8"></script>
+<script src="../assets/header.js?v=8"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {

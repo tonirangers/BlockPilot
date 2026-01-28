@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Guide Client — BlockPilot Capital</title>
   
+  <!-- Favicon ajouté -->
+  <link rel="icon" type="image/png" href="../logo.png" />
+  
   <link rel="stylesheet" href="../assets/styles.css?v=6" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,9 +15,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* --- STYLES SPÉCIFIQUES DOCS (Alignement Index) --- */
+    /* --- STYLES SPÉCIFIQUES DOCS --- */
     
-    /* Grille Cartes Yield (Style Index) */
+    /* Grille Cartes Yield */
     .yieldCards { 
         display: grid; 
         grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
@@ -49,7 +52,7 @@
     /* Icones Inline */
     .icon-inline { width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 8px; stroke-width: 2.5; }
     
-    /* Layout Sidebar plus propre */
+    /* Layout Sidebar */
     .doc-layout { gap: 64px; }
     .doc-sidebar { padding-top: 8px; }
     .doc-nav-link { border-left: 2px solid transparent; border-radius: 0 6px 6px 0; padding: 8px 16px; margin-bottom: 2px; }
@@ -70,8 +73,8 @@
         align-items: start;
     }
 
-    /* Container Boutons Flex (Fix Mobile) */
-    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+    /* Container Boutons Flex */
+    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; align-items: center; }
     .btn-group .btn { white-space: nowrap; }
 
     /* Tables */
@@ -111,7 +114,7 @@
         <p>BlockPilot est un service de gestion privée DeFi. Nous déployons un coffre sécurisé (Safe) à votre nom pour opérer des stratégies de rendement on-chain.</p>
         <ul class="bullets">
             <li><strong>3 Piliers :</strong> Souveraineté (vos clés), Rendement (Yield actif), Transparence (Visibilité 24/7).</li>
-            <li><strong>Sécurité :</strong> Les retraits se font uniquement sur demande par email. Telegram est réservé à l'accompagnement humain.</li>
+            <li><strong>Sécurité :</strong> Les retraits se font uniquement sur demande par email.</li>
         </ul>
 
         <h1 id="chap1">CHAPITRE 1 : DÉMARRAGE RAPIDE</h1>
@@ -172,6 +175,7 @@
                 Télécharger Zeal (Lien Officiel)
             </a>
             <a href="https://www.zeal.app/fr/learn/how-zeal-works" target="_blank" class="btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 Voir le tutoriel Zeal
             </a>
         </div>
@@ -231,6 +235,13 @@
             <li>Nous effectuons le virement.</li>
         </ol>
         
+        <div class="bp-card" style="padding: 16px; background: #F0FDFA; border-left: 4px solid var(--bp-primary); margin-top:16px;">
+            <strong style="color:var(--bp-primary); display:block; margin-bottom:8px;">Indépendance Totale</strong>
+            <p style="font-size:14px; margin:0; line-height:1.5; color:#334155;">
+                Note importante : Vous ne dépendez pas de nous. Si vous le souhaitez, ou en cas d'urgence, vous pouvez utiliser le "Kit de Secours" (Chapitre 4.2) pour déclencher ce retrait vous-même techniquement, sans notre validation. C'est votre garantie de liberté absolue.
+            </p>
+        </div>
+
         <div class="bp-card" style="padding: 16px; background: #F8FAFC; margin-top:16px;">
             <ul class="bullets" style="margin-bottom:0;">
                 <li><strong>Flexibilité :</strong> Retrait partiel ou total possible à tout moment.</li>
@@ -278,10 +289,10 @@
         <h1 id="chap6">CHAPITRE 6 : TARIFICATION</h1>
         <p>Tout est automatisé via Smart Contract vers notre adresse de collecte :</p>
         
-        <div class="code-block" style="display:flex; align-items:center; justify-content:space-between; margin-top:0;">
-            <code>0xD1D7F129F662De2dCFEADb2ac19860fC9c0AaafD</code>
-        </div>
-        <p style="font-size:13px; color:#64748B; margin-top:-16px; margin-bottom:24px;">(Adresse visible dans les CG / Page Sécurité)</p>
+        <!-- Utilisation de <pre> pour que le script JS ajoute le bouton copier automatiquement -->
+        <pre>0xD1D7F129F662De2dCFEADb2ac19860fC9c0AaafD</pre>
+        
+        <p style="font-size:13px; color:#64748B; margin-top:8px; margin-bottom:24px;">(Adresse visible dans les CG / Page Sécurité)</p>
 
         <table class="doc-table">
             <tr>
@@ -297,7 +308,7 @@
             <tr>
                 <td><strong>Stable-Only</strong></td>
                 <td>0,25% (soit 1%/an)</td>
-                <td>0%</td>
+                <td><strong>2,5%</strong> sur les bénéfices nets</td>
             </tr>
         </table>
         <p style="font-size:13px; color:#64748B;">
@@ -358,7 +369,6 @@
         <h1 id="chap8">CONTACT & CADRE</h1>
         <ul class="bullets">
             <li><strong>Email (Officiel / Retraits) :</strong> <a href="mailto:support@blockpilot.capital">support@blockpilot.capital</a></li>
-            <li><strong>Telegram (Chat Client) :</strong> <a href="https://t.me/tonirangers" target="_blank">@tonirangers</a></li>
         </ul>
         
         <p style="text-align: center; margin-top: 48px;">
@@ -377,8 +387,6 @@
 <footer class="footer">
   <div class="container-premium">
     <span>© Copyright BlockPilot Capital Ltd 2026</span>
-    <span style="margin:0 8px;">·</span>
-    <a href="https://t.me/tonirangers" target="_blank" rel="noopener">Telegram</a>
   </div>
 </footer>
 
@@ -435,6 +443,29 @@
       });
     }, { rootMargin: '-100px 0px -70% 0px' });
     content.querySelectorAll('h1, h2').forEach(h => observer.observe(h));
+
+    // COPIER BOUTON (Script corrigé pour éviter les doublons)
+    document.querySelectorAll('pre').forEach(pre => {
+        let wrapper = pre.parentElement;
+        if (!wrapper.classList.contains('code-block')) {
+            wrapper = document.createElement('div');
+            wrapper.className = 'code-block';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+        }
+        
+        if (!wrapper.querySelector('.copy-btn')) {
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.textContent = 'Copier';
+            btn.onclick = () => {
+                navigator.clipboard.writeText(pre.innerText);
+                btn.textContent = 'Copié !';
+                setTimeout(() => btn.textContent = 'Copier', 2000);
+            };
+            wrapper.appendChild(btn);
+        }
+    });
   });
 </script>
 

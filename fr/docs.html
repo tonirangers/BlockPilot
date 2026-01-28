@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Guide Client — BlockPilot Capital</title>
   
-  <!-- Favicon ajouté -->
+  <!-- Favicon & Meta (Alignement avec le site principal) -->
   <link rel="icon" type="image/png" href="../logo.png" />
+  <meta name="description" content="Guide de démarrage et gestion BlockPilot." />
+
+  <!-- Styles Globaux -->
+  <link rel="stylesheet" href="../assets/styles.css?v=7" />
   
-  <link rel="stylesheet" href="../assets/styles.css?v=6" />
-  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -73,9 +76,11 @@
         align-items: start;
     }
 
-    /* Container Boutons Flex */
-    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; align-items: center; }
-    .btn-group .btn { white-space: nowrap; }
+    /* Container Boutons Flex (Fix Mobile & Bug Affichage) */
+    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+    /* On enlève le white-space nowrap strict pour éviter les débordements sur petits écrans */
+    .btn-group .btn { white-space: normal; text-align: center; } 
+    .btn svg { flex-shrink: 0; } /* Empêche l'icône de s'écraser */
 
     /* Tables */
     .lexique-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #F1F5F9; }
@@ -88,6 +93,7 @@
 
 <body data-lang="fr">
 
+<!-- Le Header sera injecté ici par header.js -->
 <header class="header"></header>
 
 <main class="section" style="padding-top: 64px; min-height: 80vh;">
@@ -175,7 +181,6 @@
                 Télécharger Zeal (Lien Officiel)
             </a>
             <a href="https://www.zeal.app/fr/learn/how-zeal-works" target="_blank" class="btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 Voir le tutoriel Zeal
             </a>
         </div>
@@ -228,24 +233,27 @@
         <p>Si BlockPilot disparaît, vous n'êtes pas bloqué. Vous disposez d'un kit de secours technique pour "casser la vitre" (révoquer nos droits) et récupérer vos fonds vous-même.</p>
 
         <h2 id="4-3">4.3 Retraits : comment ça se passe</h2>
-        <p>Le processus est conçu pour empêcher tout vol :</p>
-        <ol>
-            <li>Vous envoyez un email avec le montant et l'adresse de destination (doit être en liste blanche).</li>
-            <li>Nous désengageons les fonds des protocoles (quelques heures à 48h selon liquidité).</li>
-            <li>Nous effectuons le virement.</li>
-        </ol>
+        <p>Le processus est conçu pour vous offrir le confort d'une banque privée, avec la garantie technique de la Blockchain :</p>
         
-        <div class="bp-card" style="padding: 16px; background: #F0FDFA; border-left: 4px solid var(--bp-primary); margin-top:16px;">
-            <strong style="color:var(--bp-primary); display:block; margin-bottom:8px;">Indépendance Totale</strong>
-            <p style="font-size:14px; margin:0; line-height:1.5; color:#334155;">
-                Note importante : Vous ne dépendez pas de nous. Si vous le souhaitez, ou en cas d'urgence, vous pouvez utiliser le "Kit de Secours" (Chapitre 4.2) pour déclencher ce retrait vous-même techniquement, sans notre validation. C'est votre garantie de liberté absolue.
-            </p>
+        <div style="margin-bottom: 24px;">
+            <strong>La Voie Standard (Confort) :</strong>
+            <ol>
+                <li>Vous envoyez un simple email à <code>support@blockpilot.capital</code>.</li>
+                <li>Nous désengageons les fonds des protocoles (quelques heures à 48h selon liquidité).</li>
+                <li>Nous effectuons le virement vers votre adresse validée.</li>
+            </ol>
         </div>
 
+        <div class="callout" style="background: #F0FDF4; border-color: #86EFAC; color: #166534;">
+            <strong>Pourquoi vous êtes en sécurité (Trustless) :</strong><br>
+            Beaucoup de clients demandent : <em>"Et si vous ne répondez pas à mon email ?"</em>.<br>
+            C'est là que le <strong>Kit de Secours (Marteau)</strong> intervient. Contrairement à une banque qui peut geler vos avoirs, vous possédez une "clé de secours" technique. Si nous disparaissons, vous pouvez l'utiliser pour forcer le retrait de vos fonds sans notre permission. Vous ne dépendez pas de notre bonne volonté.
+        </div>
+        
         <div class="bp-card" style="padding: 16px; background: #F8FAFC; margin-top:16px;">
             <ul class="bullets" style="margin-bottom:0;">
                 <li><strong>Flexibilité :</strong> Retrait partiel ou total possible à tout moment.</li>
-                <li><strong>Frais Réseau (Gas) :</strong> BlockPilot prend en charge les frais des opérations de gestion internes. Les frais liés à un retrait spécifique peuvent dépendre du réseau et sont cadrés par les CGU.</li>
+                <li><strong>Frais Réseau (Gas) :</strong> BlockPilot prend en charge les frais des opérations de gestion internes. Les frais liés à un retrait spécifique peuvent dépendre du réseau.</li>
                 <li><strong>Ajout d'adresse :</strong> Tout ajout d'une nouvelle adresse impose un délai de sécurité de <strong>24 heures</strong>.</li>
             </ul>
         </div>
@@ -289,10 +297,10 @@
         <h1 id="chap6">CHAPITRE 6 : TARIFICATION</h1>
         <p>Tout est automatisé via Smart Contract vers notre adresse de collecte :</p>
         
-        <!-- Utilisation de <pre> pour que le script JS ajoute le bouton copier automatiquement -->
-        <pre>0xD1D7F129F662De2dCFEADb2ac19860fC9c0AaafD</pre>
-        
-        <p style="font-size:13px; color:#64748B; margin-top:8px; margin-bottom:24px;">(Adresse visible dans les CG / Page Sécurité)</p>
+        <div class="code-block" style="display:flex; align-items:center; justify-content:space-between; margin-top:0;">
+            <code>0xD1D7F129F662De2dCFEADb2ac19860fC9c0AaafD</code>
+        </div>
+        <p style="font-size:13px; color:#64748B; margin-top:-16px; margin-bottom:24px;">(Adresse visible dans les CG / Page Sécurité)</p>
 
         <table class="doc-table">
             <tr>
@@ -307,8 +315,8 @@
             </tr>
             <tr>
                 <td><strong>Stable-Only</strong></td>
-                <td>0,25% (soit 1%/an)</td>
-                <td><strong>2,5%</strong> sur les bénéfices nets</td>
+                <td>0,25% par an</td>
+                <td>2,5% sur les bénéfices nets</td>
             </tr>
         </table>
         <p style="font-size:13px; color:#64748B;">
@@ -390,8 +398,8 @@
   </div>
 </footer>
 
-<script src="../assets/main.js?v=6"></script>
-<script src="../assets/header.js?v=6"></script>
+<script src="../assets/main.js?v=7"></script>
+<script src="../assets/header.js?v=7"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -443,29 +451,6 @@
       });
     }, { rootMargin: '-100px 0px -70% 0px' });
     content.querySelectorAll('h1, h2').forEach(h => observer.observe(h));
-
-    // COPIER BOUTON (Script corrigé pour éviter les doublons)
-    document.querySelectorAll('pre').forEach(pre => {
-        let wrapper = pre.parentElement;
-        if (!wrapper.classList.contains('code-block')) {
-            wrapper = document.createElement('div');
-            wrapper.className = 'code-block';
-            pre.parentNode.insertBefore(wrapper, pre);
-            wrapper.appendChild(pre);
-        }
-        
-        if (!wrapper.querySelector('.copy-btn')) {
-            const btn = document.createElement('button');
-            btn.className = 'copy-btn';
-            btn.textContent = 'Copier';
-            btn.onclick = () => {
-                navigator.clipboard.writeText(pre.innerText);
-                btn.textContent = 'Copié !';
-                setTimeout(() => btn.textContent = 'Copier', 2000);
-            };
-            wrapper.appendChild(btn);
-        }
-    });
   });
 </script>
 

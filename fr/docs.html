@@ -5,50 +5,33 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Guide Client — BlockPilot Capital</title>
   
-  <!-- Favicon & Meta -->
   <link rel="icon" type="image/png" href="../logo.png" />
   <meta name="description" content="Guide de démarrage et gestion BlockPilot." />
 
-  <!-- Styles Globaux -->
-  <link rel="stylesheet" href="../assets/styles.css?v=10" />
+  <link rel="stylesheet" href="../assets/styles.css?v=12" />
   
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* --- STYLES SPÉCIFIQUES DOCS --- */
+    /* --- CORRECTIFS VISUELS --- */
     
-    /* FIX BOUTON ZEAL : Force le texte en blanc sur le bouton vert */
+    /* 1. SÉCURITÉ LOGO : On force la taille pour qu'il soit IDENTIQUE à l'index */
+    .brand__logo { width: 40px !important; height: 40px !important; min-width: 40px; }
+    .brand span { font-size: 20px !important; }
+
+    /* 2. BOUTON ZEAL : Texte blanc sur fond vert */
     .doc-content .btn { color: var(--bp-text-main); text-decoration: none; }
     .doc-content .btn--primary { color: #fff !important; } 
 
-    /* Grille Cartes Yield */
-    .yieldCards { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
-        gap: 12px; 
-        margin: 24px 0;
-    }
-    .ycard { 
-        border: 1px solid var(--bp-border); 
-        border-radius: 8px; 
-        padding: 16px 12px; 
-        text-align: center; 
-        background: #fff;
-        transition: transform 0.2s;
-    }
+    /* --- STYLES DOCS --- */
+    .yieldCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin: 24px 0; }
+    .ycard { border: 1px solid var(--bp-border); border-radius: 8px; padding: 16px 12px; text-align: center; background: #fff; transition: transform 0.2s; }
     .ycard:hover { transform: translateY(-2px); border-color: var(--bp-primary); }
-    .ycard .n { 
-        font-weight: 800; 
-        font-size: 18px; 
-        color: var(--bp-primary); 
-        margin-top: 4px; 
-    }
+    .ycard .n { font-weight: 800; font-size: 18px; color: var(--bp-primary); margin-top: 4px; }
     .ycard .l { font-size: 12px; color: var(--bp-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* Comparaison HODL vs ACTIVE */
     .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
     .comp-card { padding: 20px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
     .comp-passive { background: #F8FAFC; border: 1px solid #E2E8F0; color: #64748B; }
@@ -56,47 +39,29 @@
     .comp-title { font-weight: 800; font-size: 15px; display: block; margin-bottom: 6px; letter-spacing: -0.02em;}
     .comp-desc { font-size: 13px; line-height: 1.4; opacity: 0.9; }
 
-    /* Icones Inline */
     .icon-inline { width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 8px; stroke-width: 2.5; }
     
-    /* Layout Sidebar */
     .doc-layout { gap: 64px; }
     .doc-sidebar { padding-top: 8px; }
     .doc-nav-link { border-left: 2px solid transparent; border-radius: 0 6px 6px 0; padding: 8px 16px; margin-bottom: 2px; }
     .doc-nav-link:hover { background: #F1F5F9; border-left-color: #CBD5E1; }
     .doc-nav-link.active { background: rgba(60, 117, 110, 0.08); color: var(--bp-primary); border-left-color: var(--bp-primary); font-weight: 600; }
     
-    /* Checksum Tip */
-    .checksum-tip {
-        font-size: 13px;
-        background: #FFFBEB;
-        border: 1px solid #FCD34D;
-        color: #92400E;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-top: 16px;
-        display: flex;
-        gap: 12px;
-        align-items: start;
-    }
+    .checksum-tip { font-size: 13px; background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; padding: 12px 16px; border-radius: 8px; margin-top: 16px; display: flex; gap: 12px; align-items: start; }
 
-    /* Container Boutons Flex */
     .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
     .btn-group .btn { white-space: nowrap; display: inline-flex; align-items: center; } 
     .btn svg { flex-shrink: 0; } 
 
-    /* Tables */
     .lexique-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #F1F5F9; }
     .lexique-item:last-child { border-bottom: none; }
     .lexique-term { font-weight: 700; color: var(--bp-text-main); font-size: 15px; display: block; margin-bottom: 4px; }
     .lexique-def { font-size: 14px; color: var(--bp-text-muted); line-height: 1.6; }
-
   </style>
 </head>
 
 <body data-lang="fr">
 
-<!-- Le Header sera injecté ici par header.js -->
 <header class="header"></header>
 
 <main class="section" style="padding-top: 64px; min-height: 80vh;">
@@ -401,8 +366,8 @@
   </div>
 </footer>
 
-<script src="../assets/main.js?v=10"></script>
-<script src="../assets/header.js?v=10"></script>
+<script src="../assets/main.js?v=12"></script>
+<script src="../assets/header.js?v=12"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {

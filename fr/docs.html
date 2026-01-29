@@ -10,7 +10,7 @@
   <meta name="description" content="Guide de démarrage et gestion BlockPilot." />
 
   <!-- Styles Globaux -->
-  <link rel="stylesheet" href="../assets/styles.css?v=9" />
+  <link rel="stylesheet" href="../assets/styles.css?v=10" />
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,19 +20,9 @@
   <style>
     /* --- STYLES SPÉCIFIQUES DOCS --- */
     
-    /* FIX HEADER : On force le style "inactif" pour ressembler à l'index */
-    header .nav__links a.active {
-        background: transparent !important;
-        color: var(--bp-text-muted) !important;
-    }
-    header .nav__links a.active:hover {
-        color: var(--bp-text-main) !important;
-        background: var(--bp-surface-alt) !important;
-    }
-
-    /* FIX BOUTON ZEAL : Force la couleur du texte */
+    /* FIX BOUTON ZEAL : Force le texte en blanc sur le bouton vert */
     .doc-content .btn { color: var(--bp-text-main); text-decoration: none; }
-    .doc-content .btn--primary { color: #fff !important; } /* Blanc sur fond vert */
+    .doc-content .btn--primary { color: #fff !important; } 
 
     /* Grille Cartes Yield */
     .yieldCards { 
@@ -411,8 +401,8 @@
   </div>
 </footer>
 
-<script src="../assets/main.js?v=9"></script>
-<script src="../assets/header.js?v=9"></script>
+<script src="../assets/main.js?v=10"></script>
+<script src="../assets/header.js?v=10"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
